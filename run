@@ -92,7 +92,7 @@ else
 
     MOUNT_OPTS="${MOUNT_OPTS} \
         -v ${scriptdir}/../.work/cross_pkg:${BUILDER_HOME}/go/pkg
-        -v ${scriptdir}/..:${BUILDER_HOME}/go/src/${BUILD_REPO}"
+        -v ${scriptdir}/..:${BUILDER_HOME}/go/src/${PROJECT_REPO}"
 fi
 
 # we copy credential files for github access
@@ -152,7 +152,7 @@ docker run \
     ${DOCKER_NESTED_ARGS} \
     ${NET_ARGS} \
     ${MOUNT_OPTS} \
-    -w ${BUILDER_HOME}/go/src/${BUILD_REPO} \
+    -w ${BUILDER_HOME}/go/src/${PROJECT_REPO} \
     ${CROSS_IMAGE} \
     "$@" || { rsync_back; exit 1; }
 
