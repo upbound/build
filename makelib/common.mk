@@ -228,7 +228,7 @@ endef
 # This is a special target used to support the build container
 
 build.vars:
-	@echo PROJECT_REPO=$(PROJECT_NAME)
+	@echo PROJECT_REPO=$(PROJECT_REPO)
 	@echo BUILD_HOST=$(HOSTNAME)
 	@echo BUILD_REGISTRY=$(BUILD_REGISTRY)
 	@echo OUTPUT_DIR=$(OUTPUT_DIR)
