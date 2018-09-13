@@ -304,23 +304,37 @@ distclean: clean
 	@rm -fr $(CACHE_DIR)
 
 # run lint and other code analysis
-lint: ; @:
+lint.init: ; @:
+lint.run: ; @:
+lint.done: ; @:
+lint:
+	@$(MAKE) lint.init
+	@$(MAKE) lint.run
+	@$(MAKE) lint.done
 
-# init unit tests
+# unit tests
 test.init: ; @:
-# run unit tests
 test.run: ; @:
+test.done: ; @:
 
-test: ; @:
+test:
 	@$(MAKE) test.init
 	@$(MAKE) test.run
+	@$(MAKE) test.done
 
-# run e2e tests
-e2e: ; @:
+# e2e tests
+e2e.init: ; @:
+e2e.run: ; @:
+e2e.done: ; @:
+
+e2e:
+	@$(MAKE) e2e.init
+	@$(MAKE) e2e.run
+	@$(MAKE) e2e.done
 
 .PHONY: build.init build.check build.check.platform build.code build.code.platform build.artifacts build.artifacts.platform
 .PHONY: build.done do.build.platform.% do.build.platform do.build.artifacts.% do.build.artifacts
-.PHONY: build.all build clean distclean lint test e2e
+.PHONY: build.all build clean distclean lint test.init test.run test.done e2e.init e2e.run e2e.done
 
 # ====================================================================================
 # Release Targets
