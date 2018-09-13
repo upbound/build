@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 # get the build environment variables from the special build.vars target in the main makefile
-eval $(make -C ${scriptdir}/.. build.vars)
+eval $(make --no-print-directory -C ${scriptdir}/.. build.vars)
 
 KUBEADM_DIND_DIR=${CACHE_DIR}/kubeadm-dind
 
