@@ -225,6 +225,17 @@ define \n
 endef
 
 # ====================================================================================
+# This is a special target used to support the build container
+
+build.vars:
+	@echo PROJECT_REPO=$(PROJECT_NAME)
+	@echo BUILD_HOST=$(HOSTNAME)
+	@echo BUILD_REGISTRY=$(BUILD_REGISTRY)
+	@echo OUTPUT_DIR=$(OUTPUT_DIR)
+	@echo WORK_DIR=$(WORK_DIR)
+	@echo CACHE_DIR=$(CACHE_DIR)
+
+# ====================================================================================
 # Common Targets - Build and Test workflow
 
 # run init steps before building code

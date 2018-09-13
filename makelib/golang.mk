@@ -2,9 +2,7 @@
 # Options
 
 # The go project including repo name, for example, github.com/rook/rook
-ifeq ($(GO_PROJECT),)
-$(error the variable GO_PROJECT must be set prior to including golang.mk)
-endif
+GO_PROJECT ?= $(PROJECT_REPO)
 
 # the packages to be built statically, for example, $(GO_PROJECT)/cmd/mytool
 ifeq ($(GO_STATIC_PACKAGES),)

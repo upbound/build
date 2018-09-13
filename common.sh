@@ -1,13 +1,7 @@
 #!/bin/bash -e
 
-BUILD_HOST=$(hostname)
-BUILD_REPO=github.com/upbound/upbound-api
-BUILD_ROOT=$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd -P)
-BUILD_REGISTRY=build-$(echo ${BUILD_HOST}-${BUILD_ROOT} | shasum -a 256 | cut -c1-8)
-
-OUTPUT_DIR=${BUILD_ROOT}/_output
-WORK_DIR=${BUILD_ROOT}/.work
-CACHE_DIR=${BUILD_ROOT}/.cache
+# get the build environment variables from the special build.vars target in the main makefile
+eval $(make -C ${scriptdir}/.. build.vars)
 
 KUBEADM_DIND_DIR=${CACHE_DIR}/kubeadm-dind
 
@@ -35,7 +29,7 @@ function start_rsync_container() {
         -d \
         -e OWNER=root \
         -e GROUP=root \
-        -e MKDIRS="/volume/go/src/${BUILD_REPO}" \
+        -e MKDIRS="/volume/go/src/${PROJECT_REPO}" \
         -p ${CROSS_RSYNC_PORT}:873 \
         -v ${CROSS_IMAGE_VOLUME}:/volume \
         --entrypoint "/tini" \
@@ -90,9 +84,9 @@ function run_rsync() {
 }
 
 function rsync_host_to_container() {
-    run_rsync ${scriptdir}/.. rsync://localhost:${CROSS_RSYNC_PORT}/volume/go/src/${BUILD_REPO} "$@"
+    run_rsync ${scriptdir}/.. rsync://localhost:${CROSS_RSYNC_PORT}/volume/go/src/${PROJECT_REPO} "$@"
 }
 
 function rsync_container_to_host() {
-    run_rsync rsync://localhost:${CROSS_RSYNC_PORT}/volume/go/src/${BUILD_REPO}/ ${scriptdir}/.. "$@"
+    run_rsync rsync://localhost:${CROSS_RSYNC_PORT}/volume/go/src/${PROJECT_REPO}/ ${scriptdir}/.. "$@"
 }
