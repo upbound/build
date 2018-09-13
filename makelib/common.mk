@@ -296,10 +296,12 @@ else
 endif
 
 # clean all files created during the build.
-clean: ; @:
+clean:
+	@rm -fr $(OUTPUT_DIR) $(WORK_DIR)
 
 # clean all files created during the build, including caches across builds
 distclean: clean
+	@rm -fr $(CACHE_DIR)
 
 # run lint and other code analysis
 lint: ; @:
