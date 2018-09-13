@@ -58,6 +58,11 @@ RUN ln -fs /usr/bin/xvfb-chrome /usr/bin/google-chrome
 ENV CHROME_BIN /usr/bin/google-chrome
 
 # ------------------------------------------------------------------------------------------------
+# Install some tools we use
+
+RUN npm install -g mjml
+
+# ------------------------------------------------------------------------------------------------
 # Run tini as PID 1 and avoid signal handling issues
 ARG ARCH
 ARG TINI_VERSION
