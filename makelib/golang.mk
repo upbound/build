@@ -196,7 +196,7 @@ build.code.platform: go.build
 clean: go.clean
 distclean: go.distclean
 lint: go.lint
-test: go.test.unit
+test.run: go.test.unit
 
 # ====================================================================================
 # Special Targets
