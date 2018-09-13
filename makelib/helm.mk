@@ -22,7 +22,7 @@ HELM_OUTPUT_DIR ?= $(OUTPUT_DIR)/charts
 HELM_INDEX := $(HELM_OUTPUT_DIR)/index.yaml
 
 # helm home
-HELM_HOME := $(abspath $(CACHE_DIR)/helm)
+HELM_HOME := $(abspath $(WORK_DIR)/helm)
 export HELM_HOME
 
 # helm tool version
