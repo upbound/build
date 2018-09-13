@@ -1,0 +1,65 @@
+pipeline {
+    agent { label 'upbound-gce' }
+
+    environment {
+        reload = '--reload pipeline--'
+    }
+
+    options {
+        disableConcurrentBuilds()
+        timestamps()
+    }
+
+    parameters {
+        string(name: 'version', defaultValue: '', description: 'The version you are releasing, for example, v0.5.0')
+        choice(name: 'channel', choices: "--reload pipeline--\nalpha\nbeta\nstable", description: 'Promote to channel')
+    }
+
+    stages {
+        stage('Reload Pipeline') {
+            when {
+                expression { return params.channel == env.reload }
+            }
+
+            steps {
+                script {
+                    currentBuild.result = 'NOT_BUILT'
+                    currentBuild.displayName = "Skipped"
+                    currentBuild.description = "Reloading pipeline definition, promotion skipped"
+                }
+            }
+        }
+
+        stage('Promote Release') {
+            when {
+                expression { return params.channel != env.reload }
+            }
+
+            environment {
+                DOCKER = credentials('dockerhub-upboundci')
+                AWS = credentials('aws-upbound-bot')
+            }
+
+            steps {
+                script {
+                    sh 'docker login -u="${DOCKER_USR}" -p="${DOCKER_PSW}"'
+                    lock('promote-job') {
+                        sh "build/run make -j\$(nproc) -C build/release promote BRANCH_NAME=${BRANCH_NAME} VERSION=${params.version} CHANNEL=${params.channel} AWS_ACCESS_KEY_ID=${AWS_USR} AWS_SECRET_ACCESS_KEY=${AWS_PSW}"
+                    }
+                    currentBuild.displayName = "${params.version} - ${params.channel}"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                if (params.channel != env.reload) {
+                    sh 'make -j\$(nproc) -C build/release clean'
+                }
+            }
+        }
+    }
+}
+
