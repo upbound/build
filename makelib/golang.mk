@@ -235,7 +235,7 @@ $(DEP):
 		GOPATH=$(TOOLS_HOST_DIR)/tmp-dep GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get -u github.com/golang/dep/cmd/dep || $(FAIL) ;\
 		mv $(TOOLS_HOST_DIR)/dep $@ || $(FAIL);\
 	else \
-		curl -sL -o $(DEP) https://github.com/golang/dep/releases/download/$(DEP_VERSION)/dep-$(HOSTOS)-$(HOSTARCH) || $(FAIL);\
+		curl -fsSL -o $(DEP) https://github.com/golang/dep/releases/download/$(DEP_VERSION)/dep-$(HOSTOS)-$(HOSTARCH) || $(FAIL);\
 	fi
 	@chmod +x $(DEP) || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-dep
