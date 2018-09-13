@@ -35,28 +35,32 @@ HELM_CHART_VERSION := $(VERSION:v%=%)
 # ====================================================================================
 # Helm Targets
 
+$(HELM_HOME): $(HELM)
+	@mkdir -p $(HELM_HOME)
+	@$(HELM) init -c
+
 $(HELM_OUTPUT_DIR):
 	@mkdir -p $(HELM_OUTPUT_DIR)
 
 define helm.chart
-$(HELM_OUTPUT_DIR)/$(1)-$(HELM_CHART_VERSION).tgz: $(HELM) $(HELM_OUTPUT_DIR) $(shell find $(HELM_CHARTS_DIR)/$(1) -type f)
+$(HELM_OUTPUT_DIR)/$(1)-$(HELM_CHART_VERSION).tgz: $(HELM_HOME) $(HELM_OUTPUT_DIR) $(shell find $(HELM_CHARTS_DIR)/$(1) -type f)
 	@$(INFO) helm package $(1) $(HELM_CHART_VERSION)
 	@$(HELM) package --version $(HELM_CHART_VERSION) --app-version $(HELM_CHART_VERSION) -d $(HELM_OUTPUT_DIR) $(abspath $(HELM_CHARTS_DIR)/$(1))
 	@$(OK) helm package $(1) $(HELM_CHART_VERSION)
 
-helm.prepare.$(1): $(HELM)
+helm.prepare.$(1): $(HELM_HOME)
 	@cp -f $(HELM_CHARTS_DIR)/$(1)/values.yaml.tmpl $(HELM_CHARTS_DIR)/$(1)/values.yaml
 	@cd $(HELM_CHARTS_DIR)/$(1) && $(SED_CMD) 's|%%VERSION%%|$(VERSION)|g' values.yaml
 
 helm.prepare: helm.prepare.$(1)
 
-helm.lint.$(1): $(HELM)
+helm.lint.$(1): $(HELM_HOME)
 	@rm -rf $(abspath $(HELM_CHARTS_DIR)/$(1)/charts)
 	@$(HELM) lint $(abspath $(HELM_CHARTS_DIR)/$(1)) $(HELM_CHART_LINT_ARGS_$(1)) --strict
 
 helm.lint: helm.lint.$(1)
 
-helm.dep.$(1): $(HELM)
+helm.dep.$(1): $(HELM_HOME)
 	@$(INFO) helm dep $(1) $(HELM_CHART_VERSION)
 	@$(HELM) dependency update $(abspath $(HELM_CHARTS_DIR)/$(1))
 	@$(OK) helm dep $(1) $(HELM_CHART_VERSION)
@@ -67,7 +71,7 @@ $(HELM_INDEX): $(HELM_OUTPUT_DIR)/$(1)-$(HELM_CHART_VERSION).tgz
 endef
 $(foreach p,$(HELM_CHARTS),$(eval $(call helm.chart,$(p))))
 
-$(HELM_INDEX): $(HELM) $(HELM_OUTPUT_DIR)
+$(HELM_INDEX): $(HELM_HOME) $(HELM_OUTPUT_DIR)
 	@$(INFO) helm index
 	@$(HELM) repo index $(HELM_OUTPUT_DIR)
 	@$(OK) helm index
@@ -83,7 +87,7 @@ helm.clean:
 HELM_TEMP := $(shell mktemp -d)
 HELM_URL := $(HELM_BASE_URL)/$(CHANNEL)
 
-helm.promote: $(HELM)
+helm.promote: $(HELM_HOME)
 	@$(INFO) promoting helm charts
 #	copy existing charts to a temp dir, the combine with new charts, reindex, and upload
 	@$(S3_SYNC) s3://$(HELM_S3_BUCKET)/$(CHANNEL) $(HELM_TEMP)
@@ -101,7 +105,7 @@ build.check: helm.dep
 build.artifacts: helm.build
 clean: helm.clean
 lint: helm.lint
-promote.artifacts: $(HELM)
+promote.artifacts: helm.promote
 
 # ====================================================================================
 # Special Targets
@@ -129,6 +133,4 @@ $(HELM):
 	@curl -fsSL https://storage.googleapis.com/kubernetes-helm/helm-$(HELM_VERSION)-$(HOSTOS)-$(HOSTARCH).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-helm
 	@mv $(TOOLS_HOST_DIR)/tmp-helm/$(HOSTOS)-$(HOSTARCH)/helm $(HELM)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-helm
-	@mkdir -p $(HELM_HOME)
-	@$(HELM) init -c
 	@$(OK) installing helm $(HOSTOS)-$(HOSTARCH)
