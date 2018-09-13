@@ -293,8 +293,14 @@ distclean: clean
 # run lint and other code analysis
 lint: ; @:
 
+# init unit tests
+test.init: ; @:
 # run unit tests
+test.run: ; @:
+
 test: ; @:
+	@$(MAKE) test.init
+	@$(MAKE) test.run
 
 # run e2e tests
 e2e: ; @:
