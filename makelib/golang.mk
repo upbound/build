@@ -205,9 +205,9 @@ vet: go.vet
 
 define GO_HELPTEXT
 Go Targets:
-    fmt          Build and publish final releasable artifacts
-    vendor       Promote a release to a release channel
-    vet          Tag a release
+    fmt          Checks go source code for formatting issues.
+    vendor       Updates vendor packages.
+    vet          Checks go source code and reports suspicious constructs.
 
 endef
 export GO_HELPTEXT
