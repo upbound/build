@@ -201,11 +201,7 @@ test.run: go.test.unit
 
 fmt: go.fmt
 vendor: go.vendor
-ifneq ($(filter $(PLATFORMS),$(PLATFORM)),)
 vet: go.vet
-else
-vet: ; @:
-endif
 
 define GO_HELPTEXT
 Go Targets:
