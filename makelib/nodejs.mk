@@ -71,13 +71,10 @@ ng.distclean:
 # ====================================================================================
 # Common Targets
 
-build.init: npm.install
+build.code: ng.build
 clean: ng.clean
 distclean: ng.distclean
-lint.init: npm.install
 lint: ng.lint
-test.init: npm.install
 test.run: ng.test
-e2e.init: npm.install
 e2e.run: ng.test
 
