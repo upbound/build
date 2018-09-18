@@ -181,7 +181,13 @@ go.clean:
 go.distclean:
 	@rm -rf $(GO_VENDOR_DIR) $(GO_PKG_DIR)
 
-.PHONY: go.init go.build go.install go.test.unit go.test.integration go.lint go.vet go.fmt
+go.generate:
+	@$(INFO) go generate $(PLATFORM)
+	@CGO_ENABLED=0 $(GOHOST) generate $(GO_COMMON_FLAGS) $(GO_PACKAGES) $(GO_INTEGRATION_TEST_PACKAGES) || $(FAIL)
+	@$(OK) go generate $(PLATFORM)
+
+
+.PHONY: go.init go.build go.install go.test.unit go.test.integration go.lint go.vet go.fmt go.generate
 .PHONY: go.validate go.vendor.lite go.vendor go.clean go.distclean
 
 # ====================================================================================
@@ -202,9 +208,11 @@ test.run: go.test.unit
 fmt: go.fmt
 vendor: go.vendor
 vet: go.vet
+generate codegen: go.generate
 
 define GO_HELPTEXT
 Go Targets:
+    generate     Runs go code generation.
     fmt          Checks go source code for formatting issues.
     vendor       Updates vendor packages.
     vet          Checks go source code and reports suspicious constructs.

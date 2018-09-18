@@ -11,13 +11,6 @@ TEST_ASSET_ETCD := $(KUBEBUILDER)/etcd
 TEST_ASSET_KUBECTL := $(KUBEBUILDER)/kubectl
 export TEST_ASSET_KUBE_APISERVER TEST_ASSET_ETCD TEST_ASSET_KUBECTL
 
-kubebuilder.codegen: $(KUBEBUILDER)
-	@$(INFO) running kubebuilder generate
-	@$(KUBEBUILDER)/kubebuilder generate || $(FAIL)
-	@$(OK) kubebuilder generate
-
-.PHONY: kubebuilder.codegen
-
 # ====================================================================================
 # Common Targets
 
@@ -25,8 +18,6 @@ test.init: $(KUBEBUILDER)
 
 # ====================================================================================
 # Special Targets
-
-codegen: kubebuilder.codegen
 
 define KUBEBULDER_HELPTEXT
 Kubebuilder Targets:
