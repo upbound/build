@@ -208,6 +208,7 @@ test.run: go.test.unit
 fmt: go.fmt
 vendor: go.vendor
 vet: go.vet
+generate codegen: go.generate
 
 define GO_HELPTEXT
 Go Targets:
