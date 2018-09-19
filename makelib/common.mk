@@ -335,7 +335,7 @@ e2e:
 
 .PHONY: build.init build.check build.check.platform build.code build.code.platform build.artifacts build.artifacts.platform
 .PHONY: build.done do.build.platform.% do.build.platform do.build.artifacts.% do.build.artifacts
-.PHONY: build.all build clean distclean lint test.init test.run test.done e2e.init e2e.run e2e.done
+.PHONY: build.all build clean distclean lint test test.init test.run test.done e2e.init e2e.run e2e.done
 
 # ====================================================================================
 # Release Targets
