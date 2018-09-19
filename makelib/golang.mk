@@ -170,6 +170,15 @@ go.vendor.lite: $(DEP)
 		$(MAKE) vendor; \
 	fi
 
+go.vendor.check:
+	@$(INFO) checking if vendor deps changed
+	@$(DEP) ensure || $(FAIL)
+	@if ! git diff --exit-code --name-only Gopkg.lock &> /dev/null; then \
+		$(ERR) Gopkg.lock has changed. Failing the build.;\
+		exit 1;\
+	fi
+	@$(OK) vendor deps have not changed
+
 go.vendor: $(DEP)
 	@$(INFO) dep ensure
 	@$(DEP) ensure || $(FAIL)
@@ -207,6 +216,7 @@ test.run: go.test.unit
 
 fmt: go.fmt
 vendor: go.vendor
+vendor.check: go.vendor.check
 vet: go.vet
 generate codegen: go.generate
 
@@ -215,6 +225,7 @@ Go Targets:
     generate     Runs go code generation.
     fmt          Checks go source code for formatting issues.
     vendor       Updates vendor packages.
+    vendor.check Fail the build if vendor packages have changed.
     vet          Checks go source code and reports suspicious constructs.
 
 endef
