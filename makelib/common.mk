@@ -209,6 +209,10 @@ endif
 	fi
 	@$(OK) tagging
 
+# fail publish if the version is dirty
+version.isdirty:
+	@[[ $(VERSION) != *.dirty ]] || ($(ERR) version '$(VERSION)' is dirty aborting publish; exit 1)
+
 # ====================================================================================
 # Helpers
 
@@ -347,7 +351,7 @@ publish.init: ; @:
 publish.artifacts: ; @:
 
 # publish all releasable artifacts
-publish: 
+publish: version.isdirty
 	@$(MAKE) publish.init
 	@$(MAKE) publish.artifacts
 
