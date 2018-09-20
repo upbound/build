@@ -170,7 +170,7 @@ go.vendor.lite: $(DEP)
 		$(MAKE) vendor; \
 	fi
 
-go.vendor.check:
+go.vendor.check: $(DEP)
 	@$(INFO) checking if vendor deps changed
 	@$(DEP) ensure || $(FAIL)
 	@if ! git diff --exit-code --name-only Gopkg.lock &> /dev/null; then \
