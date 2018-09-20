@@ -211,7 +211,11 @@ endif
 
 # fail publish if the version is dirty
 version.isdirty:
-	@[[ $(VERSION) != *.dirty ]] || ($(ERR) version '$(VERSION)' is dirty aborting publish; exit 1)
+	@if [[ $(VERSION) = *.dirty ]]; then \
+		$(ERR) version '$(VERSION)' is dirty aborting publish. The following files changed: ;\
+		git status --short;\
+		exit 1; \
+	fi
 
 # ====================================================================================
 # Helpers
