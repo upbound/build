@@ -65,7 +65,7 @@ endif
 GOPATH := $(shell go env GOPATH)
 
 # setup tools used during the build
-DEP_VERSION=v0.4.1
+DEP_VERSION=v0.5.0
 DEP := $(TOOLS_HOST_DIR)/dep-$(DEP_VERSION)
 GOLINT := $(TOOLS_HOST_DIR)/golint
 GOJUNIT := $(TOOLS_HOST_DIR)/go-junit-report
@@ -172,11 +172,7 @@ go.vendor.lite: $(DEP)
 
 go.vendor.check: $(DEP)
 	@$(INFO) checking if vendor deps changed
-	@$(DEP) ensure || $(FAIL)
-	@if ! git diff --exit-code --name-only Gopkg.lock &> /dev/null; then \
-		$(ERR) Gopkg.lock has changed. Failing the build.;\
-		exit 1;\
-	fi
+	@$(DEP) check || $(FAIL)
 	@$(OK) vendor deps have not changed
 
 go.vendor: $(DEP)
