@@ -172,8 +172,7 @@ go.vendor.lite: $(DEP)
 
 go.vendor.check: $(DEP)
 	@$(INFO) checking if vendor deps changed
-	@$(DEP) ensure || $(FAIL)
-	@$(DEP) check || $(FAIL)
+	@$(DEP) check -skip-vendor || $(FAIL)
 	@$(OK) vendor deps have not changed
 
 go.vendor: $(DEP)
