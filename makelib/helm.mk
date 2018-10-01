@@ -54,7 +54,7 @@ helm.prepare.$(1): $(HELM_HOME)
 
 helm.prepare: helm.prepare.$(1)
 
-helm.lint.$(1): $(HELM_HOME)
+helm.lint.$(1): $(HELM_HOME) helm.prepare.$(1)
 	@rm -rf $(abspath $(HELM_CHARTS_DIR)/$(1)/charts)
 	@$(HELM) lint $(abspath $(HELM_CHARTS_DIR)/$(1)) $(HELM_CHART_LINT_ARGS_$(1)) --strict
 
