@@ -175,6 +175,11 @@ go.vendor.check: $(DEP)
 	@$(DEP) check -skip-vendor || $(FAIL)
 	@$(OK) vendor deps have not changed
 
+go.vendor.update: $(DEP)
+	@$(INFO) updating vendor deps
+	@$(DEP) ensure -update -v || $(FAIL)
+	@$(OK) updating vendor deps
+
 go.vendor: $(DEP)
 	@$(INFO) dep ensure
 	@$(DEP) ensure || $(FAIL)
@@ -193,7 +198,7 @@ go.generate:
 
 
 .PHONY: go.init go.build go.install go.test.unit go.test.integration go.lint go.vet go.fmt go.generate
-.PHONY: go.validate go.vendor.lite go.vendor go.clean go.distclean
+.PHONY: go.validate go.vendor.lite go.vendor go.vendor.check go.vendor.update go.clean go.distclean
 
 # ====================================================================================
 # Common Targets
@@ -213,16 +218,18 @@ test.run: go.test.unit
 fmt: go.fmt
 vendor: go.vendor
 vendor.check: go.vendor.check
+vendor.update: go.vendor.update
 vet: go.vet
 generate codegen: go.generate
 
 define GO_HELPTEXT
 Go Targets:
-    generate     Runs go code generation.
-    fmt          Checks go source code for formatting issues.
-    vendor       Updates vendor packages.
-    vendor.check Fail the build if vendor packages have changed.
-    vet          Checks go source code and reports suspicious constructs.
+    generate       Runs go code generation.
+    fmt            Checks go source code for formatting issues.
+    vendor         Updates vendor packages.
+    vendor.check   Fail the build if vendor packages have changed.
+    vendor.update  Update vendor dependencies.
+    vet            Checks go source code and reports suspicious constructs.
 
 endef
 export GO_HELPTEXT
