@@ -133,6 +133,12 @@ endif
 OS := $(word 1, $(subst _, ,$(PLATFORM)))
 ARCH := $(word 2, $(subst _, ,$(PLATFORM)))
 
+ifeq ($(HOSTOS),darwin)
+NPROCS := $(shell sysctl -n hw.ncpu)
+else
+NPROCS := $(shell nproc)
+endif
+
 # ====================================================================================
 # Setup directories and paths
 

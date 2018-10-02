@@ -24,6 +24,7 @@ GO_BUILDFLAGS ?=
 GO_LDFLAGS ?=
 GO_TAGS ?=
 GO_TEST_FLAGS ?=
+GO_TEST_SUITE ?=
 
 # ====================================================================================
 # Setup go environment
@@ -54,12 +55,12 @@ GOHOSTARCH := $(HOSTARCH)
 GO_PACKAGES := $(foreach t,$(GO_SUBDIRS),$(GO_PROJECT)/$(t)/...)
 GO_INTEGRATION_TEST_PACKAGES := $(foreach t,$(GO_INTEGRATION_TESTS_SUBDIRS),$(GO_PROJECT)/$(t)/integration)
 
-ifneq ($(GO_TEST_SUITE),)
-GO_TEST_FLAGS += -run '$(GO_TEST_SUITE)'
+ifneq ($(GO_TEST_PARALLEL),)
+GO_TEST_FLAGS += -p $(GO_TEST_PARALLEL)
 endif
 
-ifneq ($(GO_TEST_FILTER),)
-TEST_FILTER_PARAM := -testify.m '$(GO_TEST_FILTER)'
+ifneq ($(GO_TEST_SUITE),)
+GO_TEST_FLAGS += -run '$(GO_TEST_SUITE)'
 endif
 
 GOPATH := $(shell go env GOPATH)
