@@ -220,7 +220,12 @@ build.done: img.cache img.done
 clean: img.clean img.release.clean
 
 publish.init: img.release.build
+
+# only publish images for master and release branches
+ifneq ($(filter master release-%,$(BRANCH_NAME)),)
 publish.artifacts: $(addprefix img.release.manifest.publish.,$(IMAGES))
+endif
+
 promote.artifacts: $(addprefix img.release.manifest.promote.,$(IMAGES))
 
 else

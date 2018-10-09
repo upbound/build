@@ -25,3 +25,13 @@ docs.build:
 
 docs.publish:
 	$(DOCS_WORK_DIR)/build/publish.sh
+
+# ====================================================================================
+# Common Targets
+
+build.artifacts: docs.build
+
+# only publish docs for master and release branches
+ifneq ($(filter master release-%,$(BRANCH_NAME)),)
+publish.artifacts: docs.publish
+endif
