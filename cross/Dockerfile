@@ -4,19 +4,19 @@ FROM ubuntu:16.04
 # install build and release tools
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -yy -q --no-install-recommends \
-        awscli \
-        build-essential \
-        ca-certificates \
-        curl \
-        docker.io \
-        git \
-        jq \
-        lsb-release \
-        make \
-        rsync \
-        runit \
-        sudo \
-        zip && \
+    awscli \
+    build-essential \
+    ca-certificates \
+    curl \
+    docker.io \
+    git \
+    jq \
+    lsb-release \
+    make \
+    rsync \
+    runit \
+    sudo \
+    zip && \
     DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
     DEBIAN_FRONTEND=noninteractive apt-get autoremove -y && \
@@ -44,9 +44,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_10.x | bash - && \
     echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list && \
     DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -yy -q --no-install-recommends \
-        nodejs \
-        google-chrome-stable \
-        xvfb && \
+    nodejs \
+    google-chrome-stable \
+    xvfb && \
     DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
     DEBIAN_FRONTEND=noninteractive apt-get autoremove -y && \
     DEBIAN_FRONTEND=noninteractive apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
@@ -56,6 +56,18 @@ RUN curl -fsSL https://deb.nodesource.com/setup_10.x | bash - && \
 ADD xvfb-chrome /usr/bin/xvfb-chrome
 RUN ln -fs /usr/bin/xvfb-chrome /usr/bin/google-chrome
 ENV CHROME_BIN /usr/bin/google-chrome
+
+# ------------------------------------------------------------------------------------------------
+# Yarn
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - && \
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list && \
+    DEBIAN_FRONTEND=noninteractive apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -yy -q --no-install-recommends yarn && \
+    DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get autoremove -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    rm -f /etc/apt/sources.list.d/yarn.list
+
 
 # ------------------------------------------------------------------------------------------------
 # Run tini as PID 1 and avoid signal handling issues
