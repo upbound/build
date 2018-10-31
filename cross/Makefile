@@ -6,7 +6,7 @@ include ../makelib/common.mk
 
 IMAGE = $(BUILD_REGISTRY)/cross-$(ARCH)
 CACHE_IMAGES = $(IMAGE)
-include ../../build/makelib/image.mk
+include ../makelib/image.mk
 
 # ====================================================================================
 # Targets
