@@ -4,7 +4,7 @@ FROM ubuntu:16.04
 # install build and release tools
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -yy -q --no-install-recommends \
-    awscli \
+    python \
     build-essential \
     ca-certificates \
     curl \
@@ -21,6 +21,12 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
     DEBIAN_FRONTEND=noninteractive apt-get autoremove -y && \
     DEBIAN_FRONTEND=noninteractive apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# ------------------------------------------------------------------------------------------------
+# Install pip & AWSCLI
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+    python get-pip.py && \
+    pip install awscli --upgrade
 
 # ------------------------------------------------------------------------------------------------
 # Go support

@@ -3,10 +3,12 @@
 
 SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 
+YARN_DIR ?= $(SELF_DIR)/../..
+
 YARN := yarn
-YARN_MODULE_DIR := $(SELF_DIR)/../../node_modules
-YARN_PACKAGE_FILE := $(SELF_DIR)/../../package.json
-YARN_PACKAGE_LOCK_FILE := $(SELF_DIR)/../../yarn.lock
+YARN_MODULE_DIR := $(YARN_DIR)/node_modules
+YARN_PACKAGE_FILE := $(YARN_DIR)/package.json
+YARN_PACKAGE_LOCK_FILE := $(YARN_DIR)/yarn.lock
 
 YARN_OUTDIR ?= $(OUTPUT_DIR)/yarn
 export YARN_OUTDIR
@@ -21,7 +23,7 @@ YARN_INSTALL_STAMP := $(YARN_MODULE_DIR)/yarn.install.$(HOST_PLATFORM).stamp
 # only run "yarn" if the package.json has changed
 $(YARN_INSTALL_STAMP): $(YARN_PACKAGE_FILE) $(YARN_PACKAGE_LOCK_FILE)
 	@echo === yarn
-	@$(YARN) --frozen-lockfile --non-interactive
+	@cd $(YARN_DIR); $(YARN) --frozen-lockfile --non-interactive
 	@touch $(YARN_INSTALL_STAMP)
 
 yarn.install: $(YARN_INSTALL_STAMP)
@@ -33,15 +35,15 @@ yarn.install: $(YARN_INSTALL_STAMP)
 
 yarn.build: yarn.install
 	@echo === yarn build $(PLATFORM)
-	@$(YARN) build
+	@cd $(YARN_DIR); $(YARN) build
 	@mkdir -p $(YARN_OUTDIR) && cp -a build $(YARN_OUTDIR)
 
 yarn.test: yarn.install
 	@echo === yarn test
-	@$(YARN) test-ci
+	@cd $(YARN_DIR); $(YARN) test-ci
 
 yarn.clean:
-	@rm -fr build _output .work
+	@rm -fr $(YARN_DIR)/build _output .work
 
 yarn.distclean:
 	@rm -fr $(YARN_MODULE_DIR) .cache
