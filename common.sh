@@ -9,21 +9,6 @@ CROSS_IMAGE=${BUILD_REGISTRY}/cross-amd64
 CROSS_IMAGE_VOLUME=cross-volume
 CROSS_RSYNC_PORT=10873
 
-function ver() {
-    printf "%d%03d%03d%03d" $(echo "$1" | tr '.' ' ')
-}
-
-function check_git() {
-    # git version 2.6.6+ through 2.8.3 had a bug with submodules. this makes it hard
-    # to share a cloned directory between host and container
-    # see https://github.com/git/git/blob/master/Documentation/RelNotes/2.8.3.txt#L33
-    local gitversion=$(git --version | cut -d" " -f3)
-    if (( $(ver ${gitversion}) > $(ver 2.6.6) && $(ver ${gitversion}) < $(ver 2.8.3) )); then
-        echo WARN: your running git version ${gitversion} which has a bug realted to relative
-        echo WARN: submodule paths. Please consider upgrading to 2.8.3 or later
-    fi
-}
-
 function start_rsync_container() {
     docker run \
         -d \
