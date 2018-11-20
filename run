@@ -3,8 +3,6 @@
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "${scriptdir}/common.sh"
 
-check_git
-
 #if [ ! -z $DOCKER_HOST ]; then
 #    echo ERROR: we only support the case where docker is running locally for now.
 #    exit 1
