@@ -27,10 +27,6 @@ ifndef DOCS_GIT_REPO
 $(error DOCS_GIT_REPO must be defined)
 endif
 
-DOCS_VERSION := $(shell echo $(BRANCH_NAME) | sed -E "s/^release\-([0-9]+)\.([0-9]+)$$/v\1.\2/g")
-DOCS_WORK_DIR := $(WORK_DIR)/docs-repo
-DOCS_VERSION_DIR := $(DOCS_WORK_DIR)/$(DEST_DOCS_DIR)/$(DOCS_VERSION)
-
 # ====================================================================================
 # Targets
 
@@ -47,5 +43,9 @@ docs.publish:
 
 # only publish docs for master and release branches
 ifneq ($(filter master release-%,$(BRANCH_NAME)),)
+DOCS_VERSION := $(shell echo $(BRANCH_NAME) | sed -E "s/^release\-([0-9]+)\.([0-9]+)$$/v\1.\2/g")
+DOCS_WORK_DIR := $(WORK_DIR)/docs-repo
+DOCS_VERSION_DIR := $(DOCS_WORK_DIR)/$(DEST_DOCS_DIR)/$(DOCS_VERSION)
+
 publish.artifacts: docs.publish
 endif
