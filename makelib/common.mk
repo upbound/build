@@ -83,7 +83,7 @@ override COMMIT_HASH := $(shell git rev-parse HEAD)
 endif
 
 ifeq ($(origin BRANCH_NAME), undefined)
-BRANCH_NAME := $(shell git branch | grep \* | cut -d ' ' -f2)
+BRANCH_NAME := $(shell git rev-parse --abbrev-ref HEAD)
 endif
 
 REMOTE_NAME ?= origin
