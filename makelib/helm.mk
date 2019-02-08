@@ -114,6 +114,10 @@ helm.promote: $(HELM_HOME)
 # ====================================================================================
 # Common Targets
 
+helm.buildvars:
+	@echo HELM=$(HELM)
+
+build.vars: helm.buildvars
 build.init: helm.prepare helm.lint
 build.check: helm.dep
 build.artifacts: helm.build
