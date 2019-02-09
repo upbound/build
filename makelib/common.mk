@@ -241,7 +241,7 @@ endef
 # ====================================================================================
 # This is a special target used to support the build container
 
-build.vars:
+common.buildvars:
 	@echo PROJECT_NAME=$(PROJECT_NAME)
 	@echo PROJECT_REPO=$(PROJECT_REPO)
 	@echo BUILD_HOST=$(HOSTNAME)
@@ -250,6 +250,8 @@ build.vars:
 	@echo OUTPUT_DIR=$(OUTPUT_DIR)
 	@echo WORK_DIR=$(WORK_DIR)
 	@echo CACHE_DIR=$(CACHE_DIR)
+
+build.vars: common.buildvars
 
 # ====================================================================================
 # Common Targets - Build and Test workflow
