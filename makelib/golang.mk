@@ -151,7 +151,9 @@ go.test.unit: $(GOJUNIT)
 	@cat $(GO_TEST_OUTPUT)/unit-tests.log | $(GOJUNIT) -set-exit-code > $(GO_TEST_OUTPUT)/unit-tests.xml || $(FAIL)
 	@$(OK) go test unit-tests
 
-go.test.codecov: go.test.unit
+# Depends on go.test.unit, but is only run in CI with a valid token after unit-testing is complete
+# DO NOT run locally.
+go.test.codecov:
 	@$(INFO) go test codecov
 	@cd $(GO_TEST_OUTPUT) && bash <(curl -s https://codecov.io/bash) || $(FAIL)
 	@$(OK) go test codecov
