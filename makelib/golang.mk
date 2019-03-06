@@ -82,7 +82,7 @@ GOPATH := $(shell go env GOPATH)
 # setup tools used during the build
 DEP_VERSION=v0.5.0
 DEP := $(TOOLS_HOST_DIR)/dep-$(DEP_VERSION)
-GOLINT := $(TOOLS_HOST_DIR)/golint
+GOLANGCILINT := $(TOOLS_HOST_DIR)/golangci-lint
 GOJUNIT := $(TOOLS_HOST_DIR)/go-junit-report
 GOVERALLS := $(TOOLS_HOST_DIR)/goveralls
 
@@ -166,10 +166,10 @@ go.test.integration: $(GOJUNIT)
 	@cat $(GO_TEST_OUTPUT)/integration-tests.log | $(GOJUNIT) -set-exit-code > $(GO_TEST_OUTPUT)/integration-tests.xml || $(FAIL)
 	@$(OK) go test integration-tests
 
-go.lint: $(GOLINT)
-	@$(INFO) go lint
-	@$(GOLINT) -set_exit_status=true $(GO_PACKAGES) $(GO_INTEGRATION_TEST_PACKAGES) || $(FAIL)
-	@$(OK) go lint
+go.lint: $(GOLANGCILINT)
+	@$(INFO) golangci-lint
+	@$(GOLANGCILINT) run || $(FAIL)
+	@$(OK) golangci-lint
 
 go.vet:
 	@$(INFO) go vet $(PLATFORM)
@@ -279,12 +279,12 @@ $(DEP):
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-dep
 	@$(OK) installing dep $(HOSTOS)-$(HOSTARCH)
 
-$(GOLINT):
-	@$(INFO) installing golint
-	@mkdir -p $(TOOLS_HOST_DIR)/tmp-lint || $(FAIL)
-	@GOPATH=$(TOOLS_HOST_DIR)/tmp-lint GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get github.com/golang/lint/golint || rm -fr $(TOOLS_HOST_DIR)/tmp-lint || $(FAIL)
-	@rm -fr $(TOOLS_HOST_DIR)/tmp-lint
-	@$(OK) installing golint
+$(GOLANGCILINT):
+	@$(INFO) installing golangci-lint
+	@mkdir -p $(TOOLS_HOST_DIR)/tmp-golangci-lint || $(FAIL)
+	@GOPATH=$(TOOLS_HOST_DIR)/tmp-golangci-lint GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get -u github.com/golangci/golangci-lint/cmd/golangci-lint || rm -fr $(TOOLS_HOST_DIR)/tmp-golangci-lint || $(FAIL)
+	@rm -fr $(TOOLS_HOST_DIR)/tmp-golangci-lint
+	@$(OK) installing golangci-lint
 
 $(GOFMT):
 	@$(INFO) installing gofmt$(GOFMT_VERSION)
