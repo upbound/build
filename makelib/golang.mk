@@ -84,6 +84,7 @@ DEP_VERSION=v0.5.0
 DEP := $(TOOLS_HOST_DIR)/dep-$(DEP_VERSION)
 GOLINT := $(TOOLS_HOST_DIR)/golint
 GOJUNIT := $(TOOLS_HOST_DIR)/go-junit-report
+GOVERALLS := $(TOOLS_HOST_DIR)/goveralls
 
 GO := go
 GOHOST := GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) go
@@ -151,6 +152,12 @@ go.test.unit: $(GOJUNIT)
 	@cat $(GO_TEST_OUTPUT)/unit-tests.log | $(GOJUNIT) -set-exit-code > $(GO_TEST_OUTPUT)/unit-tests.xml || $(FAIL)
 	@$(OK) go test unit-tests
 
+go.test.coveralls: $(GOVERALLS)
+	@$(INFO) go test coveralls
+	@CGO_ENABLED=0 $(GOHOST) test $(GO_TEST_FLAGS) $(GO_STATIC_FLAGS) $(GO_PACKAGES) -v -covermode=count -coverprofile=$(GO_TEST_OUTPUT)/coverage.out || $(FAIL)
+	@$(GOVERALLS) -coverprofile=$(GO_TEST_OUTPUT)/coverage.out -service=circle-ci -repotoken $(COVERALLS_REPO_TOKEN) || $(FAIL)
+	@$(OK) go test coveralls
+
 go.test.integration: $(GOJUNIT)
 	@$(INFO) go test integration-tests
 	@mkdir -p $(GO_TEST_OUTPUT) || $(FAIL)
@@ -212,7 +219,7 @@ go.generate:
 	@$(OK) go generate $(PLATFORM)
 
 
-.PHONY: go.init go.build go.install go.test.unit go.test.integration go.lint go.vet go.fmt go.generate
+.PHONY: go.init go.build go.install go.test.unit go.test.integration go.test.coveralls go.lint go.vet go.fmt go.generate
 .PHONY: go.validate go.vendor.lite go.vendor go.vendor.check go.vendor.update go.clean go.distclean
 
 # ====================================================================================
@@ -293,3 +300,10 @@ $(GOJUNIT):
 	@GOPATH=$(TOOLS_HOST_DIR)/tmp-junit GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get github.com/jstemmer/go-junit-report || rm -fr $(TOOLS_HOST_DIR)/tmp-junit || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-junit
 	@$(OK) installing go-junit-report
+
+$(GOVERALLS):
+	@$(INFO) installing goveralls
+	@mkdir -p $(TOOLS_HOST_DIR)/tmp-goveralls || $(FAIL)
+	@GOPATH=$(TOOLS_HOST_DIR)/tmp-goveralls GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get github.com/mattn/goveralls || rm -fr $(TOOLS_HOST_DIR)/tmp-goveralls || $(FAIL)
+	@rm -fr $(TOOLS_HOST_DIR)/tmp-goveralls
+	@$(OK) installing goveralls
