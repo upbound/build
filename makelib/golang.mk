@@ -85,6 +85,7 @@ DEP := $(TOOLS_HOST_DIR)/dep-$(DEP_VERSION)
 GOLANGCILINT := $(TOOLS_HOST_DIR)/golangci-lint
 GOJUNIT := $(TOOLS_HOST_DIR)/go-junit-report
 GOCOVER_COBERTURA := $(TOOLS_HOST_DIR)/gocover-cobertura
+GOIMPORTS := $(TOOLS_HOST_DIR)/goimports
 
 GO := go
 GOHOST := GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) go
@@ -183,6 +184,11 @@ go.fmt: $(GOFMT)
 	@gofmt_out=$$($(GOFMT) -s -d -e $(GO_SUBDIRS) $(GO_INTEGRATION_TESTS_SUBDIRS) 2>&1) && [ -z "$${gofmt_out}" ] || (echo "$${gofmt_out}" 1>&2; $(FAIL))
 	@$(OK) go fmt
 
+go.imports: $(GOIMPORTS)
+	@$(INFO) goimports
+	@goimports_out=$$($(GOIMPORTS) -d -e -local $(GO_PROJECT) $(GO_SUBDIRS) $(GO_INTEGRATION_TESTS_SUBDIRS) 2>&1) && [ -z "$${goimports_out}" ] || (echo "$${goimports_out}" 1>&2; $(FAIL))
+	@$(OK) goimports
+
 go.validate: go.vet go.fmt
 
 go.vendor.lite: $(DEP)
@@ -239,7 +245,7 @@ test.run: go.test.unit
 # ====================================================================================
 # Special Targets
 
-fmt: go.fmt
+fmt: go.imports
 vendor: go.vendor
 vendor.check: go.vendor.check
 vendor.update: go.vendor.update
@@ -295,6 +301,13 @@ $(GOFMT):
 	@mv $(TOOLS_HOST_DIR)/tmp-fmt/go/bin/gofmt $(GOFMT) || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-fmt
 	@$(OK) installing gofmt$(GOFMT_VERSION)
+
+$(GOIMPORTS):
+	@$(INFO) installing goimports
+	@mkdir -p $(TOOLS_HOST_DIR)/tmp-imports || $(FAIL)
+	@GOPATH=$(TOOLS_HOST_DIR)/tmp-imports GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get -u golang.org/x/tools/cmd/goimports || rm -fr $(TOOLS_HOST_DIR)/tmp-imports || $(FAIL)
+	@rm -fr $(TOOLS_HOST_DIR)/tmp-imports
+	@$(OK) installing goimports
 
 $(GOJUNIT):
 	@$(INFO) installing go-junit-report
