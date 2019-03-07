@@ -102,9 +102,17 @@ GO_BIN_DIR := $(abspath $(OUTPUT_DIR)/bin)
 GO_OUT_DIR := $(GO_BIN_DIR)/$(PLATFORM)
 GO_TEST_DIR := $(abspath $(OUTPUT_DIR)/tests)
 GO_TEST_OUTPUT := $(GO_TEST_DIR)/$(PLATFORM)
+GO_LINT_DIR := $(abspath $(OUTPUT_DIR)/lint)
+GO_LINT_OUTPUT := $(GO_LINT_DIR)/$(PLATFORM)
 
 ifeq ($(GOOS),windows)
 GO_OUT_EXT := .exe
+endif
+
+# Detect when we're running in CI and output checkstyle XML at lint time rather
+# than human readable output.
+ifeq ($(RUNNING_IN_CI),true)
+GO_LINT_ARGS := --out-format=checkstyle > $(GO_LINT_OUTPUT)/checkstyle.xml
 endif
 
 # NOTE: the install suffixes are matched with the build container to speed up the
@@ -168,7 +176,8 @@ go.test.integration: $(GOJUNIT)
 
 go.lint: $(GOLANGCILINT)
 	@$(INFO) golangci-lint
-	@$(GOLANGCILINT) run || $(FAIL)
+	@mkdir -p $(GO_LINT_OUTPUT)
+	@$(GOLANGCILINT) run $(GO_LINT_ARGS) || $(FAIL)
 	@$(OK) golangci-lint
 
 go.vet:

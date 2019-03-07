@@ -153,6 +153,7 @@ docker run \
     -e GITHUB_TOKEN \
     -e VERSION \
     -e CHANNEL \
+    -e RUNNING_IN_CI \
     -v ${PWD}/_output:${BUILDER_HOME}/go/bin \
     ${TTY_ARGS} \
     ${KUBE_ARGS} \
