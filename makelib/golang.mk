@@ -235,12 +235,12 @@ go.generate:
 # Common Targets
 
 build.init: go.init
-build.check: go.fmt
-build.check.platform: go.vet
+build.check: go.lint
 build.code.platform: go.build
 clean: go.clean
 distclean: go.distclean
-lint: go.lint
+lint.init: go.init
+lint.run: go.lint
 test.run: go.test.unit
 
 # ====================================================================================
