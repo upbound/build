@@ -84,6 +84,7 @@ DEP_VERSION=v0.5.0
 DEP := $(TOOLS_HOST_DIR)/dep-$(DEP_VERSION)
 GOLANGCILINT := $(TOOLS_HOST_DIR)/golangci-lint
 GOJUNIT := $(TOOLS_HOST_DIR)/go-junit-report
+GOCOVER_COBERTURA := $(TOOLS_HOST_DIR)/gocover-cobertura
 
 GO := go
 GOHOST := GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) go
@@ -143,12 +144,13 @@ go.install:
 	$(foreach p,$(GO_STATIC_PACKAGES),@CGO_ENABLED=0 $(GO) install -v $(GO_STATIC_FLAGS) $(p) || $(FAIL) ${\n})
 	@$(OK) go install $(PLATFORM)
 
-go.test.unit: $(GOJUNIT)
+go.test.unit: $(GOJUNIT) $(GOCOVER_COBERTURA)
 	@$(INFO) go test unit-tests
 	@mkdir -p $(GO_TEST_OUTPUT)
 	@CGO_ENABLED=0 $(GOHOST) test -v -i -cover $(GO_STATIC_FLAGS) $(GO_PACKAGES) || $(FAIL)
 	@CGO_ENABLED=0 $(GOHOST) test -v -covermode=count -coverprofile=$(GO_TEST_OUTPUT)/coverage.txt $(GO_TEST_FLAGS) $(GO_STATIC_FLAGS) $(GO_PACKAGES) 2>&1 | tee $(GO_TEST_OUTPUT)/unit-tests.log || $(FAIL)
 	@cat $(GO_TEST_OUTPUT)/unit-tests.log | $(GOJUNIT) -set-exit-code > $(GO_TEST_OUTPUT)/unit-tests.xml || $(FAIL)
+	@$(GOCOVER_COBERTURA) < $(GO_TEST_OUTPUT)/coverage.txt > $(GO_TEST_OUTPUT)/coverage.xml
 	@$(OK) go test unit-tests
 
 # Depends on go.test.unit, but is only run in CI with a valid token after unit-testing is complete
@@ -300,3 +302,10 @@ $(GOJUNIT):
 	@GOPATH=$(TOOLS_HOST_DIR)/tmp-junit GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get github.com/jstemmer/go-junit-report || rm -fr $(TOOLS_HOST_DIR)/tmp-junit || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-junit
 	@$(OK) installing go-junit-report
+
+$(GOCOVER_COBERTURA):
+	@$(INFO) installing gocover-cobertura
+	@mkdir -p $(TOOLS_HOST_DIR)/tmp-gocover-cobertura || $(FAIL)
+	@GOPATH=$(TOOLS_HOST_DIR)/tmp-gocover-cobertura GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get github.com/t-yuki/gocover-cobertura || rm -fr $(TOOLS_HOST_DIR)/tmp-covcover-cobertura || $(FAIL)
+	@rm -fr $(TOOLS_HOST_DIR)/tmp-gocover-cobertura
+	@$(OK) installing gocover-cobertura
