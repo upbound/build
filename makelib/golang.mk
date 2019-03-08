@@ -82,7 +82,6 @@ GOPATH := $(shell go env GOPATH)
 # setup tools used during the build
 DEP_VERSION=v0.5.0
 DEP := $(TOOLS_HOST_DIR)/dep-$(DEP_VERSION)
-GOLANGCILINT := $(TOOLS_HOST_DIR)/golangci-lint
 GOJUNIT := $(TOOLS_HOST_DIR)/go-junit-report
 GOCOVER_COBERTURA := $(TOOLS_HOST_DIR)/gocover-cobertura
 GOIMPORTS := $(TOOLS_HOST_DIR)/goimports
@@ -99,6 +98,11 @@ GOFMT := $(shell which gofmt)
 else
 GOFMT := $(TOOLS_HOST_DIR)/gofmt$(GOFMT_VERSION)
 endif
+
+# We use a consistent version of golangci-lint to ensure everyone gets the same
+# linters.
+GOLANGCILINT_VERSION := 1.15.0
+GOLANGCILINT := $(TOOLS_HOST_DIR)/golangci-lint-v$(GOLANGCILINT_VERSION)
 
 GO_BIN_DIR := $(abspath $(OUTPUT_DIR)/bin)
 GO_OUT_DIR := $(GO_BIN_DIR)/$(PLATFORM)
@@ -297,11 +301,12 @@ $(DEP):
 	@$(OK) installing dep $(HOSTOS)-$(HOSTARCH)
 
 $(GOLANGCILINT):
-	@$(INFO) installing golangci-lint
+	@$(INFO) installing golangci-lint-v$(GOLANGCILINT_VERSION) $(HOSTOS)-$(HOSTARCH)
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-golangci-lint || $(FAIL)
-	@GOPATH=$(TOOLS_HOST_DIR)/tmp-golangci-lint GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get -u github.com/golangci/golangci-lint/cmd/golangci-lint || rm -fr $(TOOLS_HOST_DIR)/tmp-golangci-lint || $(FAIL)
+	@curl -fsSL https://github.com/golangci/golangci-lint/releases/download/v$(GOLANGCILINT_VERSION)/golangci-lint-$(GOLANGCILINT_VERSION)-$(HOSTOS)-$(HOSTARCH).tar.gz | tar -xz --strip-components=1 -C $(TOOLS_HOST_DIR)/tmp-golangci-lint || $(FAIL)
+	@mv $(TOOLS_HOST_DIR)/tmp-golangci-lint/golangci-lint $(GOLANGCILINT) || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-golangci-lint
-	@$(OK) installing golangci-lint
+	@$(OK) installing golangci-lint-v$(GOLANGCILINT_VERSION) $(HOSTOS)-$(HOSTARCH)
 
 $(GOFMT):
 	@$(INFO) installing gofmt$(GOFMT_VERSION)
