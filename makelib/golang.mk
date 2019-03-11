@@ -290,12 +290,7 @@ help-special: go.help
 $(DEP):
 	@$(INFO) installing dep $(HOSTOS)-$(HOSTARCH)
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-dep || $(FAIL)
-	@if [ "$(GOHOSTARCH)" = "arm64" ]; then\
-		GOPATH=$(TOOLS_HOST_DIR)/tmp-dep GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get -u github.com/golang/dep/cmd/dep || $(FAIL) ;\
-		mv $(TOOLS_HOST_DIR)/dep $@ || $(FAIL);\
-	else \
-		curl -fsSL -o $(DEP) https://github.com/golang/dep/releases/download/$(DEP_VERSION)/dep-$(HOSTOS)-$(HOSTARCH) || $(FAIL);\
-	fi
+	@curl -fsSL -o $(DEP) https://github.com/golang/dep/releases/download/$(DEP_VERSION)/dep-$(HOSTOS)-$(HOSTARCH) || $(FAIL)
 	@chmod +x $(DEP) || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-dep
 	@$(OK) installing dep $(HOSTOS)-$(HOSTARCH)
