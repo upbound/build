@@ -288,12 +288,12 @@ help-special: go.help
 # Tools install targets
 
 $(DEP):
-	@$(INFO) installing dep $(HOSTOS)-$(HOSTARCH)
+	@$(INFO) installing dep-$(DEP_VERSION) $(HOSTOS)-$(HOSTARCH)
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-dep || $(FAIL)
 	@curl -fsSL -o $(DEP) https://github.com/golang/dep/releases/download/$(DEP_VERSION)/dep-$(HOSTOS)-$(HOSTARCH) || $(FAIL)
 	@chmod +x $(DEP) || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-dep
-	@$(OK) installing dep $(HOSTOS)-$(HOSTARCH)
+	@$(OK) installing dep-$(DEP_VERSION) $(HOSTOS)-$(HOSTARCH)
 
 $(GOLANGCILINT):
 	@$(INFO) installing golangci-lint-v$(GOLANGCILINT_VERSION) $(HOSTOS)-$(HOSTARCH)
