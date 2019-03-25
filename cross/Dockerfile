@@ -44,7 +44,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
 
 # ------------------------------------------------------------------------------------------------
 # Go support
-RUN GO_VERSION=1.11 && \
+RUN GO_VERSION=1.12 && \
     GO_HASH=b3fcf280ff86558e0559e185b601c9eade0fd24c900b4c63cd14d1d38613e499 && \
     curl -fsSL https://golang.org/dl/go${GO_VERSION}.linux-amd64.tar.gz -o golang.tar.gz && \
     echo "${GO_HASH}  golang.tar.gz" | sha256sum -c - && \
