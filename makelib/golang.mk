@@ -166,6 +166,11 @@ go.test.unit: $(GOJUNIT) $(GOCOVER_COBERTURA)
 	@$(GOCOVER_COBERTURA) < $(GO_TEST_OUTPUT)/coverage.txt > $(GO_TEST_OUTPUT)/coverage.xml
 	@$(OK) go test unit-tests
 
+go.test.unit.nocov:
+	@$(INFO) go test unit-tests without coverage
+	@CGO_ENABLED=0 $(GOHOST) test $(ARGS) $(GO_TEST_FLAGS) $(GO_STATIC_FLAGS) $(GO_PACKAGES) || $(FAIL)
+	@$(OK) go test unit-tests without coverage
+
 # Depends on go.test.unit, but is only run in CI with a valid token after unit-testing is complete
 # DO NOT run locally.
 go.test.codecov:
@@ -196,6 +201,11 @@ go.fmt: $(GOFMT)
 	@$(INFO) go fmt
 	@gofmt_out=$$($(GOFMT) -s -d -e $(GO_SUBDIRS) $(GO_INTEGRATION_TESTS_SUBDIRS) 2>&1) && [ -z "$${gofmt_out}" ] || (echo "$${gofmt_out}" 1>&2; $(FAIL))
 	@$(OK) go fmt
+
+go.fmt.simplify: $(GOFMT)
+	@$(INFO) gofmt simplify
+	@$(GOFMT) -l -s -w $(GO_SUBDIRS) || $(FAIL)
+	@$(OK) gofmt simplify
 
 go.imports: $(GOIMPORTS)
 	@$(INFO) goimports
@@ -267,13 +277,14 @@ generate codegen: go.generate
 
 define GO_HELPTEXT
 Go Targets:
-    generate       Runs go code generation.
-    fmt            Checks go source code for formatting issues.
-    vendor         Updates vendor packages.
-    vendor.check   Fail the build if vendor packages have changed.
-    vendor.update  Update vendor dependencies.
-    vet            Checks go source code and reports suspicious constructs.
-
+    generate        Runs go code generation.
+    fmt             Checks go source code for formatting issues.
+    fmt.simplify    Format, simplify, update source files.
+    vendor          Updates vendor packages.
+    vendor.check    Fail the build if vendor packages have changed.
+    vendor.update   Update vendor dependencies.
+    vet             Checks go source code and reports suspicious constructs.
+    test.unit.nocov Runs unit tests without coverage (faster for iterative development)
 endef
 export GO_HELPTEXT
 

@@ -16,7 +16,7 @@
 # Options
 
 # the version of kubebuilder to use
-KUBEBUILDER_VERSION ?= 1.0.4
+KUBEBUILDER_VERSION ?= 1.0.8
 KUBEBUILDER := $(TOOLS_HOST_DIR)/kubebuilder-$(KUBEBUILDER_VERSION)
 
 # these are use by the kube builder test harness
@@ -35,7 +35,8 @@ test.init: $(KUBEBUILDER)
 
 define KUBEBULDER_HELPTEXT
 Kubebuilder Targets:
-    codegen      run code generation
+    bin        run kubebuilder binary, pass args by setting ARGS=""
+    codegen    run code generation
 
 endef
 export KUBEBULDER_HELPTEXT
@@ -45,18 +46,21 @@ kubebuilder.help:
 
 help-special: kubebuilder.help
 
-.PHONY: codegen kubebuilder.help
+kubebuilder.bin: $(KUBEBUILDER)
+	@$(KUBEBUILDER)/kubebuilder $(ARGS)
+
+.PHONY: codegen kubebuilder.help kubebuilder.bin
 
 # ====================================================================================
 # tools
 
 # kubebuilder download and install
 $(KUBEBUILDER):
-	@$(INFO) installing kubebuilder
+	@$(INFO) installing kubebuilder $(KUBEBUILDER_VERSION)
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp || $(FAIL)
 	@curl -fsSL https://github.com/kubernetes-sigs/kubebuilder/releases/download/v$(KUBEBUILDER_VERSION)/kubebuilder_$(KUBEBUILDER_VERSION)_$(GOHOSTOS)_$(GOHOSTARCH).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp  || $(FAIL)
 	@mv $(TOOLS_HOST_DIR)/tmp/kubebuilder_$(KUBEBUILDER_VERSION)_$(GOHOSTOS)_$(GOHOSTARCH)/bin $(KUBEBUILDER) || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp
-	@$(OK) installing kubebuilder
+	@$(OK) installing kubebuilder $(KUBEBUILDER_VERSION)
 
 
