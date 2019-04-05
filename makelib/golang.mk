@@ -39,6 +39,7 @@ GO_LDFLAGS ?=
 GO_TAGS ?=
 GO_TEST_FLAGS ?=
 GO_TEST_SUITE ?=
+GO_NOCOV ?=
 
 # ====================================================================================
 # Setup go environment
@@ -159,17 +160,17 @@ go.install:
 
 go.test.unit: $(GOJUNIT) $(GOCOVER_COBERTURA)
 	@$(INFO) go test unit-tests
+ifeq ($(GO_NOCOV),true)
+	@$(WARN) coverage analysis is disabled
+	@CGO_ENABLED=0 $(GOHOST) test $(GO_TEST_FLAGS) $(GO_STATIC_FLAGS) $(GO_PACKAGES) || $(FAIL)
+else
 	@mkdir -p $(GO_TEST_OUTPUT)
 	@CGO_ENABLED=0 $(GOHOST) test -v -i -cover $(GO_STATIC_FLAGS) $(GO_PACKAGES) || $(FAIL)
 	@CGO_ENABLED=0 $(GOHOST) test -v -covermode=count -coverprofile=$(GO_TEST_OUTPUT)/coverage.txt $(GO_TEST_FLAGS) $(GO_STATIC_FLAGS) $(GO_PACKAGES) 2>&1 | tee $(GO_TEST_OUTPUT)/unit-tests.log || $(FAIL)
 	@cat $(GO_TEST_OUTPUT)/unit-tests.log | $(GOJUNIT) -set-exit-code > $(GO_TEST_OUTPUT)/unit-tests.xml || $(FAIL)
 	@$(GOCOVER_COBERTURA) < $(GO_TEST_OUTPUT)/coverage.txt > $(GO_TEST_OUTPUT)/coverage.xml
+endif
 	@$(OK) go test unit-tests
-
-go.test.unit.nocov:
-	@$(INFO) go test unit-tests without coverage
-	@CGO_ENABLED=0 $(GOHOST) test $(ARGS) $(GO_TEST_FLAGS) $(GO_STATIC_FLAGS) $(GO_PACKAGES) || $(FAIL)
-	@$(OK) go test unit-tests without coverage
 
 # Depends on go.test.unit, but is only run in CI with a valid token after unit-testing is complete
 # DO NOT run locally.
@@ -204,7 +205,7 @@ go.fmt: $(GOFMT)
 
 go.fmt.simplify: $(GOFMT)
 	@$(INFO) gofmt simplify
-	@$(GOFMT) -l -s -w $(GO_SUBDIRS) || $(FAIL)
+	@$(GOFMT) -l -s -w $(GO_SUBDIRS) $(GO_INTEGRATION_TESTS_SUBDIRS) || $(FAIL)
 	@$(OK) gofmt simplify
 
 go.imports: $(GOIMPORTS)
