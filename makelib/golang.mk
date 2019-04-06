@@ -39,6 +39,7 @@ GO_LDFLAGS ?=
 GO_TAGS ?=
 GO_TEST_FLAGS ?=
 GO_TEST_SUITE ?=
+GO_NOCOV ?=
 
 # ====================================================================================
 # Setup go environment
@@ -159,11 +160,16 @@ go.install:
 
 go.test.unit: $(GOJUNIT) $(GOCOVER_COBERTURA)
 	@$(INFO) go test unit-tests
+ifeq ($(GO_NOCOV),true)
+	@$(WARN) coverage analysis is disabled
+	@CGO_ENABLED=0 $(GOHOST) test $(GO_TEST_FLAGS) $(GO_STATIC_FLAGS) $(GO_PACKAGES) || $(FAIL)
+else
 	@mkdir -p $(GO_TEST_OUTPUT)
 	@CGO_ENABLED=0 $(GOHOST) test -v -i -cover $(GO_STATIC_FLAGS) $(GO_PACKAGES) || $(FAIL)
 	@CGO_ENABLED=0 $(GOHOST) test -v -covermode=count -coverprofile=$(GO_TEST_OUTPUT)/coverage.txt $(GO_TEST_FLAGS) $(GO_STATIC_FLAGS) $(GO_PACKAGES) 2>&1 | tee $(GO_TEST_OUTPUT)/unit-tests.log || $(FAIL)
 	@cat $(GO_TEST_OUTPUT)/unit-tests.log | $(GOJUNIT) -set-exit-code > $(GO_TEST_OUTPUT)/unit-tests.xml || $(FAIL)
 	@$(GOCOVER_COBERTURA) < $(GO_TEST_OUTPUT)/coverage.txt > $(GO_TEST_OUTPUT)/coverage.xml
+endif
 	@$(OK) go test unit-tests
 
 # Depends on go.test.unit, but is only run in CI with a valid token after unit-testing is complete
@@ -196,6 +202,11 @@ go.fmt: $(GOFMT)
 	@$(INFO) go fmt
 	@gofmt_out=$$($(GOFMT) -s -d -e $(GO_SUBDIRS) $(GO_INTEGRATION_TESTS_SUBDIRS) 2>&1) && [ -z "$${gofmt_out}" ] || (echo "$${gofmt_out}" 1>&2; $(FAIL))
 	@$(OK) go fmt
+
+go.fmt.simplify: $(GOFMT)
+	@$(INFO) gofmt simplify
+	@$(GOFMT) -l -s -w $(GO_SUBDIRS) $(GO_INTEGRATION_TESTS_SUBDIRS) || $(FAIL)
+	@$(OK) gofmt simplify
 
 go.imports: $(GOIMPORTS)
 	@$(INFO) goimports
@@ -267,13 +278,14 @@ generate codegen: go.generate
 
 define GO_HELPTEXT
 Go Targets:
-    generate       Runs go code generation.
-    fmt            Checks go source code for formatting issues.
-    vendor         Updates vendor packages.
-    vendor.check   Fail the build if vendor packages have changed.
-    vendor.update  Update vendor dependencies.
-    vet            Checks go source code and reports suspicious constructs.
-
+    generate        Runs go code generation.
+    fmt             Checks go source code for formatting issues.
+    fmt.simplify    Format, simplify, update source files.
+    vendor          Updates vendor packages.
+    vendor.check    Fail the build if vendor packages have changed.
+    vendor.update   Update vendor dependencies.
+    vet             Checks go source code and reports suspicious constructs.
+    test.unit.nocov Runs unit tests without coverage (faster for iterative development)
 endef
 export GO_HELPTEXT
 
