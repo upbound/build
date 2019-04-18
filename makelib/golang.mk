@@ -86,6 +86,7 @@ DEP := $(TOOLS_HOST_DIR)/dep-$(DEP_VERSION)
 GOJUNIT := $(TOOLS_HOST_DIR)/go-junit-report
 GOCOVER_COBERTURA := $(TOOLS_HOST_DIR)/gocover-cobertura
 GOIMPORTS := $(TOOLS_HOST_DIR)/goimports
+MOCKGEN := $(TOOLS_HOST_DIR)/mockgen
 
 GO := go
 GOHOST := GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) go
@@ -245,11 +246,10 @@ go.clean:
 go.distclean:
 	@rm -rf $(GO_VENDOR_DIR) $(GO_PKG_DIR)
 
-go.generate:
+go.generate: go.vendor $(MOCKGEN)
 	@$(INFO) go generate $(PLATFORM)
-	@CGO_ENABLED=0 $(GOHOST) generate $(GO_COMMON_FLAGS) $(GO_PACKAGES) $(GO_INTEGRATION_TEST_PACKAGES) || $(FAIL)
+	@PATH=$(TOOLS_HOST_DIR):$(PATH) CGO_ENABLED=0 $(GOHOST) generate $(GO_COMMON_FLAGS) $(GO_PACKAGES) $(GO_INTEGRATION_TEST_PACKAGES) || $(FAIL)
 	@$(OK) go generate $(PLATFORM)
-
 
 .PHONY: go.init go.build go.install go.test.unit go.test.integration go.test.codecov go.lint go.vet go.fmt go.generate
 .PHONY: go.validate go.vendor.lite go.vendor go.vendor.check go.vendor.update go.clean go.distclean
@@ -343,3 +343,8 @@ $(GOCOVER_COBERTURA):
 	@GOPATH=$(TOOLS_HOST_DIR)/tmp-gocover-cobertura GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get github.com/t-yuki/gocover-cobertura || rm -fr $(TOOLS_HOST_DIR)/tmp-covcover-cobertura || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-gocover-cobertura
 	@$(OK) installing gocover-cobertura
+
+$(MOCKGEN):
+	@$(INFO) installing mockgen
+	@GOBIN=$(TOOLS_HOST_DIR) go install github.com/golang/mock/mockgen
+	@$(OK) installing mockgen
