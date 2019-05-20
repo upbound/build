@@ -108,6 +108,8 @@ helm.promote: $(HELM_HOME)
 	@$(S3_SYNC) s3://$(S3_BUCKET)/build/$(BRANCH_NAME)/$(VERSION)/charts $(HELM_TEMP)
 	@$(HELM) repo index --url $(HELM_URL) $(HELM_TEMP)
 	@$(S3_SYNC_DEL) $(HELM_TEMP) s3://$(HELM_S3_BUCKET)/$(CHANNEL)
+# 	re-upload index.yaml setting cache-control to ensure the file is not cached by http clients
+	@$(S3_CP) --cache-control "private, max-age=0, no-transform" $(HELM_TEMP)/index.yaml s3://$(HELM_S3_BUCKET)/$(CHANNEL)/index.yaml
 	@rm -fr $(HELM_TEMP)
 	@$(OK) promoting helm charts
 
