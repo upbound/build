@@ -264,6 +264,7 @@ clean: go.clean
 distclean: go.distclean
 lint.init: go.init
 lint.run: go.lint
+test.init: go.init
 test.run: go.test.unit
 
 # ====================================================================================
