@@ -138,14 +138,19 @@ GO_STATIC_FLAGS = $(GO_COMMON_FLAGS) $(GO_PKG_STATIC_FLAGS) -installsuffix stati
 # ====================================================================================
 # Go Targets
 
-go.init: go.vendor.lite
+go.init:
 	@if ! `$(GO) version | grep -q -E '\bgo($(GO_SUPPORTED_VERSIONS))\b'`; then \
 		$(ERR) unsupported go version. Please make install one of the following supported version: '$(GO_SUPPORTED_VERSIONS)' ;\
 		exit 1 ;\
 	fi
+ifeq ($(GO11MODULE),on)
+	$(MAKE) go.mod
+else
+	$(MAKE) go.vendor.lite
 	@if [ "$(realpath ../../../..)" !=  "$(realpath $(GOPATH))" ]; then \
 		$(WARN) the source directory is not relative to the GOPATH at $(GOPATH) or you are you using symlinks. The build might run into issue. Please move the source directory to be at $(GOPATH)/src/$(GO_PROJECT) ;\
 	fi
+endif
 
 go.build:
 	@$(INFO) go build $(PLATFORM)
@@ -239,6 +244,9 @@ go.vendor: $(DEP)
 	@$(DEP) ensure || $(FAIL)
 	@$(OK) dep ensure
 
+go.mod:
+	@$(INFO) go mod tidy
+
 go.clean:
 	@rm -fr $(GO_BIN_DIR) $(GO_TEST_DIR)
 
@@ -252,7 +260,7 @@ go.generate:
 
 
 .PHONY: go.init go.build go.install go.test.unit go.test.integration go.test.codecov go.lint go.vet go.fmt go.generate
-.PHONY: go.validate go.vendor.lite go.vendor go.vendor.check go.vendor.update go.clean go.distclean
+.PHONY: go.validate go.vendor.lite go.vendor go.vendor.check go.vendor.update go.clean go.distclean go.mod
 
 # ====================================================================================
 # Common Targets
@@ -274,6 +282,8 @@ fmt: go.imports
 vendor: go.vendor
 vendor.check: go.vendor.check
 vendor.update: go.vendor.update
+vendor.lite: go.vendor.lite
+mod: go.mod
 vet: go.vet
 generate codegen: go.generate
 
@@ -282,6 +292,7 @@ Go Targets:
     generate        Runs go code generation.
     fmt             Checks go source code for formatting issues.
     fmt.simplify    Format, simplify, update source files.
+	mod				Prunes any no-longer-needed dependencies.
     vendor          Updates vendor packages.
     vendor.check    Fail the build if vendor packages have changed.
     vendor.update   Update vendor dependencies.
