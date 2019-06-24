@@ -116,10 +116,12 @@ ifeq ($(GOOS),windows)
 GO_OUT_EXT := .exe
 endif
 
-# Detect when we're running in CI and output checkstyle XML at lint time rather
-# than human readable output.
 ifeq ($(RUNNING_IN_CI),true)
+# Output checkstyle XML rather than human readable output.
 GO_LINT_ARGS := --out-format=checkstyle > $(GO_LINT_OUTPUT)/checkstyle.xml
+
+# Output verbose tests that can be parsed into JUnit XML.
+GO_TEST_FLAGS += -v
 endif
 
 # NOTE: the install suffixes are matched with the build container to speed up the
