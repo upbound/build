@@ -250,6 +250,8 @@ common.buildvars:
 	@echo OUTPUT_DIR=$(OUTPUT_DIR)
 	@echo WORK_DIR=$(WORK_DIR)
 	@echo CACHE_DIR=$(CACHE_DIR)
+	@echo HOSTOS=$(HOSTOS)
+	@echo HOSTARCH=$(HOSTARCH)
 
 build.vars: common.buildvars
 
