@@ -117,8 +117,10 @@ GO_OUT_EXT := .exe
 endif
 
 ifeq ($(RUNNING_IN_CI),true)
+# Reduce concurrency to reduce RAM requirements on jenkins worker nodes
+# increase deadline to 3m (from default 1m, crossplane default 2m) to potentially compensate for less concurrency
 # Output checkstyle XML rather than human readable output.
-GO_LINT_ARGS := --out-format=checkstyle > $(GO_LINT_OUTPUT)/checkstyle.xml
+GO_LINT_ARGS := --concurrency=1 --deadline=3m0s --out-format=checkstyle > $(GO_LINT_OUTPUT)/checkstyle.xml
 
 # Output verbose tests that can be parsed into JUnit XML.
 GO_TEST_FLAGS += -v
@@ -192,7 +194,7 @@ go.test.integration: $(GOJUNIT)
 go.lint: $(GOLANGCILINT)
 	@$(INFO) golangci-lint
 	@mkdir -p $(GO_LINT_OUTPUT)
-	@$(GOLANGCILINT) run $(GO_LINT_ARGS) || $(FAIL)
+	@LINT_GOGC=20 $(GOLANGCILINT) run $(GO_LINT_ARGS) || $(FAIL)
 	@$(OK) golangci-lint
 
 go.vet:
