@@ -215,6 +215,11 @@ go.imports: $(GOIMPORTS)
 	@goimports_out=$$($(GOIMPORTS) -d -e -local $(GO_PROJECT) $(GO_SUBDIRS) $(GO_INTEGRATION_TESTS_SUBDIRS) 2>&1) && [ -z "$${goimports_out}" ] || (echo "$${goimports_out}" 1>&2; $(FAIL))
 	@$(OK) goimports
 
+go.imports.fix: $(GOIMPORTS)
+	@$(INFO) goimports fix
+	@$(GOIMPORTS) -l -w -local $(GO_PROJECT) $(GO_SUBDIRS) $(GO_INTEGRATION_TESTS_SUBDIRS) || $(FAIL)
+	@$(OK) goimports fix
+
 go.validate: go.vet go.fmt
 
 go.vendor.lite: $(DEP)
@@ -251,6 +256,7 @@ go.generate:
 	@$(INFO) go generate $(PLATFORM)
 	@CGO_ENABLED=0 $(GOHOST) generate $(GO_COMMON_FLAGS) $(GO_PACKAGES) $(GO_INTEGRATION_TEST_PACKAGES) || $(FAIL)
 	@$(OK) go generate $(PLATFORM)
+	@find $(GO_SUBDIRS) $(GO_INTEGRATION_TESTS_SUBDIRS) -type f -name 'zz_generated*' -exec $(GOIMPORTS) -l -w -local $(GO_PROJECT) {} \;
 
 
 .PHONY: go.init go.build go.install go.test.unit go.test.integration go.test.codecov go.lint go.vet go.fmt go.generate
@@ -273,6 +279,9 @@ test.run: go.test.unit
 # Special Targets
 
 fmt: go.imports
+fmt.simplify: go.fmt.simplify
+imports: go.imports
+imports.fix: go.imports.fix
 vendor: go.vendor
 vendor.check: go.vendor.check
 vendor.update: go.vendor.update
@@ -281,9 +290,11 @@ generate codegen: go.generate
 
 define GO_HELPTEXT
 Go Targets:
-    generate        Runs go code generation.
+    generate        Runs go code generation followed by goimports on generated files.
     fmt             Checks go source code for formatting issues.
     fmt.simplify    Format, simplify, update source files.
+    imports         Checks go source code import lines for issues.
+    imports.fix     Updates go source files to fix issues with import lines.
     vendor          Updates vendor packages.
     vendor.check    Fail the build if vendor packages have changed.
     vendor.update   Update vendor dependencies.
