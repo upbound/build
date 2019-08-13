@@ -272,7 +272,8 @@ test.run: go.test.unit
 # ====================================================================================
 # Special Targets
 
-fmt: go.imports
+fmt: go.fmt
+fmt.simplify: go.fmt.simplify
 vendor: go.vendor
 vendor.check: go.vendor.check
 vendor.update: go.vendor.update
