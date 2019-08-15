@@ -252,7 +252,7 @@ go.clean:
 go.distclean:
 	@rm -rf $(GO_VENDOR_DIR) $(GO_PKG_DIR)
 
-go.generate:
+go.generate: $(GOIMPORTS)
 	@$(INFO) go generate $(PLATFORM)
 	@CGO_ENABLED=0 $(GOHOST) generate $(GO_COMMON_FLAGS) $(GO_PACKAGES) $(GO_INTEGRATION_TEST_PACKAGES) || $(FAIL)
 	@$(OK) go generate $(PLATFORM)
