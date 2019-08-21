@@ -18,11 +18,6 @@
 # The go project including repo name, for example, github.com/rook/rook
 GO_PROJECT ?= $(PROJECT_REPO)
 
-# the packages to be built statically, for example, $(GO_PROJECT)/cmd/mytool
-ifeq ($(GO_STATIC_PACKAGES),)
-$(error please set GO_STATIC_PACKAGES prior to including golang.mk)
-endif
-
 # Optional. These are subdirs that we look for all go files to test, vet, and fmt
 GO_SUBDIRS ?= cmd pkg
 
