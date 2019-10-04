@@ -132,6 +132,16 @@ endif
 GO_COMMON_FLAGS = $(GO_BUILDFLAGS) -tags '$(GO_TAGS)'
 GO_STATIC_FLAGS = $(GO_COMMON_FLAGS) $(GO_PKG_STATIC_FLAGS) -installsuffix static  -ldflags '$(GO_LDFLAGS)'
 
+export GO111MODULE
+
+# switch for go modules
+ifeq ($(GO111MODULE),on)
+
+# set GOPATH to $(GO_PKG_DIR), so that the go modules are installed there, instead of the default $HOME/go/pkg/mod
+export GOPATH=$(abspath $(GO_PKG_DIR))
+
+endif
+
 # ====================================================================================
 # Go Targets
 
@@ -140,7 +150,7 @@ go.init: go.vendor.lite
 		$(ERR) unsupported go version. Please make install one of the following supported version: '$(GO_SUPPORTED_VERSIONS)' ;\
 		exit 1 ;\
 	fi
-	@if [ "$(realpath ../../../..)" !=  "$(realpath $(GOPATH))" ]; then \
+	@if [ "$(GO111MODULE)" != "on" ] && [ "$(realpath ../../../..)" !=  "$(realpath $(GOPATH))" ]; then \
 		$(WARN) the source directory is not relative to the GOPATH at $(GOPATH) or you are you using symlinks. The build might run into issue. Please move the source directory to be at $(GOPATH)/src/$(GO_PROJECT) ;\
 	fi
 
@@ -217,6 +227,25 @@ go.imports.fix: $(GOIMPORTS)
 
 go.validate: go.vet go.fmt
 
+ifeq ($(GO111MODULE),on)
+
+go.vendor.lite go.vendor.check:
+	@$(INFO) verify dependencies have expected content
+	@$(GOHOST) mod verify || $(FAIL)
+	@$(OK) go modules dependencies verified
+
+go.vendor.update:
+	@$(INFO) update go modules
+	@$(GOHOST) get -u ./... || $(FAIL)
+	@$(OK) update go modules
+
+go.vendor:
+	@$(INFO) go mod vendor
+	@$(GOHOST) mod vendor || $(FAIL)
+	@$(OK) go mod vendor
+
+else
+
 go.vendor.lite: $(DEP)
 #	dep ensure blindly updates the whole vendor tree causing everything to be rebuilt. This workaround
 #	will only call dep ensure if the .lock file changes or if the vendor dir is non-existent.
@@ -241,7 +270,13 @@ go.vendor: $(DEP)
 	@$(DEP) ensure || $(FAIL)
 	@$(OK) dep ensure
 
+endif
+
 go.clean:
+	@# `go modules` creates read-only folders under WORK_DIR
+	@# make all folders within WORK_DIR writable, so they can be deleted
+	@if [ -d $(WORK_DIR) ]; then chmod -R +w $(WORK_DIR); fi 
+
 	@rm -fr $(GO_BIN_DIR) $(GO_TEST_DIR)
 
 go.distclean:
@@ -335,20 +370,20 @@ $(GOFMT):
 $(GOIMPORTS):
 	@$(INFO) installing goimports
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-imports || $(FAIL)
-	@GOPATH=$(TOOLS_HOST_DIR)/tmp-imports GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get -u golang.org/x/tools/cmd/goimports || rm -fr $(TOOLS_HOST_DIR)/tmp-imports || $(FAIL)
+	@GO111MODULE=off GOPATH=$(TOOLS_HOST_DIR)/tmp-imports GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get -u golang.org/x/tools/cmd/goimports || rm -fr $(TOOLS_HOST_DIR)/tmp-imports || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-imports
 	@$(OK) installing goimports
 
 $(GOJUNIT):
 	@$(INFO) installing go-junit-report
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-junit || $(FAIL)
-	@GOPATH=$(TOOLS_HOST_DIR)/tmp-junit GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get github.com/jstemmer/go-junit-report || rm -fr $(TOOLS_HOST_DIR)/tmp-junit || $(FAIL)
+	@GO111MODULE=off GOPATH=$(TOOLS_HOST_DIR)/tmp-junit GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get github.com/jstemmer/go-junit-report || rm -fr $(TOOLS_HOST_DIR)/tmp-junit || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-junit
 	@$(OK) installing go-junit-report
 
 $(GOCOVER_COBERTURA):
 	@$(INFO) installing gocover-cobertura
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-gocover-cobertura || $(FAIL)
-	@GOPATH=$(TOOLS_HOST_DIR)/tmp-gocover-cobertura GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get github.com/t-yuki/gocover-cobertura || rm -fr $(TOOLS_HOST_DIR)/tmp-covcover-cobertura || $(FAIL)
+	@GO111MODULE=off GOPATH=$(TOOLS_HOST_DIR)/tmp-gocover-cobertura GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get github.com/t-yuki/gocover-cobertura || rm -fr $(TOOLS_HOST_DIR)/tmp-covcover-cobertura || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-gocover-cobertura
 	@$(OK) installing gocover-cobertura
