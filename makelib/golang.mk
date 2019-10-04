@@ -81,6 +81,8 @@ DEP := $(TOOLS_HOST_DIR)/dep-$(DEP_VERSION)
 GOJUNIT := $(TOOLS_HOST_DIR)/go-junit-report
 GOCOVER_COBERTURA := $(TOOLS_HOST_DIR)/gocover-cobertura
 GOIMPORTS := $(TOOLS_HOST_DIR)/goimports
+CONTROLLER_GEN_VERSION ?= v0.2.1
+CONTROLLERGEN := $(TOOLS_HOST_DIR)/controller-gen
 
 GO := go
 GOHOST := GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) go
@@ -282,11 +284,11 @@ go.clean:
 go.distclean:
 	@rm -rf $(GO_VENDOR_DIR) $(GO_PKG_DIR)
 
-go.generate: $(GOIMPORTS)
+go.generate: $(GOIMPORTS) $(CONTROLLERGEN)
 	@$(INFO) go generate $(PLATFORM)
-	@CGO_ENABLED=0 $(GOHOST) generate $(GO_COMMON_FLAGS) $(GO_PACKAGES) $(GO_INTEGRATION_TEST_PACKAGES) || $(FAIL)
-	@$(OK) go generate $(PLATFORM)
+	@CGO_ENABLED=0 CONTROLLERGEN=$(CONTROLLERGEN) $(GOHOST) generate $(GO_COMMON_FLAGS) $(GO_PACKAGES) $(GO_INTEGRATION_TEST_PACKAGES) || $(FAIL)
 	@find $(GO_SUBDIRS) $(GO_INTEGRATION_TESTS_SUBDIRS) -type f -name 'zz_generated*' -exec $(GOIMPORTS) -l -w -local $(GO_PROJECT) {} \;
+	@$(OK) go generate $(PLATFORM)
 
 
 .PHONY: go.init go.build go.install go.test.unit go.test.integration go.test.codecov go.lint go.vet go.fmt go.generate
@@ -387,3 +389,16 @@ $(GOCOVER_COBERTURA):
 	@GO111MODULE=off GOPATH=$(TOOLS_HOST_DIR)/tmp-gocover-cobertura GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get github.com/t-yuki/gocover-cobertura || rm -fr $(TOOLS_HOST_DIR)/tmp-covcover-cobertura || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-gocover-cobertura
 	@$(OK) installing gocover-cobertura
+
+$(CONTROLLERGEN):
+	@$(INFO) installing controller-gen @$(CONTROLLER_GEN_VERSION)
+	@mkdir -p $(TOOLS_HOST_DIR)/tmp-controllergen || $(FAIL)
+
+	@# `go get` only supports versioned go packages when GO111MODULE=on 
+	@#  since $(TOOLS_HOST_DIR) is under $(GO_PROJECT), make a temp folder which has a go.mod, 
+	@#  so that $(GO_PROJECT)/go.mod doesn't get modified because of running `go get`
+	@cd $(TOOLS_HOST_DIR)/tmp-controllergen; rm -f go.mod; GO111MODULE=on $(GOHOST) mod init tmp-controllergen
+	@cd $(TOOLS_HOST_DIR)/tmp-controllergen; GOPATH=$(abspath $(GO_PKG_DIR)) GO111MODULE=on GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION) || $(FAIL)
+	@rm -fr $(TOOLS_HOST_DIR)/tmp-controllergen
+
+	@$(OK) installing controller-gen @$(CONTROLLER_GEN_VERSION)
