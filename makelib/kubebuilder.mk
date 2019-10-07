@@ -26,6 +26,30 @@ TEST_ASSET_KUBECTL := $(KUBEBUILDER)/kubectl
 export TEST_ASSET_KUBE_APISERVER TEST_ASSET_ETCD TEST_ASSET_KUBECTL
 
 # ====================================================================================
+# Setup environment
+
+-include golang.mk
+
+ifeq ($(CRD_DIR),)
+$(error please set CRD_DIR (directories where CRD manifests will be saved) prior to including kubebuilder.mk)
+endif
+
+ifeq ($(API_DIR),)
+$(error please set API_DIR ()(directories where KUBEBUILDER API types are defined) prior to including kubebuilder.mk)
+endif
+
+# ====================================================================================
+# Kubebuilder Targets
+
+# Generate manifests e.g. CRD, RBAC etc.
+kubebuilder.manifests: $(CONTROLLERGEN)
+	@$(INFO) Generating CRD manifests
+	@# first delete the CRD_DIR, to remove the CRDs of types that no longer exist
+	@rm -rf $(CRD_DIR)
+	@$(CONTROLLERGEN) crd:trivialVersions=true paths=$(API_DIR) output:dir=$(CRD_DIR)
+	@$(OK) Generating CRD manifests
+
+# ====================================================================================
 # Common Targets
 
 test.init: $(KUBEBUILDER)
@@ -35,8 +59,8 @@ test.init: $(KUBEBUILDER)
 
 define KUBEBULDER_HELPTEXT
 Kubebuilder Targets:
-    bin        run kubebuilder binary, pass args by setting ARGS=""
-    codegen    run code generation
+    bin                     Run kubebuilder binary, pass args by setting ARGS=""
+    manifests               Generates Kubernetes custom resources manifests (e.g. CRDs RBACs, ...)
 
 endef
 export KUBEBULDER_HELPTEXT
@@ -45,11 +69,12 @@ kubebuilder.help:
 	@echo "$$KUBEBULDER_HELPTEXT"
 
 help-special: kubebuilder.help
+manifests: kubebuilder.manifests
 
 kubebuilder.bin: $(KUBEBUILDER)
 	@$(KUBEBUILDER)/kubebuilder $(ARGS)
 
-.PHONY: codegen kubebuilder.help kubebuilder.bin
+.PHONY: kubebuilder.help kubebuilder.bin kubebuilder.manifests
 
 # ====================================================================================
 # tools
