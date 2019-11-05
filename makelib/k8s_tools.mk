@@ -23,12 +23,17 @@ KIND := $(TOOLS_HOST_DIR)/kind-$(KIND_VERSION)
 KUBECTL_VERSION ?= v1.15.0
 KUBECTL := $(TOOLS_HOST_DIR)/kubectl-$(KUBECTL_VERSION)
 
+# the version of kustomize to use
+KUSTOMIZE_VERSION ?= v3.3.0
+KUSTOMIZE := $(TOOLS_HOST_DIR)/kustomize-$(KUSTOMIZE_VERSION)
+
 # ====================================================================================
 # Common Targets
 
 k8s_tools.buildvars:
 	@echo KIND=$(KIND)
 	@echo KUBECTL=$(KUBECTL)
+	@echo KUSTOMIZE=$(KUSTOMIZE)
 
 build.vars: k8s_tools.buildvars
 
@@ -48,3 +53,12 @@ $(KUBECTL):
 	@curl -fsSLo $(KUBECTL) https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VERSION)/bin/$(GOHOSTOS)/$(GOHOSTARCH)/kubectl || $(FAIL)
 	@chmod +x $(KUBECTL) 
 	@$(OK) installing kubectl $(KUBECTL_VERSION)
+
+# kustomize download and install
+$(KUSTOMIZE):
+	@$(INFO) installing kustomize $(KUSTOMIZE_VERSION)
+	@mkdir -p $(TOOLS_HOST_DIR)/tmp-kustomize
+	@curl -fsSL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/$(KUSTOMIZE_VERSION)/kustomize_$(KUSTOMIZE_VERSION)_$(HOST_PLATFORM).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-kustomize
+	@mv $(TOOLS_HOST_DIR)/tmp-kustomize/kustomize $(KUSTOMIZE)
+	@rm -fr $(TOOLS_HOST_DIR)/tmp-kustomize
+	@$(OK) installing kustomize $(KUSTOMIZE_VERSION)
