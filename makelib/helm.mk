@@ -46,6 +46,12 @@ HELM := $(TOOLS_HOST_DIR)/helm-$(HELM_VERSION)
 # remove the leading `v` for helm chart versions
 HELM_CHART_VERSION := $(VERSION:v%=%)
 
+#Chart Museum variables
+#MUSEUM_URL  ?= "https://helm.example.com/" - url for chart museum
+#If the following variables are set HTTP basic auth will be used. More details https://github.com/helm/chartmuseum/blob/master/README.md#basic-auth
+#MUSEUM_USER ?= "helm"
+#MUSEUM_PASS ?= "changeme"
+
 # ====================================================================================
 # Helm Targets
 
@@ -113,6 +119,24 @@ helm.promote: $(HELM_HOME)
 	@rm -fr $(HELM_TEMP)
 	@$(OK) promoting helm charts
 
+define museum.upload
+helm.museum.$(1):
+ifdef MUSEUM_URL
+	@$(INFO) pushing helm charts $(1) to chart museum $(MUSEUM_URL)
+ifneq ($(MUSEUM_USER)$(MUSEUM_PASS),"")
+	@$(INFO) curl -u $(MUSEUM_USER):$(MUSEUM_PASS) --data-binary '@$(HELM_OUTPUT_DIR)/$(1)-$(HELM_CHART_VERSION).tgz' $(MUSEUM_URL)/api/charts
+	@curl -u $(MUSEUM_USER):$(MUSEUM_PASS) --data-binary '@$(HELM_OUTPUT_DIR)/$(1)-$(HELM_CHART_VERSION).tgz' $(MUSEUM_URL)/api/charts
+else
+	@$(INFO) curl --data-binary '@$(HELM_OUTPUT_DIR)/$(1)-$(HELM_CHART_VERSION).tgz' $(MUSEUM_URL)/api/charts
+	@curl --data-binary '@$(HELM_OUTPUT_DIR)/$(1)-$(HELM_CHART_VERSION).tgz' $(MUSEUM_URL)/api/charts
+endif
+	@$(OK) pushing helm charts to chart museum
+endif
+
+helm.museum: helm.museum.$(1)
+endef
+$(foreach p,$(HELM_CHARTS),$(eval $(call museum.upload,$(p))))
+
 # ====================================================================================
 # Common Targets
 
@@ -125,7 +149,7 @@ build.check: helm.dep
 build.artifacts: helm.build
 clean: helm.clean
 lint: helm.lint
-promote.artifacts: helm.promote
+promote.artifacts: helm.promote helm.museum
 
 # ====================================================================================
 # Special Targets
