@@ -144,6 +144,9 @@ rsync_back() {
     fi
 }
 
+# set GOPROXY
+GOPROXY=https://proxy.golang.org
+
 docker run \
     --rm \
     -h ${BUILD_HOST} \
@@ -154,6 +157,7 @@ docker run \
     -e VERSION \
     -e CHANNEL \
     -e RUNNING_IN_CI \
+    -e GOPROXY="${GOPROXY}" \
     -v ${PWD}/_output:${BUILDER_HOME}/go/bin \
     ${TTY_ARGS} \
     ${KUBE_ARGS} \
