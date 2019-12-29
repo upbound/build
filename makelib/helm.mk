@@ -40,7 +40,7 @@ HELM_HOME := $(abspath $(WORK_DIR)/helm)
 export HELM_HOME
 
 # helm tool version
-HELM_VERSION := v2.10.0
+HELM_VERSION := v2.15.1
 HELM := $(TOOLS_HOST_DIR)/helm-$(HELM_VERSION)
 
 # remove the leading `v` for helm chart versions
@@ -98,7 +98,7 @@ $(HELM_INDEX): $(HELM_HOME) $(HELM_OUTPUT_DIR)
 
 helm.build: $(HELM_INDEX)
 
-helm.clean: 
+helm.clean:
 	@rm -fr $(HELM_OUTPUT_DIR)
 
 # ====================================================================================
