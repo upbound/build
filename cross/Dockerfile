@@ -30,6 +30,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     rsync \
     runit \
     sudo \
+    unzip \
     zip && \
     DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
