@@ -50,9 +50,6 @@ ifeq ($(DEBUG),0)
 GO_LDFLAGS += -s -w
 endif
 
-# supported go versions
-GO_SUPPORTED_VERSIONS ?= 1.7|1.8|1.9|1.10|1.11|1.12|1.13
-
 # set GOOS and GOARCH
 GOOS := $(OS)
 GOARCH := $(ARCH)
@@ -82,9 +79,9 @@ GOJUNIT := $(TOOLS_HOST_DIR)/go-junit-report
 GOCOVER_COBERTURA := $(TOOLS_HOST_DIR)/gocover-cobertura
 GOIMPORTS := $(TOOLS_HOST_DIR)/goimports
 
-GO := go
-GOHOST := GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) go
-GO_VERSION := $(shell $(GO) version | sed -ne 's/[^0-9]*\(\([0-9]\.\)\{0,4\}[0-9][^.]\).*/\1/p')
+GO_VERSION ?= 1.13.5
+GO_INSTALL_PATH := $(TOOLS_HOST_DIR)/go-v$(GO_VERSION)
+GO := $(TOOLS_HOST_DIR)/go-v$(GO_VERSION)/bin/go
 
 # we use a consistent version of gofmt even while running different go compilers.
 # see https://github.com/golang/go/issues/26397 for more details
@@ -147,11 +144,7 @@ endif
 # ====================================================================================
 # Go Targets
 
-go.init: go.vendor.lite
-	@if ! `$(GO) version | grep -q -E '\bgo($(GO_SUPPORTED_VERSIONS))\b'`; then \
-		$(ERR) unsupported go version. Please make install one of the following supported version: '$(GO_SUPPORTED_VERSIONS)' ;\
-		exit 1 ;\
-	fi
+go.init: go.vendor.lite $(GO)
 	@if [ "$(GO111MODULE)" != "on" ] && [ "$(realpath ../../../..)" !=  "$(realpath $(GOPATH))" ]; then \
 		$(WARN) the source directory is not relative to the GOPATH at $(GOPATH) or you are you using symlinks. The build might run into issue. Please move the source directory to be at $(GOPATH)/src/$(GO_PROJECT) ;\
 	fi
@@ -171,11 +164,11 @@ go.test.unit: $(GOJUNIT) $(GOCOVER_COBERTURA)
 	@$(INFO) go test unit-tests
 ifeq ($(GO_NOCOV),true)
 	@$(WARN) coverage analysis is disabled
-	@CGO_ENABLED=0 $(GOHOST) test $(GO_TEST_FLAGS) $(GO_STATIC_FLAGS) $(GO_PACKAGES) || $(FAIL)
+	@CGO_ENABLED=0 $(GO) test $(GO_TEST_FLAGS) $(GO_STATIC_FLAGS) $(GO_PACKAGES) || $(FAIL)
 else
 	@mkdir -p $(GO_TEST_OUTPUT)
-	@CGO_ENABLED=0 $(GOHOST) test -i -cover $(GO_STATIC_FLAGS) $(GO_PACKAGES) || $(FAIL)
-	@CGO_ENABLED=0 $(GOHOST) test -covermode=count -coverprofile=$(GO_TEST_OUTPUT)/coverage.txt $(GO_TEST_FLAGS) $(GO_STATIC_FLAGS) $(GO_PACKAGES) 2>&1 | tee $(GO_TEST_OUTPUT)/unit-tests.log || $(FAIL)
+	@CGO_ENABLED=0 $(GO) test -i -cover $(GO_STATIC_FLAGS) $(GO_PACKAGES) || $(FAIL)
+	@CGO_ENABLED=0 $(GO) test -covermode=count -coverprofile=$(GO_TEST_OUTPUT)/coverage.txt $(GO_TEST_FLAGS) $(GO_STATIC_FLAGS) $(GO_PACKAGES) 2>&1 | tee $(GO_TEST_OUTPUT)/unit-tests.log || $(FAIL)
 	@cat $(GO_TEST_OUTPUT)/unit-tests.log | $(GOJUNIT) -set-exit-code > $(GO_TEST_OUTPUT)/unit-tests.xml || $(FAIL)
 	@$(GOCOVER_COBERTURA) < $(GO_TEST_OUTPUT)/coverage.txt > $(GO_TEST_OUTPUT)/coverage.xml
 endif
@@ -191,8 +184,8 @@ go.test.codecov:
 go.test.integration: $(GOJUNIT)
 	@$(INFO) go test integration-tests
 	@mkdir -p $(GO_TEST_OUTPUT) || $(FAIL)
-	@CGO_ENABLED=0 $(GOHOST) test -i $(GO_STATIC_FLAGS) $(GO_INTEGRATION_TEST_PACKAGES) || $(FAIL)
-	@CGO_ENABLED=0 $(GOHOST) test $(GO_TEST_FLAGS) $(GO_STATIC_FLAGS) $(GO_INTEGRATION_TEST_PACKAGES) $(TEST_FILTER_PARAM) 2>&1 | tee $(GO_TEST_OUTPUT)/integration-tests.log || $(FAIL)
+	@CGO_ENABLED=0 $(GO) test -i $(GO_STATIC_FLAGS) $(GO_INTEGRATION_TEST_PACKAGES) || $(FAIL)
+	@CGO_ENABLED=0 $(GO) test $(GO_TEST_FLAGS) $(GO_STATIC_FLAGS) $(GO_INTEGRATION_TEST_PACKAGES) $(TEST_FILTER_PARAM) 2>&1 | tee $(GO_TEST_OUTPUT)/integration-tests.log || $(FAIL)
 	@cat $(GO_TEST_OUTPUT)/integration-tests.log | $(GOJUNIT) -set-exit-code > $(GO_TEST_OUTPUT)/integration-tests.xml || $(FAIL)
 	@$(OK) go test integration-tests
 
@@ -204,7 +197,7 @@ go.lint: $(GOLANGCILINT)
 
 go.vet:
 	@$(INFO) go vet $(PLATFORM)
-	@CGO_ENABLED=0 $(GOHOST) vet $(GO_COMMON_FLAGS) $(GO_PACKAGES) $(GO_INTEGRATION_TEST_PACKAGES) || $(FAIL)
+	@CGO_ENABLED=0 $(GO) vet $(GO_COMMON_FLAGS) $(GO_PACKAGES) $(GO_INTEGRATION_TEST_PACKAGES) || $(FAIL)
 	@$(OK) go vet $(PLATFORM)
 
 go.fmt: $(GOFMT)
@@ -233,17 +226,17 @@ ifeq ($(GO111MODULE),on)
 
 go.vendor.lite go.vendor.check:
 	@$(INFO) verify dependencies have expected content
-	@$(GOHOST) mod verify || $(FAIL)
+	@$(GO) mod verify || $(FAIL)
 	@$(OK) go modules dependencies verified
 
 go.vendor.update:
 	@$(INFO) update go modules
-	@$(GOHOST) get -u ./... || $(FAIL)
+	@$(GO) get -u ./... || $(FAIL)
 	@$(OK) update go modules
 
 go.vendor:
 	@$(INFO) go mod vendor
-	@$(GOHOST) mod vendor || $(FAIL)
+	@$(GO) mod vendor || $(FAIL)
 	@$(OK) go mod vendor
 
 else
@@ -286,7 +279,7 @@ go.distclean:
 
 go.generate: $(GOIMPORTS)
 	@$(INFO) go generate $(PLATFORM)
-	@CGO_ENABLED=0 $(GOHOST) generate $(GO_GENERATE_FLAGS) $(GO_PACKAGES) $(GO_INTEGRATION_TEST_PACKAGES) || $(FAIL)
+	@CGO_ENABLED=0 $(GO) generate $(GO_GENERATE_FLAGS) $(GO_PACKAGES) $(GO_INTEGRATION_TEST_PACKAGES) || $(FAIL)
 	@find $(GO_SUBDIRS) $(GO_INTEGRATION_TESTS_SUBDIRS) -type f -name 'zz_generated*' -exec $(GOIMPORTS) -l -w -local $(GO_PROJECT) {} \;
 	@$(OK) go generate $(PLATFORM)
 
@@ -345,6 +338,14 @@ help-special: go.help
 # ====================================================================================
 # Tools install targets
 
+$(GO):
+	@$(INFO) installing go-$(GO_VERSION) $(HOSTOS)-$(HOSTARCH)
+	@rm -fr $(TOOLS_HOST_DIR)/tmp-golang
+	@mkdir -p $(TOOLS_HOST_DIR)/tmp-golang || $(FAIL)
+	@curl -fsSL https://golang.org/dl/go${GO_VERSION}.$(HOSTOS)-$(HOSTARCH).tar.gz | tar -xz --strip-components=1 -C $(TOOLS_HOST_DIR)/tmp-golang || $(FAIL)
+	@mv $(TOOLS_HOST_DIR)/tmp-golang $(GO_INSTALL_PATH) || $(FAIL)
+	@$(OK) installing dep-$(DEP_VERSION) $(HOSTOS)-$(HOSTARCH)
+
 $(DEP):
 	@$(INFO) installing dep-$(DEP_VERSION) $(HOSTOS)-$(HOSTARCH)
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-dep || $(FAIL)
@@ -372,20 +373,20 @@ $(GOFMT):
 $(GOIMPORTS):
 	@$(INFO) installing goimports
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-imports || $(FAIL)
-	@GO111MODULE=off GOPATH=$(TOOLS_HOST_DIR)/tmp-imports GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get -u golang.org/x/tools/cmd/goimports || rm -fr $(TOOLS_HOST_DIR)/tmp-imports || $(FAIL)
+	@GO111MODULE=off GOPATH=$(TOOLS_HOST_DIR)/tmp-imports GOBIN=$(TOOLS_HOST_DIR) $(GO) get -u golang.org/x/tools/cmd/goimports || rm -fr $(TOOLS_HOST_DIR)/tmp-imports || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-imports
 	@$(OK) installing goimports
 
 $(GOJUNIT):
 	@$(INFO) installing go-junit-report
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-junit || $(FAIL)
-	@GO111MODULE=off GOPATH=$(TOOLS_HOST_DIR)/tmp-junit GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get github.com/jstemmer/go-junit-report || rm -fr $(TOOLS_HOST_DIR)/tmp-junit || $(FAIL)
+	@GO111MODULE=off GOPATH=$(TOOLS_HOST_DIR)/tmp-junit GOBIN=$(TOOLS_HOST_DIR) $(GO) get github.com/jstemmer/go-junit-report || rm -fr $(TOOLS_HOST_DIR)/tmp-junit || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-junit
 	@$(OK) installing go-junit-report
 
 $(GOCOVER_COBERTURA):
 	@$(INFO) installing gocover-cobertura
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-gocover-cobertura || $(FAIL)
-	@GO111MODULE=off GOPATH=$(TOOLS_HOST_DIR)/tmp-gocover-cobertura GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get github.com/t-yuki/gocover-cobertura || rm -fr $(TOOLS_HOST_DIR)/tmp-covcover-cobertura || $(FAIL)
+	@GO111MODULE=off GOPATH=$(TOOLS_HOST_DIR)/tmp-gocover-cobertura GOBIN=$(TOOLS_HOST_DIR) $(GO) get github.com/t-yuki/gocover-cobertura || rm -fr $(TOOLS_HOST_DIR)/tmp-covcover-cobertura || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-gocover-cobertura
 	@$(OK) installing gocover-cobertura

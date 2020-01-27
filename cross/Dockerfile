@@ -44,21 +44,6 @@ RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     pip install awscli --upgrade
 
 # ------------------------------------------------------------------------------------------------
-# Go support
-RUN GO_VERSION=1.13.5 && \
-    GO_HASH=512103d7ad296467814a6e3f635631bd35574cab3369a97a323c9a585ccaa569 && \
-    curl -fsSL https://golang.org/dl/go${GO_VERSION}.linux-amd64.tar.gz -o golang.tar.gz && \
-    echo "${GO_HASH}  golang.tar.gz" | sha256sum -c - && \
-    tar -C /usr/local -xzf golang.tar.gz && \
-    rm golang.tar.gz
-ENV PATH /usr/local/go/bin:$PATH
-
-# precompile the go standard library for all supported platforms and configurations
-# the install suffixes match those in golang.mk so please keep them in sync
-RUN platforms="darwin_amd64 windows_amd64 linux_amd64 linux_arm64" && \
-    for p in $platforms; do CGO_ENABLED=0 GOOS=${p%_*} GOARCH=${p##*_} GOARM=7 go install -installsuffix static -a std; done
-
-# ------------------------------------------------------------------------------------------------
 # Node JS and chrome support
 RUN curl -fsSL https://deb.nodesource.com/setup_10.x | bash - && \
     curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
