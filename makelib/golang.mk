@@ -113,7 +113,8 @@ endif
 
 ifeq ($(RUNNING_IN_CI),true)
 # Output checkstyle XML rather than human readable output.
-GO_LINT_ARGS := --out-format=checkstyle > $(GO_LINT_OUTPUT)/checkstyle.xml
+# the timeout is increased to 10m, to accommodate CI machines with low resources.
+GO_LINT_ARGS := --timeout 10m0s --out-format=checkstyle > $(GO_LINT_OUTPUT)/checkstyle.xml
 
 # Output verbose tests that can be parsed into JUnit XML.
 GO_TEST_FLAGS += -v
