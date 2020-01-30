@@ -70,7 +70,6 @@ ifneq ($(GO_TEST_SUITE),)
 GO_TEST_FLAGS += -run '$(GO_TEST_SUITE)'
 endif
 
-GOPATH := $(shell $(GO) env GOPATH)
 
 # setup tools used during the build
 DEP_VERSION=v0.5.1
@@ -82,6 +81,14 @@ GOIMPORTS := $(TOOLS_HOST_DIR)/goimports
 GO_VERSION ?= 1.13.5
 GO_INSTALL_PATH := $(TOOLS_HOST_DIR)/go-v$(GO_VERSION)
 GO := $(TOOLS_HOST_DIR)/go-v$(GO_VERSION)/bin/go
+$(GO):
+	@$(INFO) installing go-$(GO_VERSION) $(HOSTOS)-$(HOSTARCH)
+	@rm -fr $(TOOLS_HOST_DIR)/tmp-golang
+	@mkdir -p $(TOOLS_HOST_DIR)/tmp-golang || $(FAIL)
+	@curl -fsSL https://golang.org/dl/go${GO_VERSION}.$(HOSTOS)-$(HOSTARCH).tar.gz | tar -xz --strip-components=1 -C $(TOOLS_HOST_DIR)/tmp-golang || $(FAIL)
+	@mv $(TOOLS_HOST_DIR)/tmp-golang $(GO_INSTALL_PATH) || $(FAIL)
+	@$(OK) installing dep-$(DEP_VERSION) $(HOSTOS)-$(HOSTARCH)
+
 
 # we use a consistent version of gofmt even while running different go compilers.
 # see https://github.com/golang/go/issues/26397 for more details
@@ -149,18 +156,18 @@ go.init: go.vendor.lite $(GO)
 		$(WARN) the source directory is not relative to the GOPATH at $(GOPATH) or you are you using symlinks. The build might run into issue. Please move the source directory to be at $(GOPATH)/src/$(GO_PROJECT) ;\
 	fi
 
-go.build:
+go.build: $(GO)
 	@$(INFO) go build $(PLATFORM)
 	$(foreach p,$(GO_STATIC_PACKAGES),@CGO_ENABLED=0 $(GO) build -v -i -o $(GO_OUT_DIR)/$(lastword $(subst /, ,$(p)))$(GO_OUT_EXT) $(GO_STATIC_FLAGS) $(p) || $(FAIL) ${\n})
 	$(foreach p,$(GO_TEST_PACKAGES) $(GO_LONGHAUL_TEST_PACKAGES),@CGO_ENABLED=0 $(GO) test -i -c -o $(GO_TEST_OUTPUT)/$(lastword $(subst /, ,$(p)))$(GO_OUT_EXT) $(GO_STATIC_FLAGS) $(p) || $(FAIL ${\n}))
 	@$(OK) go build $(PLATFORM)
 
-go.install:
+go.install: $(GO)
 	@$(INFO) go install $(PLATFORM)
 	$(foreach p,$(GO_STATIC_PACKAGES),@CGO_ENABLED=0 $(GO) install -v $(GO_STATIC_FLAGS) $(p) || $(FAIL) ${\n})
 	@$(OK) go install $(PLATFORM)
 
-go.test.unit: $(GOJUNIT) $(GOCOVER_COBERTURA)
+go.test.unit: $(GOJUNIT) $(GOCOVER_COBERTURA) $(GO)
 	@$(INFO) go test unit-tests
 ifeq ($(GO_NOCOV),true)
 	@$(WARN) coverage analysis is disabled
@@ -337,14 +344,6 @@ help-special: go.help
 
 # ====================================================================================
 # Tools install targets
-
-$(GO):
-	@$(INFO) installing go-$(GO_VERSION) $(HOSTOS)-$(HOSTARCH)
-	@rm -fr $(TOOLS_HOST_DIR)/tmp-golang
-	@mkdir -p $(TOOLS_HOST_DIR)/tmp-golang || $(FAIL)
-	@curl -fsSL https://golang.org/dl/go${GO_VERSION}.$(HOSTOS)-$(HOSTARCH).tar.gz | tar -xz --strip-components=1 -C $(TOOLS_HOST_DIR)/tmp-golang || $(FAIL)
-	@mv $(TOOLS_HOST_DIR)/tmp-golang $(GO_INSTALL_PATH) || $(FAIL)
-	@$(OK) installing dep-$(DEP_VERSION) $(HOSTOS)-$(HOSTARCH)
 
 $(DEP):
 	@$(INFO) installing dep-$(DEP_VERSION) $(HOSTOS)-$(HOSTARCH)
