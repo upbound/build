@@ -70,7 +70,7 @@ ifneq ($(GO_TEST_SUITE),)
 GO_TEST_FLAGS += -run '$(GO_TEST_SUITE)'
 endif
 
-GOPATH := $(shell go env GOPATH)
+GOPATH := $(shell $(GO) env GOPATH)
 
 # setup tools used during the build
 DEP_VERSION=v0.5.1
