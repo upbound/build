@@ -80,7 +80,6 @@ DEP_VERSION=v0.5.1
 DEP := $(TOOLS_HOST_DIR)/dep-$(DEP_VERSION)
 GOJUNIT := $(TOOLS_HOST_DIR)/go-junit-report
 GOCOVER_COBERTURA := $(TOOLS_HOST_DIR)/gocover-cobertura
-GOIMPORTS := $(TOOLS_HOST_DIR)/goimports
 
 GO := go
 GOHOST := GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) go
@@ -217,16 +216,6 @@ go.fmt.simplify: $(GOFMT)
 	@$(GOFMT) -l -s -w $(GO_SUBDIRS) $(GO_INTEGRATION_TESTS_SUBDIRS) || $(FAIL)
 	@$(OK) gofmt simplify
 
-go.imports: $(GOIMPORTS)
-	@$(INFO) goimports
-	@goimports_out=$$($(GOIMPORTS) -d -e -local $(GO_PROJECT) $(GO_SUBDIRS) $(GO_INTEGRATION_TESTS_SUBDIRS) 2>&1) && [ -z "$${goimports_out}" ] || (echo "$${goimports_out}" 1>&2; $(FAIL))
-	@$(OK) goimports
-
-go.imports.fix: $(GOIMPORTS)
-	@$(INFO) goimports fix
-	@$(GOIMPORTS) -l -w -local $(GO_PROJECT) $(GO_SUBDIRS) $(GO_INTEGRATION_TESTS_SUBDIRS) || $(FAIL)
-	@$(OK) goimports fix
-
 go.validate: go.vet go.fmt
 
 ifeq ($(GO111MODULE),on)
@@ -284,10 +273,9 @@ go.clean:
 go.distclean:
 	@rm -rf $(GO_VENDOR_DIR) $(GO_PKG_DIR)
 
-go.generate: $(GOIMPORTS)
+go.generate:
 	@$(INFO) go generate $(PLATFORM)
 	@CGO_ENABLED=0 $(GOHOST) generate $(GO_GENERATE_FLAGS) $(GO_PACKAGES) $(GO_INTEGRATION_TEST_PACKAGES) || $(FAIL)
-	@find $(GO_SUBDIRS) $(GO_INTEGRATION_TESTS_SUBDIRS) -type f -name 'zz_generated*' -exec $(GOIMPORTS) -l -w -local $(GO_PROJECT) {} \;
 	@$(OK) go generate $(PLATFORM)
 
 
@@ -368,13 +356,6 @@ $(GOFMT):
 	@mv $(TOOLS_HOST_DIR)/tmp-fmt/go/bin/gofmt $(GOFMT) || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-fmt
 	@$(OK) installing gofmt$(GOFMT_VERSION)
-
-$(GOIMPORTS):
-	@$(INFO) installing goimports
-	@mkdir -p $(TOOLS_HOST_DIR)/tmp-imports || $(FAIL)
-	@GO111MODULE=off GOPATH=$(TOOLS_HOST_DIR)/tmp-imports GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get -u golang.org/x/tools/cmd/goimports || rm -fr $(TOOLS_HOST_DIR)/tmp-imports || $(FAIL)
-	@rm -fr $(TOOLS_HOST_DIR)/tmp-imports
-	@$(OK) installing goimports
 
 $(GOJUNIT):
 	@$(INFO) installing go-junit-report
