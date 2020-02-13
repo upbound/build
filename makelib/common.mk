@@ -184,27 +184,62 @@ endif
 
 # set a semantic version number from git if VERSION is undefined.
 ifeq ($(origin VERSION), undefined)
+# Version is read from git from git tags - so lets increment per our versioning logic
+# 1. We branch from master release-MAJOR.MINOR
+# 2. We tag HEAD of branch with v{MAJOR.MINOR.PATCH}-prerelease where patch is initialized at 0.
+# 3. The tagged commit will have artifacts equal to it's version which will be of format - v{MAJOR.MINOR.PATCH}-prerelease
+# 4. All untagged commits will get last tags semantic version with '{commitCount}.g{gitsha}' appended to prerelease or directly as pre-release if no prerlease info exists in lastest tag.
+# Note: for those clever readers of semver spec, oh no build info in prerelease info - this is because docker tags don't support a + thus we can't propogate build info into docker easily.
+# 6. Patch releases - additional commits to release branch result in vMAJOR.MINOR.PATCH-prerelease-{commitCount}.g{gitsha} where PATCH = previous tags' PATCH version + 1 - These are pre-release on the next patch version
+# 6. Master integration - additional commits, PRs, merges to master branch result in vMAJOR.MINOR.PATCH-prerelease-{commitCount}.g{gitsha} where MINOR = previous tags' MINOR +1 - These are pre-release on the next minor version.
+# Notes: 
+#  - zero padding "2" > "10"
+#  - if we include prerelease in the tag -> we don't need to increment minor or patch
 # check if there are any existing `git tag` values
-ifeq ($(shell git tag),)
-# no tags found - default to initial tag `v0.0.0`
-VERSION := $(shell echo "v0.0.0-$$(git rev-list HEAD --count)-$$(git describe --dirty --always)" | sed 's/-/./2' | sed 's/-/./2')
-else
-# use tags
-VERSION := $(shell git describe --dirty --always --tags | sed 's/-/./2' | sed 's/-/./2' )
+CONSTRAINT=">0.0.0-0"
+LATEST_TAG=$(shell git describe --abbrev=0 || echo "v0.0.0")
+GITSHA=$(shell git rev-parse --short HEAD)
+TAG_PRERELEASE := $(shell ${CURDIR}/../semver-cli/main get prerelease ${LATEST_TAG})
+
+# TODO: is leading zero invalid - i.e. v0.0.0-0.gitsha
+REV_COUNT=$(shell git rev-list ${LATEST_TAG}..HEAD --count 2>/dev/null || git rev-list HEAD --count)
+
+REVISION_SUFFIX=${REV_COUNT}.g${GITSHA}
+VERSION=${LATEST_TAG}
+
+
+ifneq ($(shell git describe --contains HEAD 2>/dev/null || echo "0"), ${LATEST_TAG}) # If head isn't latest tag
+ifneq ($(TAG_PRERELEASE),) # If pre-release is set we append a '.' and revision info.
+    VERSION:=${VERSION}.${REVISION_SUFIX}
+else ifeq ($(shell git rev-parse --abbrev-ref HEAD), master) # If Master branch increment MINOR VERSION
+    VERSION=v$(shell ${CURDIR}/../semver-cli/main inc minor ${VERSION})-${REVISION_SUFFIX}
+else # If other branch increment patch version - should work for local or release branch.
+    VERSION=v$(shell ${CURDIR}/../semver-cli/main inc patch ${VERSION})-${REVISION_SUFFIX}
 endif
 endif
+
+IS_VALID_SEMVER=$(shell ${CURDIR}/../semver-cli/main satisfies ${LATEST_TAG} ${CONSTRAINT})
+ifeq ($(IS_VALID_SEMVER), 0)
+	$(error invalid version $(VERSION). must be a semantic version with v[Major].[Minor].[Patch]-prerelease)
+endif
+endif
+
 export VERSION
 
-VERSION_REGEX := ^v\([0-9]*\)[.]\([0-9]*\)[.]\([0-9]*\)$$
-VERSION_VALID := $(shell echo "$(VERSION)" | grep -q '$(VERSION_REGEX)' && echo 1 || echo 0)
-VERSION_MAJOR := $(shell echo "$(VERSION)" | sed -e 's/$(VERSION_REGEX)/\1/')
-VERSION_MINOR := $(shell echo "$(VERSION)" | sed -e 's/$(VERSION_REGEX)/\2/')
-VERSION_PATCH := $(shell echo "$(VERSION)" | sed -e 's/$(VERSION_REGEX)/\3/')
+VERSION_MAJOR := $(shell ${CURDIR}/../semver-cli/main get major ${VERSION})
+VERSION_MINOR := $(shell ${CURDIR}/../semver-cli/main get minor ${VERSION})
+VERSION_PATCH := $(shell ${CURDIR}/../semver-cli/main get patch ${VERSION})
+VERSION_PRERELEASE := $(shell ${CURDIR}/../semver-cli/main get prerelease ${VERSION})
 
-release.tag:
-ifneq ($(VERSION_VALID),1)
-	$(error invalid version $(VERSION). must be a semantic version with v[Major].[Minor].[Patch] only)
+check.version: #semver
+# TODO: see is valid semver above - need to strip build meta as it will break docker
+ifneq ($(shell ${CURDIR}/../semver-cli/main get minor ${VERSION} 1>/dev/null 2>&1; echo $$?), 0)
+	$(error invalid version $(VERSION). must be a semantic version with v[Major].[Minor].[Patch]-prerelease)
 endif
+
+### TODO: Add pre-release optionally....
+release.tag: check.version
+   # TODO: add patch release metadata with -{VERSION_PRERELEASE} if it exists, and strip build metadata(anything after +) because it will break docker.
 	@$(INFO) tagging commit hash $(COMMIT_HASH) with v$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
 	git tag -f -m "release $(VERSION)" v$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH) $(COMMIT_HASH)
 	git push $(REMOTE_NAME) v$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
