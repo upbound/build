@@ -96,7 +96,7 @@ endif
 
 # We use a consistent version of golangci-lint to ensure everyone gets the same
 # linters.
-GOLANGCILINT_VERSION ?= 1.22.2
+GOLANGCILINT_VERSION ?= 1.23.8
 GOLANGCILINT := $(TOOLS_HOST_DIR)/golangci-lint-v$(GOLANGCILINT_VERSION)
 
 GO_BIN_DIR := $(abspath $(OUTPUT_DIR)/bin)
