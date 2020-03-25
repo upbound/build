@@ -42,7 +42,7 @@ output.clean:
 
 # if S3_BUCKET is set, add targets for publishing and promoting artifacts
 ifeq ($(S3_BUCKET),)
-	@$(SKIPPED) publishing outputs to an s3 bucket since 'S3_BUCKET' is not set
+	@$(INFO) skipped publishing outputs to an s3 bucket since 'S3_BUCKET' is not set
 else
 
 ifeq ($(CHANNEL),)
