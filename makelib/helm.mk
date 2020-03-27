@@ -40,7 +40,7 @@ HELM_HOME := $(abspath $(WORK_DIR)/helm)
 export HELM_HOME
 
 # helm tool version
-HELM_VERSION ?= v2.15.1
+HELM_VERSION := v3.1.2
 HELM := $(TOOLS_HOST_DIR)/helm-$(HELM_VERSION)
 
 # remove the leading `v` for helm chart versions
@@ -176,7 +176,7 @@ help-special: helm.help
 $(HELM):
 	@$(INFO) installing helm $(HOSTOS)-$(HOSTARCH)
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-helm
-	@curl -fsSL https://storage.googleapis.com/kubernetes-helm/helm-$(HELM_VERSION)-$(HOSTOS)-$(HOSTARCH).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-helm
+	@curl -fsSL https://get.helm.sh/helm-$(HELM_VERSION)-$(HOSTOS)-$(HOSTARCH).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-helm
 	@mv $(TOOLS_HOST_DIR)/tmp-helm/$(HOSTOS)-$(HOSTARCH)/helm $(HELM)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-helm
 	@$(OK) installing helm $(HOSTOS)-$(HOSTARCH)
