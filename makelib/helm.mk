@@ -111,7 +111,9 @@ helm.promote: $(HELM_HOME)
 	@$(INFO) promoting helm charts
 #	copy existing charts to a temp dir, the combine with new charts, reindex, and upload
 	@$(S3_SYNC) s3://$(HELM_S3_BUCKET)/$(CHANNEL) $(HELM_TEMP)
-	@$(S3_SYNC) s3://$(S3_BUCKET)/build/$(BRANCH_NAME)/$(VERSION)/charts $(HELM_TEMP)
+	@if [ "$(S3_BUCKET)" != "" ]; then \
+		$(S3_SYNC) s3://$(S3_BUCKET)/build/$(BRANCH_NAME)/$(VERSION)/charts $(HELM_TEMP); \
+	fi
 	@$(HELM) repo index --url $(HELM_URL) $(HELM_TEMP)
 	@$(S3_SYNC_DEL) $(HELM_TEMP) s3://$(HELM_S3_BUCKET)/$(CHANNEL)
 # 	re-upload index.yaml setting cache-control to ensure the file is not cached by http clients

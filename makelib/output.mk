@@ -15,24 +15,15 @@
 # ====================================================================================
 # Options
 
-ifeq ($(CHANNEL),)
-$(error the CHANNEL variable must be set before including output.mk)
-endif
 
 ifeq ($(VERSION),)
 $(error the VERSION variable must be set before including output.mk)
 endif
 
-ifeq ($(BRANCH_NAME),)
-$(error the BRANCH_NAME variable must be set before including output.mk)
-endif
+
 
 ifeq ($(OUTPUT_DIR),)
 $(error the CHANNEL variable must be set before including output.mk)
-endif
-
-ifeq ($(S3_BUCKET),)
-$(error the S3_BUCKET variable must be set before including output.mk)
 endif
 
 S3_CP := aws s3 cp --only-show-errors
@@ -49,6 +40,19 @@ output.init:
 output.clean:
 	@rm -fr $(OUTPUT_DIR)
 
+# if S3_BUCKET is set, add targets for publishing and promoting artifacts
+ifeq ($(S3_BUCKET),)
+	@$(INFO) skipped publishing outputs to an s3 bucket since 'S3_BUCKET' is not set
+else
+
+ifeq ($(CHANNEL),)
+$(error the CHANNEL variable must be set for publishing to the given S3_BUCKET)
+endif
+
+ifeq ($(BRANCH_NAME),)
+$(error the BRANCH_NAME variable must be set for publishing to the given S3_BUCKET)
+endif
+
 output.publish:
 	@$(INFO) publishing outputs to s3://$(S3_BUCKET)/build/$(BRANCH_NAME)/$(VERSION)
 	@$(S3_SYNC_DEL) $(OUTPUT_DIR) s3://$(S3_BUCKET)/build/$(BRANCH_NAME)/$(VERSION) || $(FAIL)
@@ -60,10 +64,13 @@ output.promote:
 	@$(S3_SYNC_DEL) s3://$(S3_BUCKET)/build/$(BRANCH_NAME)/$(VERSION) s3://$(S3_BUCKET)/$(CHANNEL)/current || $(FAIL)
 	@$(OK) promoting s3://$(S3_BUCKET)/$(CHANNEL)/$(VERSION)
 
+publish.artifacts: output.publish
+promote.artifacts: output.promote
+
+endif
+
 # ====================================================================================
 # Common Targets
 
 build.init: output.init
 build.clean: output.clean
-publish.artifacts: output.publish
-promote.artifacts: output.promote
