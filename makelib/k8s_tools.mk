@@ -16,7 +16,7 @@
 # Options
 
 # the version of kind to use
-KIND_VERSION ?= v0.4.0
+KIND_VERSION ?= v0.7.0
 KIND := $(TOOLS_HOST_DIR)/kind-$(KIND_VERSION)
 
 # the version of kubectl to use
