@@ -144,6 +144,7 @@ $(foreach p,$(HELM_CHARTS),$(eval $(call museum.upload,$(p))))
 
 helm.buildvars:
 	@echo HELM=$(HELM)
+	@echo HELM_VERSION=$(HELM_VERSION)
 
 build.vars: helm.buildvars
 build.init: helm.prepare helm.lint
