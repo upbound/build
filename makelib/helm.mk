@@ -56,8 +56,10 @@ HELM_CHART_VERSION := $(VERSION:v%=%)
 # Helm Targets
 
 $(HELM_HOME): $(HELM)
+	@$(INFO) helm home and init
 	@mkdir -p $(HELM_HOME)
 	@$(HELM) init -c
+	@$(OK) helm home and init
 
 $(HELM_OUTPUT_DIR):
 	@mkdir -p $(HELM_OUTPUT_DIR)
@@ -65,7 +67,7 @@ $(HELM_OUTPUT_DIR):
 define helm.chart
 $(HELM_OUTPUT_DIR)/$(1)-$(HELM_CHART_VERSION).tgz: $(HELM_HOME) $(HELM_OUTPUT_DIR) $(shell find $(HELM_CHARTS_DIR)/$(1) -type f)
 	@$(INFO) helm package $(1) $(HELM_CHART_VERSION)
-	@$(HELM) package --version $(HELM_CHART_VERSION) --app-version $(HELM_CHART_VERSION) -d $(HELM_OUTPUT_DIR) $(abspath $(HELM_CHARTS_DIR)/$(1))
+	@$(HELM) package --version $(HELM_CHART_VERSION) --app-version $(HELM_CHART_VERSION) -d $(HELM_OUTPUT_DIR) $(abspath $(HELM_CHARTS_DIR)/$(1)) --save false
 	@$(OK) helm package $(1) $(HELM_CHART_VERSION)
 
 helm.prepare.$(1): $(HELM_HOME)
