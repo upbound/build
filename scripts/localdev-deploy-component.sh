@@ -48,6 +48,9 @@ if [ "${LOCAL_BUILD}" == "true" ] && containsElement "${HELM_CHART_NAME}" "${cha
 else
   # If local build is NOT set or helm chart is NOT from this repository, deploy chart from a remote repository.
   echo "Deploying latest artifacts in chart repo \"${HELM_REPOSITORY_NAME}\"..."
+  if [ -z ${HELM_REPOSITORY_NAME} ] || [ -z ${HELM_CHART_NAME} ]; then
+    echo_error "HELM_REPOSITORY_NAME and/or HELM_CHART_NAME is not set for component ${COMPONENT}!"
+  fi
   HELM_CHART_REF="${HELM_REPOSITORY_NAME}/${HELM_CHART_NAME}"
   # Add helm repo and update repositories, if repo is not added already or force update is set.
   if [ "${HELM_REPOSITORY_FORCE_UPDATE}" == "true" ] || ! "${HELM}" repo list -o yaml |grep "Name:\s*${HELM_REPOSITORY_NAME}\s*$" >/dev/null; then
@@ -57,6 +60,10 @@ else
   if [ -z "${HELM_CHART_VERSION}" ]; then
     # if no HELM_CHART_VERSION provided, then get the latest version from repo which will be used to load required images for chart.
     HELM_CHART_VERSION=$("${HELM}" search -l ${HELM_CHART_REF} --devel |awk 'NR==2{print $2}')
+    echo "Latest version found in repo: ${HELM_CHART_VERSION}"
+  fi
+  if [ -z "${HELM_CHART_VERSION}" ]; then
+    echo_error "No version found in repo for chart ${HELM_CHART_REF}"
   fi
 fi
 
@@ -82,8 +89,6 @@ POSTDEPLOY_SCRIPT="${DEPLOY_LOCAL_CONFIG_DIR}/${COMPONENT}/post-deploy.sh"
 # Run config.validate.sh if exists.
 test -f "${DEPLOY_LOCAL_CONFIG_DIR}/config.validate.sh" && source "${DEPLOY_LOCAL_CONFIG_DIR}/config.validate.sh"
 
-helm_chart_version_flag="--devel"
-
 # Create the HELM_RELEASE_NAMESPACE if not exist already.
 "${KUBECTL}" --kubeconfig "${KUBECONFIG}" get ns "${HELM_RELEASE_NAMESPACE}" >/dev/null 2>&1 || ${KUBECTL} \
   --kubeconfig "${KUBECONFIG}" create ns "${HELM_RELEASE_NAMESPACE}"
@@ -97,8 +102,14 @@ fi
 "${GOMPLATE}" -f "${DEPLOY_LOCAL_CONFIG_DIR}/${COMPONENT}/value-overrides.yaml.tmpl" \
   -o "${DEPLOY_LOCAL_CONFIG_DIR}/${COMPONENT}/value-overrides.yaml"
 
+helm_chart_version_flag="--devel"
 if [ -n "${HELM_CHART_VERSION}" ]; then
   helm_chart_version_flag="--version ${HELM_CHART_VERSION}"
+fi
+
+helm_wait_atomic_flag="--wait"
+if [ "${HELM_DELETE_ON_FAILURE}" == "true" ]; then
+  helm_wait_atomic_flag="--atomic"
 fi
 
 # if HELM_RELEASE_NAME is not set, default to component name
@@ -108,9 +119,11 @@ fi
 
 # Run helm upgrade --install with computed parameters.
 # shellcheck disable=SC2086
+set -x
 "${HELM}" upgrade --install "${HELM_RELEASE_NAME}" --namespace "${HELM_RELEASE_NAMESPACE}" --kubeconfig "${KUBECONFIG}" \
   "${HELM_CHART_REF}" ${helm_chart_version_flag:-} -f "${DEPLOY_LOCAL_CONFIG_DIR}/${COMPONENT}/value-overrides.yaml" \
-  --atomic --force
+ ${helm_wait_atomic_flag:-} --force
+{ set +x; } 2>/dev/null
 
 # Run post-deploy script, if exists.
 if [ -f "${POSTDEPLOY_SCRIPT}" ]; then

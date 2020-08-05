@@ -3,11 +3,8 @@ set -aeuo pipefail
 
 deploy_local_root=${ROOT_DIR}/cluster/local
 
-read -p "Enter a name for local development configuration [localdev]: " config_name
-config_name=${config_name:-localdev}
-
-local_config_root=${deploy_local_root}/${config_name}
-test -d ${local_config_root} && { echo "Directory \"${local_config_root}\" already exists. Please select a different name!"; exit 1; }
+local_config_root=${deploy_local_root}
+test -d ${local_config_root}/config && { echo "Directory \"${local_config_root}/config\" already exists!"; exit 1; }
 
 charts_arr=($BUILD_HELM_CHARTS_LIST)
 default_component="${charts_arr[0]}"

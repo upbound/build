@@ -24,12 +24,19 @@ HELM_REPOSITORY_FORCE_UPDATE="false"
 HELM_RELEASE_NAME=""
 # HELM_RELEASE_NAMESPACE is the namespace for the helm release.
 HELM_RELEASE_NAMESPACE="default"
+# HELM_DELETE_ON_FAILURE controls whether to delete/rollback a failed install/upgrade.
+HELM_DELETE_ON_FAILURE="true"
 
 # COMPONENT_SKIP_DEPLOY controls whether (conditionally) skip deployment of a component or not.
 COMPONENT_SKIP_DEPLOY="false"
 
 MAIN_CONFIG_FILE="${DEPLOY_LOCAL_CONFIG_DIR}/config.env"
-COMPONENT_CONFIG_FILE="${DEPLOY_LOCAL_CONFIG_DIR}/${COMPONENT}/config.env"
+COMPONENT_CONFIG_DIR="${DEPLOY_LOCAL_CONFIG_DIR}/${COMPONENT}"
+COMPONENT_CONFIG_FILE="${COMPONENT_CONFIG_DIR}/config.env"
+
+if [[ ! -d "${COMPONENT_CONFIG_DIR}" ]]; then
+  echo_error "Component config dir \"${COMPONENT_CONFIG_DIR}\" does not exist (or is not a directory), did you run make local.prepare ?"
+fi
 
 if [[ -f "${MAIN_CONFIG_FILE}" ]]; then
   source "${MAIN_CONFIG_FILE}"

@@ -2,13 +2,15 @@ SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 SCRIPTS_DIR := $(SELF_DIR)/../scripts
 
 KIND_CLUSTER_NAME ?= local-dev
-DEPLOY_LOCAL_DIR ?= $(ROOT_DIR)/cluster/local/localdev
-DEPLOY_LOCAL_CONFIG_DIR := $(DEPLOY_LOCAL_DIR)/config
-DEPLOY_LOCAL_KUBECONFIG := $(DEPLOY_LOCAL_DIR)/kubeconfig
-KIND_CONFIG_FILE := $(DEPLOY_LOCAL_DIR)/kind.yaml
+
+DEPLOY_LOCAL_DIR ?= $(ROOT_DIR)/cluster/local
+DEPLOY_LOCAL_WORKDIR := $(WORK_DIR)/local/localdev
+DEPLOY_LOCAL_CONFIG_DIR := $(DEPLOY_LOCAL_WORKDIR)/config
+DEPLOY_LOCAL_KUBECONFIG := $(DEPLOY_LOCAL_WORKDIR)/kubeconfig
+KIND_CONFIG_FILE := $(DEPLOY_LOCAL_WORKDIR)/kind.yaml
 KUBECONFIG ?= $(HOME)/.kube/config
 
-LOCAL_BUILD ?= "true"
+LOCAL_BUILD ?= true
 
 export KIND
 export KUBECTL
@@ -18,7 +20,10 @@ export BUILD_REGISTRY
 export ROOT_DIR
 export SCRIPTS_DIR
 export KIND_CLUSTER_NAME
+export WORK_DIR
+export LOCALDEV_INTEGRATION_CONFIG_REPO
 export DEPLOY_LOCAL_DIR
+export DEPLOY_LOCAL_WORKDIR
 export DEPLOY_LOCAL_CONFIG_DIR
 export DEPLOY_LOCAL_KUBECONFIG
 export KIND_CONFIG_FILE
@@ -64,7 +69,7 @@ kind.buildvars:
 	@echo DEPLOY_LOCAL_KUBECONFIG=$(DEPLOY_LOCAL_KUBECONFIG)
 
 build.vars: kind.buildvars
-clean: kind.down
+clean: local.down
 
 .PHONY: kind.up kind.down kind.setcontext kind.buildvars
 
@@ -78,9 +83,19 @@ local.helminit: $(KUBECTL) $(HELM) kind.setcontext
 	@$(HELM) repo update
 	@$(OK) helm init
 
-local.up: kind.up local.helminit
+local.prepare:
+	@$(INFO) preparing local dev workdir
+	@$(SCRIPTS_DIR)/localdev-prepare.sh || $(FAIL)
+	@$(OK) preparing local dev workdir
 
-local.down: kind.down
+local.clean:
+	@$(INFO) cleaning local dev workdir
+	@rm -rf $(WORK_DIR)/local || $(FAIL)
+	@$(OK) cleaning local dev workdir
+
+local.up: local.prepare kind.up local.helminit
+
+local.down: local.clean kind.down
 
 local.deploy.%: $(KUBECTL) $(HELM) $(HELM_HOME) $(GOMPLATE) kind.setcontext
 	@$(INFO) localdev deploy component: $*
