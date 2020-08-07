@@ -62,6 +62,22 @@ make -j tests
 
 To see the help run `make help`.
 
+## Local Development Setup
+
+To use local development targets, first include `deploy.mk` in your make file:
+
+```
+include build/makelib/local.mk
+```
+
+Then, run the following command to initialize a local development configuration:
+
+```
+make local.scaffold
+```
+
+You can now configure and add more components (i.e. helm releases) to your local development setup.
+
 ## Contributing
 
 We welcome contributions. See [Contributing](CONTRIBUTING.md) to get started.

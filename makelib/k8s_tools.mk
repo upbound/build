@@ -43,6 +43,7 @@ build.vars: k8s_tools.buildvars
 # kind download and install
 $(KIND):
 	@$(INFO) installing kind $(KIND_VERSION)
+	@mkdir -p $(TOOLS_HOST_DIR) || $(FAIL)
 	@curl -fsSLo $(KIND) https://github.com/kubernetes-sigs/kind/releases/download/$(KIND_VERSION)/kind-$(GOHOSTOS)-$(GOHOSTARCH) || $(FAIL)
 	@chmod +x $(KIND) 
 	@$(OK) installing kind $(KIND_VERSION)
