@@ -95,7 +95,7 @@ local.clean:
 
 local.up: local.prepare kind.up local.helminit
 
-local.down: local.clean kind.down
+local.down: kind.down
 
 local.deploy.%: $(KUBECTL) $(HELM) $(HELM_HOME) $(GOMPLATE) kind.setcontext
 	@$(INFO) localdev deploy component: $*
