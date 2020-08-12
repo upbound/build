@@ -7,14 +7,14 @@ RED='\033[0;31m'
 NOC='\033[0m' # No Color
 
 echo_info(){
-    printf "\n${BLU}%s${NOC}" "$1"
+    printf "${BLU}%s${NOC}\n" "$1"
 }
 
 echo_success(){
     printf "\n${GRN}%s${NOC}\n" "$1"
 }
 echo_warn(){
-    printf "\n${YLW}%s${NOC}\n" "$1"
+    printf "${YLW}%s${NOC}\n" "$1"
 }
 echo_error(){
     printf "\n${RED}%s${NOC}\n" "$1"
