@@ -2,6 +2,7 @@ SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 SCRIPTS_DIR := $(SELF_DIR)/../scripts
 
 KIND_CLUSTER_NAME ?= local-dev
+LOCALDEV_CLONE_WITH ?= ssh # or https
 
 DEPLOY_LOCAL_DIR ?= $(ROOT_DIR)/cluster/local
 DEPLOY_LOCAL_WORKDIR := $(WORK_DIR)/local/localdev
@@ -22,6 +23,8 @@ export SCRIPTS_DIR
 export KIND_CLUSTER_NAME
 export WORK_DIR
 export LOCALDEV_INTEGRATION_CONFIG_REPO
+export LOCAL_DEV_REPOS
+export LOCALDEV_CLONE_WITH
 export DEPLOY_LOCAL_DIR
 export DEPLOY_LOCAL_WORKDIR
 export DEPLOY_LOCAL_CONFIG_DIR
@@ -83,7 +86,28 @@ local.helminit: $(KUBECTL) $(HELM) kind.setcontext
 	@$(HELM) repo update
 	@$(OK) helm init
 
-local.prepare:
+ifeq ($(LOCALDEV_INTEGRATION_CONFIG_REPO),)
+$(DEPLOY_LOCAL_WORKDIR):
+	@$(INFO) initializing local dev workdir
+	@$(INFO) no integration config repo configured, using local config
+	@mkdir -p $(DEPLOY_LOCAL_WORKDIR)
+	@cp -rf $(DEPLOY_LOCAL_DIR)/. $(DEPLOY_LOCAL_WORKDIR)
+	@$(OK) initializing local dev workdir
+else
+LOCALDEV_INTEGRATION_CONFIG_REPO_URL="git@github.com:$(LOCALDEV_INTEGRATION_CONFIG_REPO).git"
+ifeq ($(LOCALDEV_CLONE_WITH),https)
+	LOCALDEV_INTEGRATION_CONFIG_REPO_URL="https://github.com/$(LOCALDEV_INTEGRATION_CONFIG_REPO).git"
+endif
+$(DEPLOY_LOCAL_WORKDIR):
+	@$(INFO) initializing local dev workdir
+	@$(INFO) using integration config from repo $(LOCALDEV_INTEGRATION_CONFIG_REPO)
+	@git clone --depth 1 $(LOCALDEV_INTEGRATION_CONFIG_REPO_URL) $(DEPLOY_LOCAL_WORKDIR)
+	@$(OK) initializing local dev workdir
+endif
+
+-include $(DEPLOY_LOCAL_WORKDIR)/config.mk
+
+local.prepare: $(DEPLOY_LOCAL_WORKDIR)
 	@$(INFO) preparing local dev workdir
 	@$(SCRIPTS_DIR)/localdev-prepare.sh || $(FAIL)
 	@$(OK) preparing local dev workdir
@@ -97,7 +121,7 @@ local.up: local.prepare kind.up local.helminit
 
 local.down: kind.down
 
-local.deploy.%: $(KUBECTL) $(HELM) $(HELM_HOME) $(GOMPLATE) kind.setcontext
+local.deploy.%: local.prepare $(KUBECTL) $(HELM) $(HELM_HOME) $(GOMPLATE) kind.setcontext
 	@$(INFO) localdev deploy component: $*
 	@$(eval PLATFORMS=$(BUILD_PLATFORMS))
 	@$(SCRIPTS_DIR)/localdev-deploy-component.sh $* || $(FAIL)
