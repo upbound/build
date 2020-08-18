@@ -17,6 +17,13 @@ if [ "${COMPONENT_SKIP_DEPLOY}" == "true" ]; then
   exit 0
 fi
 
+if [ "${USE_HELM3}" == "true" ]; then
+  HELM="${HELM3}"
+  XDG_DATA_HOME="${HELM_HOME}"
+  XDG_CONFIG_HOME="${HELM_HOME}"
+  XDG_CACHE_HOME="${HELM_HOME}"
+fi
+
 # if HELM_CHART_NAME is not set, default to component name
 if [ -z "${HELM_CHART_NAME}" ]; then
   HELM_CHART_NAME="${COMPONENT}"
@@ -53,7 +60,7 @@ else
   fi
   HELM_CHART_REF="${HELM_REPOSITORY_NAME}/${HELM_CHART_NAME}"
   # Add helm repo and update repositories, if repo is not added already or force update is set.
-  if [ "${HELM_REPOSITORY_FORCE_UPDATE}" == "true" ] || ! "${HELM}" repo list -o yaml |grep "Name:\s*${HELM_REPOSITORY_NAME}\s*$" >/dev/null; then
+  if [ "${HELM_REPOSITORY_FORCE_UPDATE}" == "true" ] || ! "${HELM}" repo list -o yaml |grep -i "Name:\s*${HELM_REPOSITORY_NAME}\s*$" >/dev/null; then
     "${HELM}" repo add "${HELM_REPOSITORY_NAME}" "${HELM_REPOSITORY_URL}"
     "${HELM}" repo update
   fi
@@ -123,7 +130,7 @@ fi
 set -x
 "${HELM}" upgrade --install "${HELM_RELEASE_NAME}" --namespace "${HELM_RELEASE_NAMESPACE}" --kubeconfig "${KUBECONFIG}" \
   "${HELM_CHART_REF}" ${helm_chart_version_flag:-} -f "${DEPLOY_LOCAL_CONFIG_DIR}/${COMPONENT}/value-overrides.yaml" \
- ${helm_wait_atomic_flag:-} --force
+ ${helm_wait_atomic_flag:-}
 { set +x; } 2>/dev/null
 
 # Run post-deploy script, if exists.

@@ -16,6 +16,7 @@ LOCAL_BUILD ?= true
 export KIND
 export KUBECTL
 export HELM
+export HELM3
 export GOMPLATE
 export BUILD_REGISTRY
 export ROOT_DIR
@@ -121,13 +122,13 @@ local.up: local.prepare kind.up local.helminit
 
 local.down: kind.down
 
-local.deploy.%: local.prepare $(KUBECTL) $(HELM) $(HELM_HOME) $(GOMPLATE) kind.setcontext
+local.deploy.%: local.prepare $(KUBECTL) $(HELM) $(HELM3) $(HELM_HOME) $(GOMPLATE) kind.setcontext
 	@$(INFO) localdev deploy component: $*
 	@$(eval PLATFORMS=$(BUILD_PLATFORMS))
 	@$(SCRIPTS_DIR)/localdev-deploy-component.sh $* || $(FAIL)
 	@$(OK) localdev deploy component: $*
 
-local.remove.%: $(KUBECTL) $(HELM) $(HELM_HOME) $(GOMPLATE) kind.setcontext
+local.remove.%: local.prepare $(KUBECTL) $(HELM) $(HELM3) $(HELM_HOME) $(GOMPLATE) kind.setcontext
 	@$(INFO) localdev remove component: $*
 	@$(SCRIPTS_DIR)/localdev-remove-component.sh $* || $(FAIL)
 	@$(OK) localdev remove component: $*
