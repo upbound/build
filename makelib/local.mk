@@ -65,7 +65,7 @@ kind.down: $(KIND)
 	@$(KIND) delete cluster --name=$(KIND_CLUSTER_NAME)
 	@$(OK) kind down
 
-kind.setcontext: $(KUBECTL)
+kind.setcontext: $(KUBECTL) kind.up
 	@$(KUBECTL) --kubeconfig $(KUBECONFIG) config use-context kind-$(KIND_CLUSTER_NAME)
 
 kind.buildvars:
