@@ -39,10 +39,6 @@ HELM_INDEX := $(HELM_OUTPUT_DIR)/index.yaml
 HELM_HOME := $(abspath $(WORK_DIR)/helm)
 export HELM_HOME
 
-# helm tool version
-HELM_VERSION ?= v2.16.7
-HELM := $(TOOLS_HOST_DIR)/helm-$(HELM_VERSION)
-
 # remove the leading `v` for helm chart versions
 HELM_CHART_VERSION := $(VERSION:v%=%)
 
@@ -142,11 +138,6 @@ $(foreach p,$(HELM_CHARTS),$(eval $(call museum.upload,$(p))))
 # ====================================================================================
 # Common Targets
 
-helm.buildvars:
-	@echo HELM=$(HELM)
-	@echo HELM_VERSION=$(HELM_VERSION)
-
-build.vars: helm.buildvars
 build.init: helm.prepare helm.lint
 build.check: helm.dep
 build.artifacts: helm.build
@@ -171,13 +162,3 @@ helm.help:
 
 help-special: helm.help
 
-# ====================================================================================
-# Tools install targets
-
-$(HELM):
-	@$(INFO) installing helm $(HOSTOS)-$(HOSTARCH)
-	@mkdir -p $(TOOLS_HOST_DIR)/tmp-helm
-	@curl -fsSL https://storage.googleapis.com/kubernetes-helm/helm-$(HELM_VERSION)-$(HOSTOS)-$(HOSTARCH).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-helm
-	@mv $(TOOLS_HOST_DIR)/tmp-helm/$(HOSTOS)-$(HOSTARCH)/helm $(HELM)
-	@rm -fr $(TOOLS_HOST_DIR)/tmp-helm
-	@$(OK) installing helm $(HOSTOS)-$(HOSTARCH)
