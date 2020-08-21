@@ -15,6 +15,15 @@
 # ====================================================================================
 # Options
 
+# the version of istio to use
+ISTIO_VERSION ?= 1.7.0
+ISTIO := $(TOOLS_HOST_DIR)/istioctl-$(ISTIO_VERSION)
+ISTIOOS := $(HOSTOS)
+ISTIO_DOWNLOAD_TUPLE := $(HOSTOS)-$(HOSTARCH)
+ifeq ($(HOSTOS),darwin)
+ISTIO_DOWNLOAD_TUPLE := osx
+endif
+
 # the version of kind to use
 KIND_VERSION ?= v0.7.0
 KIND := $(TOOLS_HOST_DIR)/kind-$(KIND_VERSION)
@@ -49,6 +58,15 @@ build.vars: k8s_tools.buildvars
 
 # ====================================================================================
 # tools
+
+# istio download and install
+$(ISTIO):
+	@$(INFO) installing istio $(ISTIO_VERSION)
+	@mkdir -p $(TOOLS_HOST_DIR)/tmp-istio || $(FAIL)
+	@curl --progress-bar -fsSL https://github.com/istio/istio/releases/download/$(ISTIO_VERSION)/istio-$(ISTIO_VERSION)-$(ISTIO_DOWNLOAD_TUPLE).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-istio || $(FAIL)
+	@mv $(TOOLS_HOST_DIR)/tmp-istio/istio-$(ISTIO_VERSION)/bin/istioctl $(ISTIO) || $(FAIL)
+	@rm -fr $(TOOLS_HOST_DIR)/tmp-istio || $(FAIL)
+	@$(OK) $(ISTIO) installing istio $(ISTIO_VERSION)
 
 # kind download and install
 $(KIND):
