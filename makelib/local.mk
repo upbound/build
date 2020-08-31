@@ -73,7 +73,6 @@ kind.buildvars:
 	@echo DEPLOY_LOCAL_KUBECONFIG=$(DEPLOY_LOCAL_KUBECONFIG)
 
 build.vars: kind.buildvars
-clean: local.down
 
 .PHONY: kind.up kind.down kind.setcontext kind.buildvars
 
@@ -120,7 +119,7 @@ local.clean:
 
 local.up: local.prepare kind.up local.helminit
 
-local.down: kind.down
+local.down: kind.down local.clean
 
 local.deploy.%: local.prepare $(KUBECTL) $(HELM) $(HELM3) $(HELM_HOME) $(GOMPLATE) kind.setcontext
 	@$(INFO) localdev deploy component: $*
