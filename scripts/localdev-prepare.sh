@@ -22,7 +22,7 @@ if [ -n "${LOCAL_DEV_REPOS}" ]; then
     if [ "${LOCAL_BUILD}" == "true" ] && [ "${repo}" == "${local_repo}" ]; then
       # if it is a local build and repo is the local one, just use local config
 
-      echo "Using local config for repo \"${repo}\""
+      echo_info "Using local config for repo \"${repo}\""
       repo_dir="${ROOT_DIR}"
     else
       # otherwise, shallow clone the repo
@@ -33,7 +33,7 @@ if [ -n "${LOCAL_DEV_REPOS}" ]; then
         repo_url="https://github.com/${i}.git"
       fi
       # only clone if not cloned already.
-      test -d "${repo_dir}" || { echo "Cloning repo ${repo} to get local dev config"; git clone --depth 1 "${repo_url}" "${repo_dir}"; }
+      test -d "${repo_dir}" || { echo_info "Cloning repo ${repo} to get local dev config..."; git clone --depth 1 "${repo_url}" "${repo_dir}"; echo_info "Cloning repo ${repo} to get local dev config...OK"; }
     fi
 
     # copy local dev config under workdir
