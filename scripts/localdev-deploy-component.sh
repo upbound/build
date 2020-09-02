@@ -13,9 +13,29 @@ source "${SCRIPTS_DIR}/load-configs.sh" "${COMPONENT}"
 
 # Skip deployment of this component if COMPONENT_SKIP_DEPLOY is set to true
 if [ "${COMPONENT_SKIP_DEPLOY}" == "true" ]; then
-  echo "COMPONENT_SKIP_DEPLOY set to true, skipping deployment of ${COMPONENT}"
+  echo_info "COMPONENT_SKIP_DEPLOY set to true, skipping deployment of ${COMPONENT}"
   exit 0
 fi
+
+DEPLOY_SCRIPT="${DEPLOY_LOCAL_CONFIG_DIR}/${COMPONENT}/deploy.sh"
+
+# Run deploy script, if exists.
+# If there is a deploy.sh script, which indicates this is a "script-only" component, only it will be run for this
+# component and no helm deployments will be made.
+if [ -f "${DEPLOY_SCRIPT}" ]; then
+  echo_info "Loading required images..."
+  # shellcheck disable=SC2068
+  for i in ${REQUIRED_IMAGES[@]+"${REQUIRED_IMAGES[@]}"}; do
+    pullAndLoadImage "${i}"
+  done
+  echo_info "Loading required images...OK"
+
+  echo_info "Running deploy script..."
+  source "${DEPLOY_SCRIPT}"
+  echo_info "Running deploy script...OK"
+  exit 0
+fi
+
 
 if [ "${USE_HELM3}" == "true" ]; then
   HELM="${HELM3}"
@@ -36,7 +56,7 @@ charts_arr=($BUILD_HELM_CHARTS_LIST)
 
 if [ "${LOCAL_BUILD}" == "true" ] && containsElement "${HELM_CHART_NAME}" ${charts_arr[@]+"${charts_arr[@]}"}; then
   # If local build is set and helm chart is from this repository, use locally build helm chart tgz file.
-  echo "Deploying locally built artifacts..."
+  echo_info "Deploying locally built artifacts..."
   HELM_CHART_VERSION=${BUILD_HELM_CHART_VERSION}
   HELM_CHART_REF="${HELM_OUTPUT_DIR}/${COMPONENT}-${HELM_CHART_VERSION}.tgz"
   [ -f "${HELM_CHART_REF}" ] || echo_error "Local chart ${HELM_CHART_REF} not found. Did you run \"make build\" ? "
@@ -46,7 +66,7 @@ if [ "${LOCAL_BUILD}" == "true" ] && containsElement "${HELM_CHART_NAME}" ${char
     for i in "${images_arr[@]}"; do
       for a in "${image_archs_arr[@]}"; do
         if containsElement "${r}/${i}" "${REQUIRED_IMAGES[@]}"; then
-          echo "Tagging locally built image as ${r}/${i}:${VERSION}"
+          echo_info "Tagging locally built image as ${r}/${i}:${VERSION}"
           docker tag "${BUILD_REGISTRY}/${i}-${a}" "${r}/${i}:${VERSION}"
         fi
       done
@@ -54,7 +74,7 @@ if [ "${LOCAL_BUILD}" == "true" ] && containsElement "${HELM_CHART_NAME}" ${char
   done
 else
   # If local build is NOT set or helm chart is NOT from this repository, deploy chart from a remote repository.
-  echo "Deploying latest artifacts in chart repo \"${HELM_REPOSITORY_NAME}\"..."
+  echo_info "Deploying artifacts in chart repo \"${HELM_REPOSITORY_NAME}\"..."
   if [ -z ${HELM_REPOSITORY_NAME} ] || [ -z ${HELM_CHART_NAME} ]; then
     echo_error "HELM_REPOSITORY_NAME and/or HELM_CHART_NAME is not set for component ${COMPONENT}!"
   fi
@@ -67,13 +87,14 @@ else
   if [ -z "${HELM_CHART_VERSION}" ]; then
     # if no HELM_CHART_VERSION provided, then get the latest version from repo which will be used to load required images for chart.
     HELM_CHART_VERSION=$("${HELM}" search -l ${HELM_CHART_REF} --devel |awk 'NR==2{print $2}')
-    echo "Latest version found in repo: ${HELM_CHART_VERSION}"
+    echo_info "Latest version found in repo: ${HELM_CHART_VERSION}"
   fi
   if [ -z "${HELM_CHART_VERSION}" ]; then
     echo_error "No version found in repo for chart ${HELM_CHART_REF}"
   fi
 fi
 
+echo_info "Loading required images..."
 # shellcheck disable=SC2068
 for i in ${REQUIRED_IMAGES[@]+"${REQUIRED_IMAGES[@]}"}; do
   # check if image has a tag, if not, append tag for the chart
@@ -83,12 +104,9 @@ for i in ${REQUIRED_IMAGES[@]+"${REQUIRED_IMAGES[@]}"}; do
   # Pull the image:
   # - if has a tag "master" or "latest"
   # - or does not exist already.
-  if echo "${i}" | grep ":master\s*$" >/dev/null || echo "${i}" | grep ":latest\s*$" >/dev/null || ! docker inspect --type=image "${i}" >/dev/null 2>&1; then
-    docker pull "${i}"
-  fi
-  "${KIND}" load docker-image "${i}" --name="${KIND_CLUSTER_NAME}"
+  pullAndLoadImage "${i}"
 done
-
+echo_info "Loading required images...OK"
 
 PREDEPLOY_SCRIPT="${DEPLOY_LOCAL_CONFIG_DIR}/${COMPONENT}/pre-deploy.sh"
 POSTDEPLOY_SCRIPT="${DEPLOY_LOCAL_CONFIG_DIR}/${COMPONENT}/post-deploy.sh"
@@ -97,13 +115,13 @@ POSTDEPLOY_SCRIPT="${DEPLOY_LOCAL_CONFIG_DIR}/${COMPONENT}/post-deploy.sh"
 test -f "${DEPLOY_LOCAL_CONFIG_DIR}/config.validate.sh" && source "${DEPLOY_LOCAL_CONFIG_DIR}/config.validate.sh"
 
 # Create the HELM_RELEASE_NAMESPACE if not exist already.
-"${KUBECTL}" --kubeconfig "${KUBECONFIG}" get ns "${HELM_RELEASE_NAMESPACE}" >/dev/null 2>&1 || ${KUBECTL} \
-  --kubeconfig "${KUBECONFIG}" create ns "${HELM_RELEASE_NAMESPACE}"
+createNamespace "${HELM_RELEASE_NAMESPACE}"
 
 # Run pre-deploy script, if exists.
 if [ -f "${PREDEPLOY_SCRIPT}" ]; then
-  echo "Running pre-deploy script..."
+  echo_info "Running pre-deploy script..."
   source "${PREDEPLOY_SCRIPT}"
+  echo_info "Running pre-deploy script...OK"
 fi
 
 # With all configuration sourced as environment variables, render value-overrides.yaml file with gomplate.
@@ -125,16 +143,18 @@ if [ -z "${HELM_RELEASE_NAME}" ]; then
   HELM_RELEASE_NAME=${COMPONENT}
 fi
 
-# Run helm upgrade --install with computed parameters.
+echo_info "Running helm upgrade --install with computed parameters..."
 # shellcheck disable=SC2086
 set -x
 "${HELM}" upgrade --install "${HELM_RELEASE_NAME}" --namespace "${HELM_RELEASE_NAMESPACE}" --kubeconfig "${KUBECONFIG}" \
   "${HELM_CHART_REF}" ${helm_chart_version_flag:-} -f "${DEPLOY_LOCAL_CONFIG_DIR}/${COMPONENT}/value-overrides.yaml" \
  ${helm_wait_atomic_flag:-}
 { set +x; } 2>/dev/null
+echo_info "Running helm upgrade --install with computed parameters...OK"
 
 # Run post-deploy script, if exists.
 if [ -f "${POSTDEPLOY_SCRIPT}" ]; then
-  echo "Running post-deploy script..."
+  echo_info "Running post-deploy script..."
   source "${POSTDEPLOY_SCRIPT}"
+  echo_info "Running post-deploy script...OK"
 fi

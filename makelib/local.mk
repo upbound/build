@@ -18,6 +18,8 @@ export KUBECTL
 export HELM
 export HELM3
 export GOMPLATE
+export ISTIO
+export ISTIO_VERSION
 export BUILD_REGISTRY
 export ROOT_DIR
 export SCRIPTS_DIR
@@ -121,7 +123,7 @@ local.up: local.prepare kind.up local.helminit
 
 local.down: kind.down local.clean
 
-local.deploy.%: local.prepare $(KUBECTL) $(HELM) $(HELM3) $(HELM_HOME) $(GOMPLATE) kind.setcontext
+local.deploy.%: local.prepare $(KUBECTL) $(HELM) $(HELM3) $(HELM_HOME) $(GOMPLATE) $(ISTIO) kind.setcontext
 	@$(INFO) localdev deploy component: $*
 	@$(eval PLATFORMS=$(BUILD_PLATFORMS))
 	@$(SCRIPTS_DIR)/localdev-deploy-component.sh $* || $(FAIL)
