@@ -86,6 +86,7 @@ else
   fi
   if [ -z "${HELM_CHART_VERSION}" ]; then
     # if no HELM_CHART_VERSION provided, then get the latest version from repo which will be used to load required images for chart.
+    [ "${LOCALDEV_PULL_LATEST}" == "true" ] && "${HELM}" repo update
     HELM_CHART_VERSION=$("${HELM}" search -l ${HELM_CHART_REF} --devel |awk 'NR==2{print $2}')
     echo_info "Latest version found in repo: ${HELM_CHART_VERSION}"
   fi
