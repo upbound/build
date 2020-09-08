@@ -31,7 +31,6 @@ getRepo() {
       echo_error "${output}"
     fi
 
-
     echo_info "Getting latest branch \"${branch}\" of repo \"${repo}\"...OK"
   fi
 }
@@ -61,7 +60,7 @@ if [ -n "${LOCAL_DEV_REPOS}" ]; then
     local_repo=$(basename $(git config --get remote.origin.url) .git)
     base_repo=$(basename "${i}" .git)
 
-    if [ "${LOCAL_BUILD}" == "true" ] && [ "${base_repo}" == "${local_repo}" ]; then
+    if [ "${LOCALDEV_LOCAL_BUILD}" == "true" ] && [ "${base_repo}" == "${local_repo}" ]; then
       # if it is a local build and repo is the local one, just use local config
 
       echo_info "Using local config for repo \"${base_repo}\""

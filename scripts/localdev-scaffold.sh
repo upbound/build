@@ -83,5 +83,5 @@ echo "done!"
 
 echo """
 Run the following command to deploy locally built component (or consider adding as a target to makefile):
-  DEPLOY_LOCAL_DIR=${local_config_root} LOCAL_BUILD=true make local.up local.deploy.${component}
+  DEPLOY_LOCAL_DIR=${local_config_root} LOCALDEV_LOCAL_BUILD=true make local.up local.deploy.${component}
 """

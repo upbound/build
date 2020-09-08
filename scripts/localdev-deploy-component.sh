@@ -54,7 +54,7 @@ images_arr=($BUILD_IMAGES)
 image_archs_arr=($BUILD_IMAGE_ARCHS)
 charts_arr=($BUILD_HELM_CHARTS_LIST)
 
-if [ "${LOCAL_BUILD}" == "true" ] && containsElement "${HELM_CHART_NAME}" ${charts_arr[@]+"${charts_arr[@]}"}; then
+if [ "${LOCALDEV_LOCAL_BUILD}" == "true" ] && containsElement "${HELM_CHART_NAME}" ${charts_arr[@]+"${charts_arr[@]}"}; then
   # If local build is set and helm chart is from this repository, use locally build helm chart tgz file.
   echo_info "Deploying locally built artifacts..."
   HELM_CHART_VERSION=${BUILD_HELM_CHART_VERSION}

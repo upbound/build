@@ -9,11 +9,11 @@ REQUIRED_IMAGES=()
 # HELM_CHART_NAME is the name of the helm chart to deploy. If not set, defaults to COMPONENT
 HELM_CHART_NAME=""
 # HELM_CHART_VERSION is the version of the helm chart to deploy.
-# If LOCAL_BUILD=true, HELM_CHART_VERSION will be set the version in build system.
-# If LOCAL_BUILD=false, HELM_CHART_VERSION defaults to latest version in the HELM_REPOSITORY
+# If LOCALDEV_LOCAL_BUILD=true, HELM_CHART_VERSION will be set the version in build system.
+# If LOCALDEV_LOCAL_BUILD=false, HELM_CHART_VERSION defaults to latest version in the HELM_REPOSITORY
 HELM_CHART_VERSION=""
 # HELM_REPOSITORY_NAME is the name of the helm repository.
-# This will only be used if LOCAL_BUILD=false or HELM_CHART_NAME is not a local chart (e.g. not in HELM_CHARTS array)
+# This will only be used if LOCALDEV_LOCAL_BUILD=false or HELM_CHART_NAME is not a local chart (e.g. not in HELM_CHARTS array)
 HELM_REPOSITORY_NAME=""
 # HELM_REPOSITORY_NAME is the url of the helm repository.
 HELM_REPOSITORY_URL=""
