@@ -2,8 +2,6 @@ SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 SCRIPTS_DIR := $(SELF_DIR)/../scripts
 
 KIND_CLUSTER_NAME ?= local-dev
-LOCALDEV_CLONE_WITH ?= ssh # or https
-
 DEPLOY_LOCAL_DIR ?= $(ROOT_DIR)/cluster/local
 DEPLOY_LOCAL_WORKDIR := $(WORK_DIR)/local/localdev
 DEPLOY_LOCAL_CONFIG_DIR := $(DEPLOY_LOCAL_WORKDIR)/config
@@ -11,7 +9,9 @@ DEPLOY_LOCAL_KUBECONFIG := $(DEPLOY_LOCAL_WORKDIR)/kubeconfig
 KIND_CONFIG_FILE := $(DEPLOY_LOCAL_WORKDIR)/kind.yaml
 KUBECONFIG ?= $(HOME)/.kube/config
 
-LOCAL_BUILD ?= true
+LOCALDEV_CLONE_WITH ?= ssh # or https
+LOCALDEV_LOCAL_BUILD ?= true
+LOCALDEV_PULL_LATEST ?= true
 
 export KIND
 export KUBECTL
@@ -28,13 +28,14 @@ export WORK_DIR
 export LOCALDEV_INTEGRATION_CONFIG_REPO
 export LOCAL_DEV_REPOS
 export LOCALDEV_CLONE_WITH
+export LOCALDEV_PULL_LATEST
 export DEPLOY_LOCAL_DIR
 export DEPLOY_LOCAL_WORKDIR
 export DEPLOY_LOCAL_CONFIG_DIR
 export DEPLOY_LOCAL_KUBECONFIG
 export KIND_CONFIG_FILE
 export KUBECONFIG
-export LOCAL_BUILD
+export LOCALDEV_LOCAL_BUILD
 export HELM_OUTPUT_DIR
 export BUILD_HELM_CHART_VERSION=$(HELM_CHART_VERSION)
 export BUILD_HELM_CHARTS_LIST=$(HELM_CHARTS)
@@ -88,28 +89,9 @@ local.helminit: $(KUBECTL) $(HELM) kind.setcontext
 	@$(HELM) repo update
 	@$(OK) helm init
 
-ifeq ($(LOCALDEV_INTEGRATION_CONFIG_REPO),)
-$(DEPLOY_LOCAL_WORKDIR):
-	@$(INFO) initializing local dev workdir
-	@$(INFO) no integration config repo configured, using local config
-	@mkdir -p $(DEPLOY_LOCAL_WORKDIR)
-	@cp -rf $(DEPLOY_LOCAL_DIR)/. $(DEPLOY_LOCAL_WORKDIR)
-	@$(OK) initializing local dev workdir
-else
-LOCALDEV_INTEGRATION_CONFIG_REPO_URL="git@github.com:$(LOCALDEV_INTEGRATION_CONFIG_REPO).git"
-ifeq ($(LOCALDEV_CLONE_WITH),https)
-	LOCALDEV_INTEGRATION_CONFIG_REPO_URL="https://github.com/$(LOCALDEV_INTEGRATION_CONFIG_REPO).git"
-endif
-$(DEPLOY_LOCAL_WORKDIR):
-	@$(INFO) initializing local dev workdir
-	@$(INFO) using integration config from repo $(LOCALDEV_INTEGRATION_CONFIG_REPO)
-	@git clone --depth 1 $(LOCALDEV_INTEGRATION_CONFIG_REPO_URL) $(DEPLOY_LOCAL_WORKDIR)
-	@$(OK) initializing local dev workdir
-endif
-
 -include $(DEPLOY_LOCAL_WORKDIR)/config.mk
 
-local.prepare: $(DEPLOY_LOCAL_WORKDIR)
+local.prepare:
 	@$(INFO) preparing local dev workdir
 	@$(SCRIPTS_DIR)/localdev-prepare.sh || $(FAIL)
 	@$(OK) preparing local dev workdir

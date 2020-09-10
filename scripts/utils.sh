@@ -7,21 +7,30 @@ RED='\033[0;31m'
 NOC='\033[0m' # No Color
 
 echo_info(){
-    printf "${BOLD}%s${NOC}\n" "$1"
+    msg="${1}"
+    [[ -n ${COMPONENT:-} ]] && msg="[${COMPONENT:-}] ${msg}"
+    printf "${BOLD}%s${NOC}\n" "${msg}"
 }
 
 echo_success(){
-    printf "${GRN}%s${NOC}\n" "$1"
+    msg="${1}"
+    [[ -n ${COMPONENT:-} ]] && msg="[${COMPONENT:-}] ${msg}"
+    printf "${GRN}%s${NOC}\n" "${msg}"
 }
 
 echo_warn(){
-    printf "${YLW}%s${NOC}\n" "$1"
+    msg="${1}"
+    [[ -n ${COMPONENT:-} ]] && msg="[${COMPONENT:-}] ${msg}"
+    printf "${YLW}%s${NOC}\n" "${msg}"
 }
 
 echo_error(){
-    printf "\n${RED}%s${NOC}\n" "$1"
+    msg="${1}"
+    [[ -n ${COMPONENT:-} ]] && msg="[${COMPONENT:-}] ${msg}"
+    printf "\n${RED}%s${NOC}\n" "${msg}"
     return 1
 }
+
 #################################
 
 containsElement () {
