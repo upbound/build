@@ -36,9 +36,13 @@ if [ -f "${DEPLOY_SCRIPT}" ]; then
   exit 0
 fi
 
-
+# Commands for searching a repo differs for helm2 and helm3
+# helm2 search -l <ref>
+# helm3 search repo -l <ref>
+HELM_SEARCH_REPO="${HELM} search"
 if [ "${USE_HELM3}" == "true" ]; then
   HELM="${HELM3}"
+  HELM_SEARCH_REPO="${HELM3} search repo"
   XDG_DATA_HOME="${HELM_HOME}"
   XDG_CONFIG_HOME="${HELM_HOME}"
   XDG_CACHE_HOME="${HELM_HOME}"
@@ -87,7 +91,7 @@ else
   if [ -z "${HELM_CHART_VERSION}" ]; then
     # if no HELM_CHART_VERSION provided, then get the latest version from repo which will be used to load required images for chart.
     [ "${LOCALDEV_PULL_LATEST}" == "true" ] && "${HELM}" repo update
-    HELM_CHART_VERSION=$("${HELM}" search -l ${HELM_CHART_REF} --devel |awk 'NR==2{print $2}')
+    HELM_CHART_VERSION=$(${HELM_SEARCH_REPO} -l ${HELM_CHART_REF} --devel |awk 'NR==2{print $2}')
     echo_info "Latest version found in repo: ${HELM_CHART_VERSION}"
   fi
   if [ -z "${HELM_CHART_VERSION}" ]; then
