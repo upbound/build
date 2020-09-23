@@ -13,6 +13,14 @@ LOCALDEV_CLONE_WITH ?= ssh # or https
 LOCALDEV_LOCAL_BUILD ?= true
 LOCALDEV_PULL_LATEST ?= true
 
+ifeq ($(HELM_HOME),)
+HELM_HOME := $(abspath $(WORK_DIR)/helm)
+export HELM_HOME
+$(HELM_HOME): $(HELM)
+	@mkdir -p $(HELM_HOME)
+	@$(HELM) init -c
+endif
+
 export KIND
 export KUBECTL
 export HELM
