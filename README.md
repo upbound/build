@@ -40,6 +40,7 @@ HELM_BASE_URL = https://charts.upbound.io
 HELM_S3_BUCKET = upbound.charts
 HELM_CHARTS = myrepo-api
 HELM_CHART_LINT_ARGS_myrepo-api = --set nameOverride='',imagePullSecrets=''
+include build/makelib/k8s_tools.mk
 include build/makelib/helm.mk
 
 # Docker images
