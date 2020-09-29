@@ -36,13 +36,19 @@ KUBECTL := $(TOOLS_HOST_DIR)/kubectl-$(KUBECTL_VERSION)
 KUSTOMIZE_VERSION ?= v3.3.0
 KUSTOMIZE := $(TOOLS_HOST_DIR)/kustomize-$(KUSTOMIZE_VERSION)
 
-# the version of helm to use
-HELM_VERSION ?= v2.16.7
-HELM := $(TOOLS_HOST_DIR)/helm-$(HELM_VERSION)
-
 # the version of helm 3 to use
+USE_HELM3 ?= false
 HELM3_VERSION := v3.2.4
 HELM3 := $(TOOLS_HOST_DIR)/helm-$(HELM3_VERSION)
+
+# If we enable HELM3 we alias HELM to be HELM3
+ifeq ($(USE_HELM3),true)
+HELM_VERSION ?= $(HELM3_VERSION)
+HELM := $(HELM3)
+else
+HELM_VERSION ?= v2.16.7
+HELM := $(TOOLS_HOST_DIR)/helm-$(HELM_VERSION)
+endif
 
 # ====================================================================================
 # Common Targets
@@ -92,7 +98,9 @@ $(KUSTOMIZE):
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-kustomize
 	@$(OK) installing kustomize $(KUSTOMIZE_VERSION)
 
-# helm download and install
+
+# helm download and install only if helm3 not enabled
+ifeq ($(USE_HELM3),false)
 $(HELM):
 	@$(INFO) installing helm $(HOSTOS)-$(HOSTARCH)
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-helm
@@ -100,6 +108,7 @@ $(HELM):
 	@mv $(TOOLS_HOST_DIR)/tmp-helm/$(HOSTOS)-$(HOSTARCH)/helm $(HELM)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-helm
 	@$(OK) installing helm $(HOSTOS)-$(HOSTARCH)
+endif
 
 # helm3 download and install
 $(HELM3):
