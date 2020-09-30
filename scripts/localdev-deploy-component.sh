@@ -3,6 +3,14 @@ set -aeuo pipefail
 
 COMPONENT=$1
 
+# Commands for searching a repo differs for helm2 and helm3
+# helm2 search -l <ref>
+# helm3 search repo -l <ref>
+HELM_SEARCH_REPO="${HELM} search"
+if [ "${USE_HELM3}" == "true" ]; then
+  HELM_SEARCH_REPO="${HELM} search repo"
+fi
+
 # Source utility functions
 source "${SCRIPTS_DIR}/utils.sh"
 # sourcing load-configs.sh:
@@ -34,18 +42,6 @@ if [ -f "${DEPLOY_SCRIPT}" ]; then
   source "${DEPLOY_SCRIPT}"
   echo_info "Running deploy script...OK"
   exit 0
-fi
-
-# Commands for searching a repo differs for helm2 and helm3
-# helm2 search -l <ref>
-# helm3 search repo -l <ref>
-HELM_SEARCH_REPO="${HELM} search"
-if [ "${USE_HELM3}" == "true" ]; then
-  HELM="${HELM3}"
-  HELM_SEARCH_REPO="${HELM3} search repo"
-  XDG_DATA_HOME="${HELM_HOME}"
-  XDG_CONFIG_HOME="${HELM_HOME}"
-  XDG_CACHE_HOME="${HELM_HOME}"
 fi
 
 # if HELM_CHART_NAME is not set, default to component name

@@ -39,6 +39,16 @@ HELM_INDEX := $(HELM_OUTPUT_DIR)/index.yaml
 HELM_HOME := $(abspath $(WORK_DIR)/helm)
 export HELM_HOME
 
+# https://helm.sh/docs/faq/#xdg-base-directory-support
+ifeq ($(USE_HELM3),true)
+XDG_DATA_HOME := $(HELM_HOME)
+XDG_CONFIG_HOME := $(HELM_HOME)
+XDG_CACHE_HOME := $(HELM_HOME)
+export XDG_DATA_HOME
+export XDG_CONFIG_HOME
+export XDG_CACHE_HOME
+endif
+
 # remove the leading `v` for helm chart versions
 HELM_CHART_VERSION := $(VERSION:v%=%)
 

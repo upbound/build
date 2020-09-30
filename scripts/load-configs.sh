@@ -30,8 +30,6 @@ HELM_DELETE_ON_FAILURE="true"
 # COMPONENT_SKIP_DEPLOY controls whether (conditionally) skip deployment of a component or not.
 COMPONENT_SKIP_DEPLOY="false"
 
-USE_HELM3="false"
-
 MAIN_CONFIG_FILE="${DEPLOY_LOCAL_CONFIG_DIR}/config.env"
 COMPONENT_CONFIG_DIR="${DEPLOY_LOCAL_CONFIG_DIR}/${COMPONENT}"
 COMPONENT_CONFIG_FILE="${COMPONENT_CONFIG_DIR}/config.env"

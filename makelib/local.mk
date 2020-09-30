@@ -25,6 +25,7 @@ export KIND
 export KUBECTL
 export HELM
 export HELM3
+export USE_HELM3
 export GOMPLATE
 export ISTIO
 export ISTIO_VERSION
@@ -109,7 +110,11 @@ local.clean:
 	@rm -rf $(WORK_DIR)/local || $(FAIL)
 	@$(OK) cleaning local dev workdir
 
+ifeq ($(USE_HELM3),true)
+local.up: local.prepare kind.up
+else
 local.up: local.prepare kind.up local.helminit
+endif
 
 local.down: kind.down local.clean
 
