@@ -13,12 +13,20 @@ LOCALDEV_CLONE_WITH ?= ssh # or https
 LOCALDEV_LOCAL_BUILD ?= true
 LOCALDEV_PULL_LATEST ?= true
 
-ifeq ($(HELM_HOME),)
+# HELM_HOME is defined in makelib/helm.mk, however, it is not possible to include makelib/helm.mk if
+# repo has no helm charts where it fails with the variable HELM_CHARTS must be set prior to including helm.mk.
+# We want to still use local dev tooling even the repo has no helm charts
+# (e.g. deploying existing charts from other repositories).
+ifndef HELM_HOME
 HELM_HOME := $(abspath $(WORK_DIR)/helm)
-export HELM_HOME
+XDG_DATA_HOME := $(HELM_HOME)
+XDG_CONFIG_HOME := $(HELM_HOME)
+XDG_CACHE_HOME := $(HELM_HOME)
+export XDG_DATA_HOME
+export XDG_CONFIG_HOME
+export XDG_CACHE_HOME
 $(HELM_HOME): $(HELM)
 	@mkdir -p $(HELM_HOME)
-	@$(HELM) init -c
 endif
 
 export KIND
@@ -111,7 +119,7 @@ local.clean:
 	@$(OK) cleaning local dev workdir
 
 ifeq ($(USE_HELM3),true)
-local.up: local.prepare kind.up
+local.up: local.prepare kind.up $(HELM_HOME)
 else
 local.up: local.prepare kind.up local.helminit
 endif
