@@ -25,11 +25,11 @@ ISTIO_DOWNLOAD_TUPLE := osx
 endif
 
 # the version of kind to use
-KIND_VERSION ?= v0.7.0
+KIND_VERSION ?= v0.9.0
 KIND := $(TOOLS_HOST_DIR)/kind-$(KIND_VERSION)
 
 # the version of kubectl to use
-KUBECTL_VERSION ?= v1.16.9
+KUBECTL_VERSION ?= v1.17.11
 KUBECTL := $(TOOLS_HOST_DIR)/kubectl-$(KUBECTL_VERSION)
 
 # the version of kustomize to use
