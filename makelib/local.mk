@@ -3,6 +3,7 @@ SCRIPTS_DIR := $(SELF_DIR)/../scripts
 
 KIND_CLUSTER_NAME ?= local-dev
 DEPLOY_LOCAL_DIR ?= $(ROOT_DIR)/cluster/local
+DEPLOY_LOCAL_POSTRENDER_WORKDIR := $(WORK_DIR)/local/post-render
 DEPLOY_LOCAL_WORKDIR := $(WORK_DIR)/local/localdev
 DEPLOY_LOCAL_CONFIG_DIR := $(DEPLOY_LOCAL_WORKDIR)/config
 DEPLOY_LOCAL_KUBECONFIG := $(DEPLOY_LOCAL_WORKDIR)/kubeconfig
@@ -31,6 +32,7 @@ endif
 
 export KIND
 export KUBECTL
+export KUSTOMIZE
 export HELM
 export HELM3
 export USE_HELM3
@@ -47,6 +49,7 @@ export LOCAL_DEV_REPOS
 export LOCALDEV_CLONE_WITH
 export LOCALDEV_PULL_LATEST
 export DEPLOY_LOCAL_DIR
+export DEPLOY_LOCAL_POSTRENDER_WORKDIR
 export DEPLOY_LOCAL_WORKDIR
 export DEPLOY_LOCAL_CONFIG_DIR
 export DEPLOY_LOCAL_KUBECONFIG
@@ -126,7 +129,7 @@ endif
 
 local.down: kind.down local.clean
 
-local.deploy.%: local.prepare $(KUBECTL) $(HELM) $(HELM3) $(HELM_HOME) $(GOMPLATE) $(ISTIO) kind.setcontext
+local.deploy.%: local.prepare $(KUBECTL) $(KUSTOMIZE) $(HELM) $(HELM3) $(HELM_HOME) $(GOMPLATE) $(ISTIO) kind.setcontext
 	@$(INFO) localdev deploy component: $*
 	@$(eval PLATFORMS=$(BUILD_PLATFORMS))
 	@$(SCRIPTS_DIR)/localdev-deploy-component.sh $* || $(FAIL)

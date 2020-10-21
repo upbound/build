@@ -79,3 +79,57 @@ if [ -n "${LOCAL_DEV_REPOS}" ]; then
     fi
   done
 fi
+
+# prepare post-render workdir
+mkdir -p "${DEPLOY_LOCAL_POSTRENDER_WORKDIR}"
+
+localdev_postrender_kustomization="${DEPLOY_LOCAL_POSTRENDER_WORKDIR}/kustomization.yaml"
+cat << EOF > "${localdev_postrender_kustomization}"
+resources:
+  - in.yaml
+patches:
+  - path: patch-deployment.yaml
+    target:
+      kind: Deployment
+      name: "*"
+  - path: patch-rollout.yaml
+    target:
+      kind: Rollout
+      name: "*"
+EOF
+
+localdev_postrender_patch_deployment="${DEPLOY_LOCAL_POSTRENDER_WORKDIR}/patch-deployment.yaml"
+cat << EOF > "${localdev_postrender_patch_deployment}"
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: any
+spec:
+  template:
+    metadata:
+      annotations:
+        rollme: "$RANDOM"
+EOF
+
+localdev_postrender_patch_rollout="${DEPLOY_LOCAL_POSTRENDER_WORKDIR}/patch-rollout.yaml"
+cat << EOF > "${localdev_postrender_patch_rollout}"
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: any
+spec:
+  template:
+    metadata:
+      annotations:
+        rollme: "$RANDOM"
+EOF
+
+LOCALDEV_POSTRENDER_EXEC="${DEPLOY_LOCAL_POSTRENDER_WORKDIR}/exec"
+cat << EOF > "${LOCALDEV_POSTRENDER_EXEC}"
+#!/bin/bash
+
+cat <&0 > ${DEPLOY_LOCAL_POSTRENDER_WORKDIR}/in.yaml
+
+${KUSTOMIZE} build ${DEPLOY_LOCAL_POSTRENDER_WORKDIR}
+EOF
+chmod +x "${LOCALDEV_POSTRENDER_EXEC}"

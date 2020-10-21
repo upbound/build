@@ -54,7 +54,11 @@ images_arr=($BUILD_IMAGES)
 image_archs_arr=($BUILD_IMAGE_ARCHS)
 charts_arr=($BUILD_HELM_CHARTS_LIST)
 
+post_render_args=""
+
 if [ "${LOCALDEV_LOCAL_BUILD}" == "true" ] && containsElement "${HELM_CHART_NAME}" ${charts_arr[@]+"${charts_arr[@]}"}; then
+  post_render_args="--post-renderer ${DEPLOY_LOCAL_POSTRENDER_WORKDIR}/exec"
+
   # If local build is set and helm chart is from this repository, use locally build helm chart tgz file.
   echo_info "Deploying locally built artifacts..."
   HELM_CHART_VERSION=${BUILD_HELM_CHART_VERSION}
@@ -149,7 +153,7 @@ echo_info "Running helm upgrade --install with computed parameters..."
 set -x
 "${HELM}" upgrade --install "${HELM_RELEASE_NAME}" --namespace "${HELM_RELEASE_NAMESPACE}" --kubeconfig "${KUBECONFIG}" \
   "${HELM_CHART_REF}" ${helm_chart_version_flag:-} -f "${DEPLOY_LOCAL_CONFIG_DIR}/${COMPONENT}/value-overrides.yaml" \
- ${helm_wait_atomic_flag:-}
+ ${post_render_args:-} ${helm_wait_atomic_flag:-}
 { set +x; } 2>/dev/null
 echo_info "Running helm upgrade --install with computed parameters...OK"
 
