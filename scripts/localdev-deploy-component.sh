@@ -65,7 +65,7 @@ if [ "${LOCALDEV_LOCAL_BUILD}" == "true" ] && containsElement "${HELM_CHART_NAME
   for r in "${registries_arr[@]}"; do
     for i in "${images_arr[@]}"; do
       for a in "${image_archs_arr[@]}"; do
-        if containsElement "${r}/${i}" "${REQUIRED_IMAGES[@]}"; then
+        if containsElement "${r}/${i}" ${REQUIRED_IMAGES[@]+"${REQUIRED_IMAGES[@]}"}; then
           echo_info "Tagging locally built image as ${r}/${i}:${VERSION}"
           docker tag "${BUILD_REGISTRY}/${i}-${a}" "${r}/${i}:${VERSION}"
         fi
