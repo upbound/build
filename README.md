@@ -65,7 +65,7 @@ To see the help run `make help`.
 
 ## Local Development Setup
 
-To use local development targets, first include `deploy.mk` in your make file:
+To use local development targets, first include `local.mk` in your make file:
 
 ```
 include build/makelib/local.mk

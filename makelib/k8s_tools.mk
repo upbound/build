@@ -54,6 +54,11 @@ HELM_VERSION ?= v2.16.7
 HELM := $(TOOLS_HOST_DIR)/helm-$(HELM_VERSION)
 endif
 
+# the version of tilt to use
+USE_TILT ?= false
+TILT_VERSION ?= v0.17.10
+TILT := $(TOOLS_HOST_DIR)/tilt-$(TILT_VERSION)
+
 # ====================================================================================
 # Common Targets
 
@@ -128,3 +133,12 @@ $(HELM3):
 	@mv $(TOOLS_HOST_DIR)/tmp-helm3/$(SAFEHOSTPLATFORM)/helm $(HELM3)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-helm3
 	@$(OK) installing helm3 $(HELM_VERSION)
+
+# tilt download and install
+$(TILT):
+	@$(INFO) installing tilt $(TILT_VERSION)
+	@mkdir -p $(TOOLS_HOST_DIR)/tmp-tilt
+	@curl -fsSL https://github.com/tilt-dev/tilt/releases/download/$(TILT_VERSION)/tilt.$(shell echo "$(TILT_VERSION)" | sed 's/v//g').$(HOSTOS).$(shell uname -m).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-tilt
+	@mv $(TOOLS_HOST_DIR)/tmp-tilt/tilt $(TILT)
+	@rm -fr $(TOOLS_HOST_DIR)/tmp-tilt
+	@$(OK) installing tilt $(TILT_VERSION)

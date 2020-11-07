@@ -36,6 +36,7 @@ export KUSTOMIZE
 export HELM
 export HELM3
 export USE_HELM3
+export TILT
 export GOMPLATE
 export ISTIO
 export ISTIO_VERSION
@@ -81,7 +82,11 @@ $(GOMPLATE):
 
 kind.up: $(KIND)
 	@$(INFO) kind up
+ifeq ($(USE_TILT),true)
+	@$(KIND) get kubeconfig --name $(KIND_CLUSTER_NAME) >/dev/null 2>&1 || KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) KUBECONFIG=$(KUBECONFIG) $(DEPLOY_LOCAL_DIR)/kind-with-registry.sh
+else
 	@$(KIND) get kubeconfig --name $(KIND_CLUSTER_NAME) >/dev/null 2>&1 || $(KIND) create cluster --name=$(KIND_CLUSTER_NAME) --config="$(KIND_CONFIG_FILE)" --kubeconfig="$(KUBECONFIG)"
+endif
 	@$(KIND) get kubeconfig --name $(KIND_CLUSTER_NAME) > $(DEPLOY_LOCAL_KUBECONFIG)
 	@$(OK) kind up
 
@@ -99,6 +104,23 @@ kind.buildvars:
 build.vars: kind.buildvars
 
 .PHONY: kind.up kind.down kind.setcontext kind.buildvars
+
+tilt.up: $(TILT)
+	@$(INFO) tilt up
+	@$(TILT) up
+	@$(OK) tilt up
+
+tilt.down: $(TILT)
+	@$(INFO) tilt down
+	@$(TILT) down
+	@$(OK) tilt down
+
+.PHONY: tilt.up tilt.down
+
+local.helmdep: $(HELM3)
+	@$(INFO) helm dependency update
+	@$(HELM3) dependency update $(ROOT_DIR)/cluster/charts/crossplane
+	@$(OK) helm dependency update
 
 local.helminit: $(KUBECTL) $(HELM) kind.setcontext
 	@$(INFO) helm init
@@ -122,13 +144,21 @@ local.clean:
 	@rm -rf $(WORK_DIR)/local || $(FAIL)
 	@$(OK) cleaning local dev workdir
 
+ifeq ($(USE_TILT),true)
+local.up: local.prepare kind.up tilt.up
+else
 ifeq ($(USE_HELM3),true)
 local.up: local.prepare kind.up $(HELM_HOME)
 else
 local.up: local.prepare kind.up local.helminit
 endif
+endif
 
+ifeq ($(USE_TILT),true)
+local.down: tilt.down kind.down local.clean
+else
 local.down: kind.down local.clean
+endif
 
 local.deploy.%: local.prepare $(KUBECTL) $(KUSTOMIZE) $(HELM) $(HELM3) $(HELM_HOME) $(GOMPLATE) $(ISTIO) kind.setcontext
 	@$(INFO) localdev deploy component: $*
