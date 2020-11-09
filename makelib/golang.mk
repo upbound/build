@@ -232,6 +232,11 @@ go.vendor:
 	@$(GOHOST) mod vendor || $(FAIL)
 	@$(OK) go mod vendor
 
+go.vendor.tidy:
+	@$(INFO) go mod tidy
+	@$(GOHOST) mod tidy || $(FAIL)
+	@$(OK) go mod tidy
+
 else
 
 go.vendor.lite: $(DEP)
@@ -277,7 +282,7 @@ go.generate:
 
 
 .PHONY: go.init go.build go.install go.test.unit go.test.integration go.test.codecov go.lint go.vet go.fmt go.generate
-.PHONY: go.validate go.vendor.lite go.vendor go.vendor.check go.vendor.update go.clean go.distclean
+.PHONY: go.validate go.vendor.lite go.vendor go.vendor.check go.vendor.tidy go.vendor.update go.clean go.distclean
 
 # ====================================================================================
 # Common Targets
