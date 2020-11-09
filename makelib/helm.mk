@@ -86,8 +86,10 @@ helm.prepare.$(1): $(HELM_HOME)
 helm.prepare: helm.prepare.$(1)
 
 helm.lint.$(1): $(HELM_HOME) helm.prepare.$(1)
+	@$(INFO) helm lint $(1)
 	@rm -rf $(abspath $(HELM_CHARTS_DIR)/$(1)/charts)
 	@$(HELM) lint $(abspath $(HELM_CHARTS_DIR)/$(1)) $(HELM_CHART_LINT_ARGS_$(1)) --strict
+	@$(OK) helm lint $(1)
 
 helm.lint: helm.lint.$(1)
 
@@ -153,8 +155,8 @@ $(foreach p,$(HELM_CHARTS),$(eval $(call museum.upload,$(p))))
 # ====================================================================================
 # Common Targets
 
-build.init: helm.prepare helm.lint
-build.check: helm.dep
+build.init: helm.prepare helm.dep
+build.check: helm.lint
 build.artifacts: helm.build
 clean: helm.clean
 lint: helm.lint
