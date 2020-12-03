@@ -31,6 +31,6 @@ fi
 
 echo_info "Running helm delete..."
 set -x
-"${HELM}" delete "${HELM_RELEASE_NAME}" --kubeconfig "${KUBECONFIG}" ${helm_purge_flag}
+"${HELM}" delete "${HELM_RELEASE_NAME}" -n "${HELM_RELEASE_NAMESPACE}" --kubeconfig "${KUBECONFIG}" ${helm_purge_flag}
 { set +x; } 2>/dev/null
 echo_info "Running helm delete...OK!"
