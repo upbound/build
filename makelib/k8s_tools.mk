@@ -38,7 +38,7 @@ KUSTOMIZE := $(TOOLS_HOST_DIR)/kustomize-$(KUSTOMIZE_VERSION)
 
 # the version of helm 3 to use
 USE_HELM3 ?= false
-HELM3_VERSION := v3.2.4
+HELM3_VERSION ?= v3.4.0
 HELM3 := $(TOOLS_HOST_DIR)/helm-$(HELM3_VERSION)
 
 # If we enable HELM3 we alias HELM to be HELM3
