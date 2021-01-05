@@ -30,11 +30,13 @@ endif
 # set the OS base image to alpine if in not defined. set your own image for each
 # supported platform.
 ifeq ($(origin OSBASEIMAGE),undefined)
-OSBASE ?= alpine:3.7
+OSBASE ?= alpine:3.12
 ifeq ($(ARCH),amd64)
 OSBASEIMAGE = $(OSBASE)
 else ifeq ($(ARCH),arm64)
 OSBASEIMAGE = arm64v8/$(OSBASE)
+else ifeq ($(ARCH),arm)
+OSBASEIMAGE = arm32v6/$(OSBASE)
 else
 $(error unsupported architecture $(ARCH))
 endif
