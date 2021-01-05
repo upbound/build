@@ -35,6 +35,8 @@ ifeq ($(ARCH),amd64)
 OSBASEIMAGE = $(OSBASE)
 else ifeq ($(ARCH),arm64)
 OSBASEIMAGE = arm64v8/$(OSBASE)
+else ifeq ($(ARCH),arm)
+OSBASEIMAGE = arm32v6/$(OSBASE)
 else
 $(error unsupported architecture $(ARCH))
 endif
