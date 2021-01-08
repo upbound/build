@@ -16,7 +16,7 @@
 # Options
 
 # the version of istio to use
-ISTIO_VERSION ?= 1.7.2
+ISTIO_VERSION ?= 1.8.1
 ISTIO := $(TOOLS_HOST_DIR)/istioctl-$(ISTIO_VERSION)
 ISTIOOS := $(HOSTOS)
 ISTIO_DOWNLOAD_TUPLE := $(HOSTOS)-$(HOSTARCH)
