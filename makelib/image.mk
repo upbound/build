@@ -31,7 +31,7 @@ endif
 # supported platform.
 ifeq ($(origin OSBASEIMAGE),undefined)
 OSBASE ?= alpine:3.13
-ifeq ($(ARCH),amd64)
+ifeq ($(ARCH),$(filter $(ARCH),amd64 ppc64le))
 OSBASEIMAGE = $(OSBASE)
 else ifeq ($(ARCH),arm64)
 OSBASEIMAGE = arm64v8/$(OSBASE)

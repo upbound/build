@@ -107,7 +107,11 @@ ifeq ($(HOSTARCH),x86_64)
 HOSTARCH := amd64
 endif
 ifneq ($(HOSTARCH),amd64)
-	$(error build only supported on amd64 host currently)
+	ifeq ($(HOSTARCH),ppc64le)
+		PLATFORMS = linux_ppc64le
+	else
+		$(error build only supported on amd64, ppc64le hosts currently)
+	endif
 endif
 HOST_PLATFORM := $(HOSTOS)_$(HOSTARCH)
 
