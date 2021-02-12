@@ -97,8 +97,11 @@ PLATFORMS ?= darwin_amd64 windows_amd64 linux_amd64 linux_arm64
 
 # Set the host's OS. Only linux and darwin supported for now
 HOSTOS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
-ifeq ($(filter darwin linux,$(HOSTOS)),)
-$(error build only supported on linux and darwin host currently)
+ifeq (mingw64_nt, $(word 1, $(subst -, ,$(HOSTOS))))
+HOSTOS := windows
+endif
+ifeq ($(filter darwin linux windows,$(HOSTOS)),)
+$(error build only supported on linux, darwin and mingw64 host currently. Detected system is $(HOSTOS))
 endif
 
 # Set the host's arch. Only amd64 support for now
