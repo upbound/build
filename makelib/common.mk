@@ -93,7 +93,7 @@ REMOTE_NAME ?= origin
 
 # all supported platforms we build for this can be set to other platforms if desired
 # we use the golang os and arch names for convenience
-PLATFORMS ?= darwin_amd64 windows_amd64 linux_amd64 linux_arm64
+PLATFORMS ?= darwin_amd64 darwin_arm64 windows_amd64 linux_amd64 linux_arm64
 
 # Set the host's OS. Only linux and darwin supported for now
 HOSTOS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
@@ -104,6 +104,10 @@ endif
 # Set the host's arch. Only amd64 support for now
 HOSTARCH := $(shell uname -m)
 ifeq ($(HOSTARCH),x86_64)
+HOSTARCH := amd64
+endif
+# For Apple Silicon we are using amd64 binaries and relying on Rosetta2
+ifeq ($(HOSTOS)_$(HOSTARCH),darwin_arm64)
 HOSTARCH := amd64
 endif
 ifneq ($(HOSTARCH),amd64)
