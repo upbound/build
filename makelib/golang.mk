@@ -52,9 +52,6 @@ ifeq ($(DEBUG),0)
 GO_LDFLAGS += -s -w
 endif
 
-# supported go versions
-GO_SUPPORTED_VERSIONS ?= 1.7|1.8|1.9|1.10|1.11|1.12|1.13|1.14
-
 # set GOOS and GOARCH
 GOOS := $(OS)
 GOARCH := $(ARCH)
@@ -146,10 +143,6 @@ endif
 # Go Targets
 
 go.init: go.vendor.lite
-	@if ! `$(GO) version | grep -q -E '\bgo($(GO_SUPPORTED_VERSIONS))\b'`; then \
-		$(ERR) unsupported go version. Please make install one of the following supported version: '$(GO_SUPPORTED_VERSIONS)' ;\
-		exit 1 ;\
-	fi
 	@if [ "$(GO111MODULE)" != "on" ] && [ "$(realpath ../../../..)" !=  "$(realpath $(GOPATH))" ]; then \
 		$(WARN) the source directory is not relative to the GOPATH at $(GOPATH) or you are you using symlinks. The build might run into issue. Please move the source directory to be at $(GOPATH)/src/$(GO_PROJECT) ;\
 	fi
