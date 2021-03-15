@@ -38,7 +38,7 @@ KUSTOMIZE := $(TOOLS_HOST_DIR)/kustomize-$(KUSTOMIZE_VERSION)
 
 # the version of helm 3 to use
 USE_HELM3 ?= false
-HELM3_VERSION ?= v3.4.2
+HELM3_VERSION ?= v3.5.3
 HELM3 := $(TOOLS_HOST_DIR)/helm-$(HELM3_VERSION)
 
 # If we enable HELM3 we alias HELM to be HELM3
@@ -78,14 +78,14 @@ $(ISTIO):
 $(KIND):
 	@$(INFO) installing kind $(KIND_VERSION)
 	@mkdir -p $(TOOLS_HOST_DIR) || $(FAIL)
-	@curl -fsSLo $(KIND) https://github.com/kubernetes-sigs/kind/releases/download/$(KIND_VERSION)/kind-$(GOHOSTOS)-$(GOHOSTARCH) || $(FAIL)
+	@curl -fsSLo $(KIND) https://github.com/kubernetes-sigs/kind/releases/download/$(KIND_VERSION)/kind-$(HOSTOS)-$(HOSTARCH) || $(FAIL)
 	@chmod +x $(KIND) 
 	@$(OK) installing kind $(KIND_VERSION)
 
 # kubectl download and install
 $(KUBECTL):
 	@$(INFO) installing kubectl $(KUBECTL_VERSION)
-	@curl -fsSLo $(KUBECTL) https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VERSION)/bin/$(GOHOSTOS)/$(GOHOSTARCH)/kubectl || $(FAIL)
+	@curl -fsSLo $(KUBECTL) https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VERSION)/bin/$(HOSTOS)/$(HOSTARCH)/kubectl || $(FAIL)
 	@chmod +x $(KUBECTL) 
 	@$(OK) installing kubectl $(KUBECTL_VERSION)
 
