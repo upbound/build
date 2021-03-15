@@ -66,9 +66,9 @@ if [ "${LOCALDEV_LOCAL_BUILD}" == "true" ] && containsElement "${HELM_CHART_NAME
   [ -f "${HELM_CHART_REF}" ] || echo_error "Local chart ${HELM_CHART_REF} not found. Did you run \"make build\" ? "
 
   # If local build, tag "required" local images, so that they can be load into kind cluster at a later step.
-  for r in "${registries_arr[@]}"; do
-    for i in "${images_arr[@]}"; do
-      for a in "${image_archs_arr[@]}"; do
+  for r in ${registries_arr[@]+"${registries_arr[@]}"}; do
+    for i in ${images_arr[@]+"${images_arr[@]}"}; do
+      for a in ${image_archs_arr[@]+"${image_archs_arr[@]}"}; do
         if containsElement "${r}/${i}" ${REQUIRED_IMAGES[@]+"${REQUIRED_IMAGES[@]}"}; then
           echo_info "Tagging locally built image as ${r}/${i}:${VERSION}"
           docker tag "${BUILD_REGISTRY}/${i}-${a}" "${r}/${i}:${VERSION}"
