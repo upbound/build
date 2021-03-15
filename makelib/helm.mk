@@ -35,6 +35,11 @@ HELM_OUTPUT_DIR ?= $(OUTPUT_DIR)/charts
 # the helm index file
 HELM_INDEX := $(HELM_OUTPUT_DIR)/index.yaml
 
+HELM_CHART_LINT_STRICT ?= true
+ifeq ($(HELM_CHART_LINT_STRICT),true)
+HELM_CHART_LINT_STRICT_ARG += --strict
+endif
+
 # helm home
 HELM_HOME := $(abspath $(WORK_DIR)/helm)
 export HELM_HOME
@@ -87,7 +92,7 @@ helm.prepare: helm.prepare.$(1)
 
 helm.lint.$(1): $(HELM_HOME) helm.prepare.$(1)
 	@rm -rf $(abspath $(HELM_CHARTS_DIR)/$(1)/charts)
-	@$(HELM) lint $(abspath $(HELM_CHARTS_DIR)/$(1)) $(HELM_CHART_LINT_ARGS_$(1)) --strict
+	@$(HELM) lint $(abspath $(HELM_CHARTS_DIR)/$(1)) $(HELM_CHART_LINT_ARGS_$(1)) $(HELM_CHART_LINT_STRICT_ARG)
 
 helm.lint: helm.lint.$(1)
 
