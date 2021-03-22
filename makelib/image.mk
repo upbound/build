@@ -99,7 +99,7 @@ BUILD_BASE_ARGS += $(BUILD_ARGS)
 export PULL
 
 # the version of tini to use
-TINI_VERSION ?= v0.16.1
+TINI_VERSION ?= v0.19.0
 
 ifeq ($(HOSTOS),Linux)
 SELF_CID := $(shell cat /proc/self/cgroup | grep docker | grep -o -E '[0-9a-f]{64}' | head -n 1)
