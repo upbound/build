@@ -36,6 +36,10 @@ KUBECTL := $(TOOLS_HOST_DIR)/kubectl-$(KUBECTL_VERSION)
 KUSTOMIZE_VERSION ?= v3.3.0
 KUSTOMIZE := $(TOOLS_HOST_DIR)/kustomize-$(KUSTOMIZE_VERSION)
 
+# the version of olm-bundle to use
+OLMBUNDLE_VERSION ?= v0.1.0
+OLMBUNDLE := $(TOOLS_HOST_DIR)/olm-bundle-$(OLMBUNDLE_VERSION)
+
 # the version of helm 3 to use
 USE_HELM3 ?= false
 HELM3_VERSION ?= v3.5.3
@@ -98,6 +102,12 @@ $(KUSTOMIZE):
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-kustomize
 	@$(OK) installing kustomize $(KUSTOMIZE_VERSION)
 
+# olm-bundle download and install
+$(OLMBUNDLE):
+	@$(INFO) installing olm-bundle $(OLMBUNDLE_VERSION)
+	@curl -fsSLo $(OLMBUNDLE) https://github.com/upbound/olm-bundle/releases/download/$(OLMBUNDLE_VERSION)/olm-bundle_$(HOST_PLATFORM) || $(FAIL)
+	@chmod +x $(OLMBUNDLE)
+	@$(OK) installing olm-bundle $(OLMBUNDLE_VERSION)
 
 # helm download and install only if helm3 not enabled
 ifeq ($(USE_HELM3),false)
