@@ -19,7 +19,7 @@
 ISTIO_VERSION ?= 1.8.1
 ISTIO := $(TOOLS_HOST_DIR)/istioctl-$(ISTIO_VERSION)
 ISTIOOS := $(HOSTOS)
-ISTIO_DOWNLOAD_TUPLE := $(HOSTOS)-$(HOSTARCH)
+ISTIO_DOWNLOAD_TUPLE := $(SAFEHOSTPLATFORM)
 ifeq ($(HOSTOS),darwin)
 ISTIO_DOWNLOAD_TUPLE := osx
 endif
@@ -82,22 +82,22 @@ $(ISTIO):
 $(KIND):
 	@$(INFO) installing kind $(KIND_VERSION)
 	@mkdir -p $(TOOLS_HOST_DIR) || $(FAIL)
-	@curl -fsSLo $(KIND) https://github.com/kubernetes-sigs/kind/releases/download/$(KIND_VERSION)/kind-$(HOSTOS)-$(HOSTARCH) || $(FAIL)
-	@chmod +x $(KIND) 
+	@curl -fsSLo $(KIND) https://github.com/kubernetes-sigs/kind/releases/download/$(KIND_VERSION)/kind-$(SAFEHOSTPLATFORM) || $(FAIL)
+	@chmod +x $(KIND)
 	@$(OK) installing kind $(KIND_VERSION)
 
 # kubectl download and install
 $(KUBECTL):
 	@$(INFO) installing kubectl $(KUBECTL_VERSION)
-	@curl -fsSLo $(KUBECTL) https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VERSION)/bin/$(HOSTOS)/$(HOSTARCH)/kubectl || $(FAIL)
-	@chmod +x $(KUBECTL) 
+	@curl -fsSLo $(KUBECTL) https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VERSION)/bin/$(HOSTOS)/$(SAFEHOSTARCH)/kubectl || $(FAIL)
+	@chmod +x $(KUBECTL)
 	@$(OK) installing kubectl $(KUBECTL_VERSION)
 
 # kustomize download and install
 $(KUSTOMIZE):
 	@$(INFO) installing kustomize $(KUSTOMIZE_VERSION)
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-kustomize
-	@curl -fsSL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/$(KUSTOMIZE_VERSION)/kustomize_$(KUSTOMIZE_VERSION)_$(HOST_PLATFORM).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-kustomize
+	@curl -fsSL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/$(KUSTOMIZE_VERSION)/kustomize_$(KUSTOMIZE_VERSION)_$(SAFEHOST_PLATFORM).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-kustomize
 	@mv $(TOOLS_HOST_DIR)/tmp-kustomize/kustomize $(KUSTOMIZE)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-kustomize
 	@$(OK) installing kustomize $(KUSTOMIZE_VERSION)
@@ -112,19 +112,19 @@ $(OLMBUNDLE):
 # helm download and install only if helm3 not enabled
 ifeq ($(USE_HELM3),false)
 $(HELM):
-	@$(INFO) installing helm $(HOSTOS)-$(HOSTARCH)
+	@$(INFO) installing helm $(SAFEHOSTPLATFORM)
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-helm
-	@curl -fsSL https://storage.googleapis.com/kubernetes-helm/helm-$(HELM_VERSION)-$(HOSTOS)-$(HOSTARCH).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-helm
-	@mv $(TOOLS_HOST_DIR)/tmp-helm/$(HOSTOS)-$(HOSTARCH)/helm $(HELM)
+	@curl -fsSL https://storage.googleapis.com/kubernetes-helm/helm-$(HELM_VERSION)-$(SAFEHOSTPLATFORM).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-helm
+	@mv $(TOOLS_HOST_DIR)/tmp-helm/$(SAFEHOSTPLATFORM)/helm $(HELM)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-helm
-	@$(OK) installing helm $(HOSTOS)-$(HOSTARCH)
+	@$(OK) installing helm $(SAFEHOSTPLATFORM)
 endif
 
 # helm3 download and install
 $(HELM3):
-	@$(INFO) installing helm3 $(HOSTOS)-$(HOSTARCH)
+	@$(INFO) installing helm3 $(SAFEHOSTPLATFORM)
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-helm3
-	@curl -fsSL https://get.helm.sh/helm-$(HELM3_VERSION)-$(HOSTOS)-$(HOSTARCH).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-helm3
-	@mv $(TOOLS_HOST_DIR)/tmp-helm3/$(HOSTOS)-$(HOSTARCH)/helm $(HELM3)
+	@curl -fsSL https://get.helm.sh/helm-$(HELM3_VERSION)-$(SAFEHOSTPLATFORM).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-helm3
+	@mv $(TOOLS_HOST_DIR)/tmp-helm3/$(SAFEHOSTPLATFORM)/helm $(HELM3)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-helm3
 	@$(OK) installing helm3 $(HOSTOS)-$(HOSTARCH)

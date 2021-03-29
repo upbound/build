@@ -101,33 +101,50 @@ ifeq ($(filter darwin linux,$(HOSTOS)),)
 $(error build only supported on linux and darwin host currently)
 endif
 
-# Set the host's arch. Only amd64 support for now
+# Set the host's arch. Only amd64 and arm64 support for now
 HOSTARCH := $(shell uname -m)
 ifeq ($(HOSTARCH),x86_64)
-HOSTARCH := amd64
+SAFEHOSTARCH := amd64
+TARGETARCH := amd64
 endif
-# For Apple Silicon we are using amd64 binaries and relying on Rosetta2
-ifeq ($(HOSTOS)_$(HOSTARCH),darwin_arm64)
-HOSTARCH := amd64
+
+# Set safe architectures for supported OSes (darwin and linux).
+# Apple Silicon binaries are not widely available yet
+ifeq ($(HOSTOS),darwin)
+SAFEHOSTARCH := amd64
+TARGETARCH := arm64
 endif
-ifneq ($(HOSTARCH),amd64)
-	$(error build only supported on amd64 host currently)
+ifeq ($(filter amd64 arm64 ,$(SAFEHOSTARCH)),)
+	$(error build only supported on amd64 and arm64 host currently)
 endif
+
+# If SAFEHOSTARCH and TARGETARCH have not been defined yet, use HOST
+ifeq ($(origin SAFEHOSTARCH),undefined)
+SAFEHOSTARCH := $(HOSTARCH)
+endif
+ifeq ($(origin TARGETARCH), undefined)
+TARGETARCH := $(HOSTARCH)
+endif
+
+# Standardize Host Platform variables
+HOSTPLATFORM := $(HOSTOS)-$(HOSTARCH)
 HOST_PLATFORM := $(HOSTOS)_$(HOSTARCH)
+SAFEHOSTPLATFORM := $(HOSTOS)-$(SAFEHOSTARCH)
+SAFEHOST_PLATFORM := $(HOSTOS)_$(SAFEHOSTARCH)
+TARGETPLATFORM := $(HOSTOS)-$(TARGETARCH)
+TARGET_PLATFORM := $(HOSTOS)_$(TARGETARCH)
 
 # Set the platform to build if not currently defined
 ifeq ($(origin PLATFORM),undefined)
-
-PLATFORM := $(HOST_PLATFORM)
-
+PLATFORM := $(TARGET_PLATFORM)
 # if the host platform is on the supported list add it to the single build target
-ifneq ($(filter $(PLATFORMS),$(HOST_PLATFORM)),)
-BUILD_PLATFORMS = $(HOST_PLATFORM)
+ifneq ($(filter $(PLATFORMS),$(TARGET_PLATFORM)),)
+BUILD_PLATFORMS = $(TARGET_PLATFORM)
 endif
 
 # for convenience always build the linux platform when building on mac
 ifneq ($(HOSTOS),linux)
-BUILD_PLATFORMS += linux_amd64
+BUILD_PLATFORMS += linux_$(TARGETARCH)
 endif
 
 else
@@ -256,6 +273,8 @@ common.buildvars:
 	@echo CACHE_DIR=$(CACHE_DIR)
 	@echo HOSTOS=$(HOSTOS)
 	@echo HOSTARCH=$(HOSTARCH)
+	@echo SAFEHOSTARCH=$(SAFEHOSTARCH)
+	@echo TARGETARCH=$(TARGETARCH)
 
 build.vars: common.buildvars
 
