@@ -37,7 +37,7 @@ KUSTOMIZE_VERSION ?= v3.3.0
 KUSTOMIZE := $(TOOLS_HOST_DIR)/kustomize-$(KUSTOMIZE_VERSION)
 
 # the version of olm-bundle to use
-OLMBUNDLE_VERSION ?= v0.1.0
+OLMBUNDLE_VERSION ?= v0.4.0
 OLMBUNDLE := $(TOOLS_HOST_DIR)/olm-bundle-$(OLMBUNDLE_VERSION)
 
 # the version of helm 3 to use
