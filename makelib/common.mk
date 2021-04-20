@@ -128,17 +128,15 @@ ifeq ($(filter amd64 arm64 ,$(TARGETARCH)),)
 endif
 
 # Standardize Host Platform variables
-HOSTPLATFORM := $(HOSTOS)-$(HOSTARCH)
 HOST_PLATFORM := $(HOSTOS)_$(HOSTARCH)
 SAFEHOSTPLATFORM := $(HOSTOS)-$(SAFEHOSTARCH)
 SAFEHOST_PLATFORM := $(HOSTOS)_$(SAFEHOSTARCH)
-TARGETPLATFORM := $(HOSTOS)-$(TARGETARCH)
 TARGET_PLATFORM := $(HOSTOS)_$(TARGETARCH)
 
 # Set the platform to build if not currently defined
 ifeq ($(origin PLATFORM),undefined)
 PLATFORM := $(TARGET_PLATFORM)
-# if the host platform is on the supported list add it to the single build target
+# if the target platform is on the supported list add it to the single build target
 ifneq ($(filter $(PLATFORMS),$(TARGET_PLATFORM)),)
 BUILD_PLATFORMS = $(TARGET_PLATFORM)
 endif
