@@ -112,9 +112,7 @@ endif
 # Apple Silicon binaries are not widely available yet
 ifeq ($(HOSTOS),darwin)
 SAFEHOSTARCH := amd64
-endif
-ifeq ($(filter amd64 arm64 ,$(SAFEHOSTARCH)),)
-	$(error build only supported on amd64 and arm64 host currently)
+TARGETARCH := $(HOSTARCH)
 endif
 
 # If SAFEHOSTARCH and TARGETARCH have not been defined yet, use HOST
@@ -123,6 +121,10 @@ SAFEHOSTARCH := $(HOSTARCH)
 endif
 ifeq ($(origin TARGETARCH), undefined)
 TARGETARCH := $(HOSTARCH)
+endif
+
+ifeq ($(filter amd64 arm64 ,$(TARGETARCH)),)
+	$(error build only supported on amd64 and arm64 host currently)
 endif
 
 # Standardize Host Platform variables
