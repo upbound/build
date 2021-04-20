@@ -112,7 +112,6 @@ endif
 # Apple Silicon binaries are not widely available yet
 ifeq ($(HOSTOS),darwin)
 SAFEHOSTARCH := amd64
-TARGETARCH := arm64
 endif
 ifeq ($(filter amd64 arm64 ,$(SAFEHOSTARCH)),)
 	$(error build only supported on amd64 and arm64 host currently)
