@@ -101,12 +101,8 @@ ifeq ($(filter darwin linux,$(HOSTOS)),)
 $(error build only supported on linux and darwin host currently)
 endif
 
-# Set the host's arch. Only amd64 and arm64 support for now
+# Set the host's arch.
 HOSTARCH := $(shell uname -m)
-ifeq ($(HOSTARCH),x86_64)
-SAFEHOSTARCH := amd64
-TARGETARCH := amd64
-endif
 
 # Set safe architectures for supported OSes (darwin and linux).
 # Apple Silicon binaries are not widely available yet
@@ -123,8 +119,14 @@ ifeq ($(origin TARGETARCH), undefined)
 TARGETARCH := $(HOSTARCH)
 endif
 
-ifeq ($(filter amd64 arm64 ,$(TARGETARCH)),)
-	$(error build only supported on amd64 and arm64 host currently)
+# Automatically translate x86_64 to amd64
+ifeq ($(HOSTARCH),x86_64)
+SAFEHOSTARCH := amd64
+TARGETARCH := amd64
+endif
+
+ifeq ($(filter amd64 arm64 ,$(SAFEHOSTARCH)),)
+$(error build only supported on amd64 and arm64 host currently)
 endif
 
 # Standardize Host Platform variables
