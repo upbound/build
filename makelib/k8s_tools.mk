@@ -127,4 +127,4 @@ $(HELM3):
 	@curl -fsSL https://get.helm.sh/helm-$(HELM3_VERSION)-$(SAFEHOSTPLATFORM).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-helm3
 	@mv $(TOOLS_HOST_DIR)/tmp-helm3/$(SAFEHOSTPLATFORM)/helm $(HELM3)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-helm3
-	@$(OK) installing helm3 $(HOSTOS)-$(HOSTARCH)
+	@$(OK) installing helm3 $(SAFEHOSTPLATFORM)
