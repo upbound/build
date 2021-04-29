@@ -57,9 +57,9 @@ GOOS := $(OS)
 GOARCH := $(ARCH)
 export GOOS GOARCH
 
-# set GOOS and GOARCH
+# set GOHOSTOS and GOHOSTARCH
 GOHOSTOS := $(HOSTOS)
-GOHOSTARCH := $(HOSTARCH)
+GOHOSTARCH := $(TARGETARCH)
 
 GO_PACKAGES := $(foreach t,$(GO_SUBDIRS),$(GO_PROJECT)/$(t)/...)
 GO_INTEGRATION_TEST_PACKAGES := $(foreach t,$(GO_INTEGRATION_TESTS_SUBDIRS),$(GO_PROJECT)/$(t)/integration)
@@ -326,25 +326,25 @@ help-special: go.help
 # Tools install targets
 
 $(DEP):
-	@$(INFO) installing dep-$(DEP_VERSION) $(HOSTOS)-$(HOSTARCH)
+	@$(INFO) installing dep-$(DEP_VERSION) $(SAFEHOSTPLATFORM)
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-dep || $(FAIL)
-	@curl -fsSL -o $(DEP) https://github.com/golang/dep/releases/download/$(DEP_VERSION)/dep-$(HOSTOS)-$(HOSTARCH) || $(FAIL)
+	@curl -fsSL -o $(DEP) https://github.com/golang/dep/releases/download/$(DEP_VERSION)/dep-$(SAFEHOSTPLATFORM) || $(FAIL)
 	@chmod +x $(DEP) || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-dep
-	@$(OK) installing dep-$(DEP_VERSION) $(HOSTOS)-$(HOSTARCH)
+	@$(OK) installing dep-$(DEP_VERSION) $(SAFEHOSTPLATFORM)
 
 $(GOLANGCILINT):
-	@$(INFO) installing golangci-lint-v$(GOLANGCILINT_VERSION) $(HOSTOS)-$(HOSTARCH)
+	@$(INFO) installing golangci-lint-v$(GOLANGCILINT_VERSION) $(SAFEHOSTPLATFORM)
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-golangci-lint || $(FAIL)
-	@curl -fsSL https://github.com/golangci/golangci-lint/releases/download/v$(GOLANGCILINT_VERSION)/golangci-lint-$(GOLANGCILINT_VERSION)-$(HOSTOS)-$(HOSTARCH).tar.gz | tar -xz --strip-components=1 -C $(TOOLS_HOST_DIR)/tmp-golangci-lint || $(FAIL)
+	@curl -fsSL https://github.com/golangci/golangci-lint/releases/download/v$(GOLANGCILINT_VERSION)/golangci-lint-$(GOLANGCILINT_VERSION)-$(SAFEHOSTPLATFORM).tar.gz | tar -xz --strip-components=1 -C $(TOOLS_HOST_DIR)/tmp-golangci-lint || $(FAIL)
 	@mv $(TOOLS_HOST_DIR)/tmp-golangci-lint/golangci-lint $(GOLANGCILINT) || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-golangci-lint
-	@$(OK) installing golangci-lint-v$(GOLANGCILINT_VERSION) $(HOSTOS)-$(HOSTARCH)
+	@$(OK) installing golangci-lint-v$(GOLANGCILINT_VERSION) $(SAFEHOSTPLATFORM)
 
 $(GOFMT):
 	@$(INFO) installing gofmt$(GOFMT_VERSION)
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-fmt || $(FAIL)
-	@curl -sL https://dl.google.com/go/go$(GOFMT_VERSION).$(HOSTOS)-$(HOSTARCH).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-fmt || $(FAIL)
+	@curl -sL https://dl.google.com/go/go$(GOFMT_VERSION).$(SAFEHOSTPLATFORM).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-fmt || $(FAIL)
 	@mv $(TOOLS_HOST_DIR)/tmp-fmt/go/bin/gofmt $(GOFMT) || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-fmt
 	@$(OK) installing gofmt$(GOFMT_VERSION)
