@@ -105,26 +105,26 @@ $(KUSTOMIZE):
 # olm-bundle download and install
 $(OLMBUNDLE):
 	@$(INFO) installing olm-bundle $(OLMBUNDLE_VERSION)
-	@curl -fsSLo $(OLMBUNDLE) https://github.com/upbound/olm-bundle/releases/download/$(OLMBUNDLE_VERSION)/olm-bundle_$(HOST_PLATFORM) || $(FAIL)
+	@curl -fsSLo $(OLMBUNDLE) https://github.com/upbound/olm-bundle/releases/download/$(OLMBUNDLE_VERSION)/olm-bundle_$(SAFEHOSTPLATFORM) || $(FAIL)
 	@chmod +x $(OLMBUNDLE)
 	@$(OK) installing olm-bundle $(OLMBUNDLE_VERSION)
 
 # helm download and install only if helm3 not enabled
 ifeq ($(USE_HELM3),false)
 $(HELM):
-	@$(INFO) installing helm $(SAFEHOSTPLATFORM)
+	@$(INFO) installing helm $(HELM_VERSION)
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-helm
 	@curl -fsSL https://storage.googleapis.com/kubernetes-helm/helm-$(HELM_VERSION)-$(SAFEHOSTPLATFORM).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-helm
 	@mv $(TOOLS_HOST_DIR)/tmp-helm/$(SAFEHOSTPLATFORM)/helm $(HELM)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-helm
-	@$(OK) installing helm $(SAFEHOSTPLATFORM)
+	@$(OK) installing helm $(HELM_VERSION)
 endif
 
 # helm3 download and install
 $(HELM3):
-	@$(INFO) installing helm3 $(SAFEHOSTPLATFORM)
+	@$(INFO) installing helm3 $(HELM_VERSION)
 	@mkdir -p $(TOOLS_HOST_DIR)/tmp-helm3
 	@curl -fsSL https://get.helm.sh/helm-$(HELM3_VERSION)-$(SAFEHOSTPLATFORM).tar.gz | tar -xz -C $(TOOLS_HOST_DIR)/tmp-helm3
 	@mv $(TOOLS_HOST_DIR)/tmp-helm3/$(SAFEHOSTPLATFORM)/helm $(HELM3)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-helm3
-	@$(OK) installing helm3 $(SAFEHOSTPLATFORM)
+	@$(OK) installing helm3 $(HELM_VERSION)
