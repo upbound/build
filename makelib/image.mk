@@ -281,8 +281,8 @@ help-special: img.help
 # tools
 
 $(MANIFEST_TOOL):
-	@$(INFO) installing manifest-tool $(HOST_PLATFORM)
+	@$(INFO) installing manifest-tool $(MANIFEST_TOOL_VERSION)
 	@mkdir -p $(TOOLS_HOST_DIR) || $(FAIL)
 	@curl -fsSL https://github.com/estesp/manifest-tool/releases/download/$(MANIFEST_TOOL_VERSION)/manifest-tool-$(HOSTOS)-$(SAFEHOSTARCH) > $@ || $(FAIL)
 	@chmod +x $@ || $(FAIL)
-	@$(OK) installing manifest-tool $(HOST_PLATFORM)
+	@$(OK) installing manifest-tool $(MANIFEST_TOOL_VERSION)
