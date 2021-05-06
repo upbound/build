@@ -73,8 +73,9 @@ DEBUG ?= 0
 # ====================================================================================
 # Releae Options
 
+# TODO(hasheddan): change default to main and remove master as valid option.
 CHANNEL ?= master
-ifeq ($(filter master alpha beta stable,$(CHANNEL)),)
+ifeq ($(filter master main alpha beta stable,$(CHANNEL)),)
 $(error invalid channel $(CHANNEL))
 endif
 
@@ -440,7 +441,7 @@ Release Targets:
 
 Release Options:
     VERSION      The version information for binaries and releases.
-    CHANNEL      Sets the release channel. Can be set to master, alpha, beta, or stable.
+    CHANNEL      Sets the release channel. Can be set to master, main, alpha, beta, or stable.
 
 endef
 export HELPTEXT
