@@ -71,7 +71,7 @@ endif
 DEBUG ?= 0
 
 # ====================================================================================
-# Releae Options
+# Release Options
 
 # TODO(hasheddan): change default to main and remove master as valid option.
 CHANNEL ?= master
