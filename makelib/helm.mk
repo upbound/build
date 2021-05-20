@@ -68,7 +68,7 @@ HELM_CHART_VERSION := $(VERSION:v%=%)
 $(HELM_HOME): $(HELM)
 	@mkdir -p $(HELM_HOME)
 	@if [ "$(USE_HELM3)" == "false" ]; then \
-		$(HELM) init -c; \
+		$(HELM) init -c --stable-repo-url=https://charts.helm.sh/stable; \
 	fi
 
 $(HELM_OUTPUT_DIR):
