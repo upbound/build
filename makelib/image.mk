@@ -31,12 +31,12 @@ endif
 # supported platform.
 ifeq ($(origin OSBASEIMAGE),undefined)
 OSBASE ?= alpine:3.13
-ifeq ($(ARCH),$(filter $(ARCH),amd64 ppc64le))
+ifeq ($(TARGETARCH),$(filter $(TARGETARCH),amd64 ppc64le))
 OSBASEIMAGE = $(OSBASE)
-else ifeq ($(ARCH),arm64)
+else ifeq ($(TARGETARCH),arm64)
 OSBASEIMAGE = arm64v8/$(OSBASE)
 else
-$(error unsupported architecture $(ARCH))
+$(error unsupported architecture $(TARGETARCH))
 endif
 endif
 
@@ -235,8 +235,9 @@ clean: img.clean img.release.clean
 
 publish.init: img.release.build
 
-# only publish images for master and release branches
-ifneq ($(filter master release-%,$(BRANCH_NAME)),)
+# only publish images for main / master and release branches
+# TODO(hasheddan): remove master and support overriding
+ifneq ($(filter main master release-%,$(BRANCH_NAME)),)
 publish.artifacts: $(addprefix img.release.manifest.publish.,$(IMAGES))
 endif
 
@@ -280,8 +281,8 @@ help-special: img.help
 # tools
 
 $(MANIFEST_TOOL):
-	@$(INFO) installing manifest-tool $(HOST_PLATFORM)
+	@$(INFO) installing manifest-tool $(MANIFEST_TOOL_VERSION)
 	@mkdir -p $(TOOLS_HOST_DIR) || $(FAIL)
-	@curl -fsSL https://github.com/estesp/manifest-tool/releases/download/$(MANIFEST_TOOL_VERSION)/manifest-tool-$(HOSTOS)-$(HOSTARCH) > $@ || $(FAIL)
+	@curl -fsSL https://github.com/estesp/manifest-tool/releases/download/$(MANIFEST_TOOL_VERSION)/manifest-tool-$(HOSTOS)-$(SAFEHOSTARCH) > $@ || $(FAIL)
 	@chmod +x $@ || $(FAIL)
-	@$(OK) installing manifest-tool $(HOST_PLATFORM)
+	@$(OK) installing manifest-tool $(MANIFEST_TOOL_VERSION)

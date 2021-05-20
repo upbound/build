@@ -62,6 +62,7 @@ export BUILD_HELM_CHARTS_LIST=$(HELM_CHARTS)
 export BUILD_REGISTRIES=$(REGISTRIES)
 export BUILD_IMAGES=$(IMAGES)
 export BUILD_IMAGE_ARCHS=$(subst linux_,,$(filter linux_%,$(BUILD_PLATFORMS)))
+export TARGETARCH
 
 # Install gomplate
 GOMPLATE_VERSION := 3.7.0
@@ -73,10 +74,10 @@ gomplate.buildvars:
 build.vars: gomplate.buildvars
 
 $(GOMPLATE):
-	@$(INFO) installing gomplate $(HOSTOS)-$(HOSTARCH)
-	@curl -fsSLo $(GOMPLATE) https://github.com/hairyhenderson/gomplate/releases/download/v$(GOMPLATE_VERSION)/gomplate_$(HOSTOS)-$(HOSTARCH) || $(FAIL)
+	@$(INFO) installing gomplate $(SAFEHOSTPLATFORM)
+	@curl -fsSLo $(GOMPLATE) https://github.com/hairyhenderson/gomplate/releases/download/v$(GOMPLATE_VERSION)/gomplate_$(SAFEHOSTPLATFORM) || $(FAIL)
 	@chmod +x $(GOMPLATE)
-	@$(OK) installing gomplate $(HOSTOS)-$(HOSTARCH)
+	@$(OK) installing gomplate $(SAFEHOSTPLATFORM)
 
 kind.up: $(KIND)
 	@$(INFO) kind up
