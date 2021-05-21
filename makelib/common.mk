@@ -127,11 +127,7 @@ TARGETARCH := amd64
 endif
 
 ifeq ($(filter amd64 arm64 ppc64le ,$(SAFEHOSTARCH)),)
-$(error build only supported on amd64 and arm64 host currently)
-endif
-
-ifeq ($(HOSTARCH),ppc64le)
-		PLATFORMS = linux_ppc64le
+$(error build only supported on amd64, arm64 and ppc64le host currently)
 endif
 
 # Standardize Host Platform variables
