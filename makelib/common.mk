@@ -126,8 +126,8 @@ SAFEHOSTARCH := amd64
 TARGETARCH := amd64
 endif
 
-ifeq ($(filter amd64 arm64 ,$(SAFEHOSTARCH)),)
-$(error build only supported on amd64 and arm64 host currently)
+ifeq ($(filter amd64 arm64 ppc64le ,$(SAFEHOSTARCH)),)
+$(error build only supported on amd64, arm64 and ppc64le host currently)
 endif
 
 # Standardize Host Platform variables
