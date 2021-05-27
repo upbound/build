@@ -409,7 +409,16 @@ promote:
 # tag a release
 tag: release.tag
 
-.PHONY: publish.init publish.artifacts publish promote.init promote.artifacts promote tag
+# run code generation
+generate: ; @:
+
+# prepare for code review
+reviewable:
+	@$(MAKE) generate
+	@$(MAKE) lint
+	@$(MAKE) test
+
+.PHONY: publish.init publish.artifacts publish promote.init promote.artifacts promote tag generate reviewable
 
 # ====================================================================================
 # Help
@@ -426,6 +435,8 @@ Common Targets:
     help         Show this help info.
     test         Runs unit tests.
     e2e          Runs end-to-end integration tests.
+	generate     Run code generation.
+	reviewable   Validate that a PR is ready for review.
 
 Common Options:
     DEBUG        Whether to generate debug symbols. Default is 0.
