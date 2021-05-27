@@ -418,7 +418,13 @@ reviewable:
 	@$(MAKE) lint
 	@$(MAKE) test
 
-.PHONY: publish.init publish.artifacts publish promote.init promote.artifacts promote tag generate reviewable
+# ensure reviewable target doesn't create a diff
+check-diff: reviewable
+	@$(INFO) checking that branch is clean
+	@test -z "$(shell git status --porcelain)"" || $(FAIL)
+	@$(OK) branch is clean
+
+.PHONY: publish.init publish.artifacts publish promote.init promote.artifacts promote tag generate reviewable check-diff
 
 # ====================================================================================
 # Help
@@ -437,6 +443,7 @@ Common Targets:
     e2e          Runs end-to-end integration tests.
 	generate     Run code generation.
 	reviewable   Validate that a PR is ready for review.
+	check-diff   Ensure the reviewable target doesn't create a git diff.
 
 Common Options:
     DEBUG        Whether to generate debug symbols. Default is 0.
