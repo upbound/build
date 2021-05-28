@@ -290,6 +290,8 @@ lint.init: go.init
 lint.run: go.lint
 test.init: go.init
 test.run: go.test.unit
+generate.init: go.init
+generate.run: go.generate
 
 # ====================================================================================
 # Special Targets
@@ -302,7 +304,6 @@ vendor: go.vendor
 vendor.check: go.vendor.check
 vendor.update: go.vendor.update
 vet: go.vet
-generate codegen: go.generate
 
 define GO_HELPTEXT
 Go Targets:

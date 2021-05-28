@@ -410,7 +410,14 @@ promote:
 tag: release.tag
 
 # run code generation
-generate: ; @:
+generate.init: ; @:
+generate.run: ; @:
+generate.done: ; @:
+
+generate:
+	@$(MAKE) generate.init
+	@$(MAKE) generate.run
+	@$(MAKE) generate.done
 
 # prepare for code review
 reviewable:

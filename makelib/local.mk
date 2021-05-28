@@ -159,7 +159,6 @@ vendor: go.vendor
 vendor.check: go.vendor.check
 vendor.update: go.vendor.update
 vet: go.vet
-generate codegen: go.generate
 
 define LOCAL_HELPTEXT
 Local Targets:
