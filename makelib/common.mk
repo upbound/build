@@ -425,8 +425,8 @@ reviewable:
 	@$(MAKE) lint
 	@$(MAKE) test
 
-# ensure reviewable target doesn't create a diff
-check-diff: reviewable
+# ensure generate target doesn't create a diff
+check-diff: generate
 	@$(INFO) checking that branch is clean
 	@test -z "$(shell git status --porcelain)" || $(FAIL)
 	@$(OK) branch is clean
