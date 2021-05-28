@@ -269,7 +269,9 @@ go.generate:
 	@$(INFO) go generate $(PLATFORM)
 	@CGO_ENABLED=0 $(GOHOST) generate $(GO_GENERATE_FLAGS) $(GO_PACKAGES) $(GO_INTEGRATION_TEST_PACKAGES) || $(FAIL)
 	@$(OK) go generate $(PLATFORM)
-
+	@$(INFO) go mod tidy
+	@$(GOHOST) mod tidy || $(FAIL)
+	@$(OK) go mod tidy
 
 .PHONY: go.init go.build go.install go.test.unit go.test.integration go.test.codecov go.lint go.vet go.fmt go.generate
 .PHONY: go.validate go.vendor.lite go.vendor go.vendor.check go.vendor.update go.clean go.distclean
@@ -286,6 +288,8 @@ lint.init: go.init
 lint.run: go.lint
 test.init: go.init
 test.run: go.test.unit
+generate.init: go.init
+generate.run: go.generate
 
 # ====================================================================================
 # Special Targets
@@ -298,7 +302,6 @@ vendor: go.vendor
 vendor.check: go.vendor.check
 vendor.update: go.vendor.update
 vet: go.vet
-generate codegen: go.generate
 
 define GO_HELPTEXT
 Go Targets:

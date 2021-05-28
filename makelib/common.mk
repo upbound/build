@@ -409,7 +409,29 @@ promote:
 # tag a release
 tag: release.tag
 
-.PHONY: publish.init publish.artifacts publish promote.init promote.artifacts promote tag
+# run code generation
+generate.init: ; @:
+generate.run: ; @:
+generate.done: ; @:
+
+generate:
+	@$(MAKE) generate.init
+	@$(MAKE) generate.run
+	@$(MAKE) generate.done
+
+# prepare for code review
+reviewable:
+	@$(MAKE) generate
+	@$(MAKE) lint
+	@$(MAKE) test
+
+# ensure generate target doesn't create a diff
+check-diff: generate
+	@$(INFO) checking that branch is clean
+	@test -z "$(shell git status --porcelain)" || $(FAIL)
+	@$(OK) branch is clean
+
+.PHONY: publish.init publish.artifacts publish promote.init promote.artifacts promote tag generate reviewable check-diff
 
 # ====================================================================================
 # Help
@@ -426,6 +448,9 @@ Common Targets:
     help         Show this help info.
     test         Runs unit tests.
     e2e          Runs end-to-end integration tests.
+    generate     Run code generation.
+    reviewable   Validate that a PR is ready for review.
+    check-diff   Ensure the reviewable target doesn't create a git diff.
 
 Common Options:
     DEBUG        Whether to generate debug symbols. Default is 0.
