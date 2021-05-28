@@ -428,7 +428,7 @@ reviewable:
 # ensure reviewable target doesn't create a diff
 check-diff: reviewable
 	@$(INFO) checking that branch is clean
-	@test -z "$(shell git status --porcelain)"" || $(FAIL)
+	@test -z "$(shell git status --porcelain)" || $(FAIL)
 	@$(OK) branch is clean
 
 .PHONY: publish.init publish.artifacts publish promote.init promote.artifacts promote tag generate reviewable check-diff
