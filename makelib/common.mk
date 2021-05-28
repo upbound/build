@@ -448,9 +448,9 @@ Common Targets:
     help         Show this help info.
     test         Runs unit tests.
     e2e          Runs end-to-end integration tests.
-	generate     Run code generation.
-	reviewable   Validate that a PR is ready for review.
-	check-diff   Ensure the reviewable target doesn't create a git diff.
+    generate     Run code generation.
+    reviewable   Validate that a PR is ready for review.
+    check-diff   Ensure the reviewable target doesn't create a git diff.
 
 Common Options:
     DEBUG        Whether to generate debug symbols. Default is 0.
