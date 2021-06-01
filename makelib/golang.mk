@@ -79,6 +79,7 @@ DEP_VERSION=v0.5.1
 DEP := $(TOOLS_HOST_DIR)/dep-$(DEP_VERSION)
 GOJUNIT := $(TOOLS_HOST_DIR)/go-junit-report
 GOCOVER_COBERTURA := $(TOOLS_HOST_DIR)/gocover-cobertura
+GOIMPORTS := $(TOOLS_HOST_DIR)/goimports
 
 GO := go
 GOHOST := GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) go
@@ -351,6 +352,13 @@ $(GOFMT):
 	@mv $(TOOLS_HOST_DIR)/tmp-fmt/go/bin/gofmt $(GOFMT) || $(FAIL)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-fmt
 	@$(OK) installing gofmt$(GOFMT_VERSION)
+
+$(GOIMPORTS):
+	@$(INFO) installing goimports
+	@mkdir -p $(TOOLS_HOST_DIR)/tmp-goimports || $(FAIL)
+	@GO111MODULE=off GOPATH=$(TOOLS_HOST_DIR)/tmp-goimports GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) get golang.org/x/tools/cmd/goimports || rm -fr $(TOOLS_HOST_DIR)/tmp-goimports || $(FAIL)
+	@rm -fr $(TOOLS_HOST_DIR)/tmp-goimports
+	@$(OK) installing goimports
 
 $(GOJUNIT):
 	@$(INFO) installing go-junit-report
