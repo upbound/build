@@ -25,15 +25,15 @@ ISTIO_DOWNLOAD_TUPLE := osx
 endif
 
 # the version of kind to use
-KIND_VERSION ?= v0.9.0
+KIND_VERSION ?= v0.11.0
 KIND := $(TOOLS_HOST_DIR)/kind-$(KIND_VERSION)
 
 # the version of kubectl to use
-KUBECTL_VERSION ?= v1.17.11
+KUBECTL_VERSION ?= v1.21.11
 KUBECTL := $(TOOLS_HOST_DIR)/kubectl-$(KUBECTL_VERSION)
 
 # the version of kustomize to use
-KUSTOMIZE_VERSION ?= v3.3.0
+KUSTOMIZE_VERSION ?= v4.1.3
 KUSTOMIZE := $(TOOLS_HOST_DIR)/kustomize-$(KUSTOMIZE_VERSION)
 
 # the version of olm-bundle to use
@@ -42,7 +42,7 @@ OLMBUNDLE := $(TOOLS_HOST_DIR)/olm-bundle-$(OLMBUNDLE_VERSION)
 
 # the version of helm 3 to use
 USE_HELM3 ?= false
-HELM3_VERSION ?= v3.5.3
+HELM3_VERSION ?= v3.6.0
 HELM3 := $(TOOLS_HOST_DIR)/helm-$(HELM3_VERSION)
 
 # If we enable HELM3 we alias HELM to be HELM3
@@ -50,7 +50,7 @@ ifeq ($(USE_HELM3),true)
 HELM_VERSION ?= $(HELM3_VERSION)
 HELM := $(HELM3)
 else
-HELM_VERSION ?= v2.16.7
+HELM_VERSION ?= v2.17.0
 HELM := $(TOOLS_HOST_DIR)/helm-$(HELM_VERSION)
 endif
 
