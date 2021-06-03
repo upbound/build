@@ -29,7 +29,7 @@ KIND_VERSION ?= v0.11.0
 KIND := $(TOOLS_HOST_DIR)/kind-$(KIND_VERSION)
 
 # the version of kubectl to use
-KUBECTL_VERSION ?= v1.21.11
+KUBECTL_VERSION ?= v1.21.1
 KUBECTL := $(TOOLS_HOST_DIR)/kubectl-$(KUBECTL_VERSION)
 
 # the version of kustomize to use
