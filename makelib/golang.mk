@@ -281,7 +281,6 @@ go.generate:
 # Common Targets
 
 build.init: go.init
-build.check: go.lint
 build.code.platform: go.build
 clean: go.clean
 distclean: go.distclean
