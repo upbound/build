@@ -105,6 +105,13 @@ endif
 # Set the host's arch.
 HOSTARCH := $(shell uname -m)
 
+# Set safe architectures for supported OSes (darwin and linux).
+# Apple Silicon binaries are not widely available yet
+ifeq ($(HOSTOS),darwin)
+SAFEHOSTARCH := amd64
+TARGETARCH := $(HOSTARCH)
+endif
+
 # If SAFEHOSTARCH and TARGETARCH have not been defined yet, use HOST
 ifeq ($(origin SAFEHOSTARCH),undefined)
 SAFEHOSTARCH := $(HOSTARCH)
