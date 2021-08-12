@@ -84,6 +84,11 @@ $(HELM_OUTPUT_DIR)/$(1)-$(HELM_CHART_VERSION).tgz: $(HELM_HOME) $(HELM_OUTPUT_DI
 	fi
 	@$(OK) helm package $(1) $(HELM_CHART_VERSION)
 
+helm.repo.add:
+ifdef INTERNAL_MUSEUM_URL
+	@$(HELM) repo add $(INTERNAL_MUSEUM_NAME) $(INTERNAL_MUSEUM_URL) --username $(INTERNAL_MUSEUM_USER) --password $(INTERNAL_MUSEUM_PASS)
+endif
+
 helm.prepare.$(1): $(HELM_HOME)
 	@cp -f $(HELM_CHARTS_DIR)/$(1)/values.yaml.tmpl $(HELM_CHARTS_DIR)/$(1)/values.yaml
 	@cd $(HELM_CHARTS_DIR)/$(1) && $(SED_CMD) 's|%%VERSION%%|$(VERSION)|g' values.yaml
@@ -159,7 +164,7 @@ $(foreach p,$(HELM_CHARTS),$(eval $(call museum.upload,$(p))))
 # ====================================================================================
 # Common Targets
 
-build.init: helm.prepare helm.lint
+build.init: helm.repo.add helm.prepare helm.lint
 build.check: helm.dep
 build.artifacts: helm.build
 clean: helm.clean
