@@ -27,6 +27,10 @@ ifndef DOCS_GIT_REPO
 $(error DOCS_GIT_REPO must be defined)
 endif
 
+# Optional. If false the publish step will remove this version from the
+# documentation repository.
+DOCS_VERSION_ACTIVE ?= true
+
 DOCS_VERSION := $(shell echo "$(BRANCH_NAME)" | sed -E "s/^release\-([0-9]+)\.([0-9]+)$$/v\1.\2/g")
 DOCS_WORK_DIR := $(WORK_DIR)/docs-repo
 DOCS_VERSION_DIR := $(DOCS_WORK_DIR)/$(DEST_DOCS_DIR)/$(DOCS_VERSION)
@@ -39,7 +43,11 @@ docs.publish:
 	mkdir -p $(DOCS_WORK_DIR)
 	git clone --depth=1 -b master $(DOCS_GIT_REPO) $(DOCS_WORK_DIR)
 	rm -rf $(DOCS_VERSION_DIR)
-	cp -r $(SOURCE_DOCS_DIR)/ $(DOCS_VERSION_DIR)
+	@if [ "$(DOCS_VERSION_ACTIVE)" == "true" ]; then \
+		$(INFO) Including version in documentation ; \
+		cp -r $(SOURCE_DOCS_DIR)/ $(DOCS_VERSION_DIR); \
+		$(OK) Version included in documentation ; \
+	fi
 	cd $(DOCS_WORK_DIR) && DOCS_VERSION=$(DOCS_VERSION) $(MAKE) publish
 
 # ====================================================================================
