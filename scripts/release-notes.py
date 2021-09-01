@@ -3,7 +3,15 @@ import re
 import time
 import urllib.request
 from html.parser import HTMLParser
+import argparse
 
+flags = argparse.ArgumentParser(description='Print draft release notes.')
+flags.add_argument('release',
+                       metavar='release',
+                       type=str,
+                       help='name of the release branch')
+flags.add_argument('--main', default='main', type=str, help='name of the main branch')
+args = flags.parse_args()
 
 class TitleParser(HTMLParser):
     def __init__(self, titleSet):
@@ -20,13 +28,19 @@ class TitleParser(HTMLParser):
             self.match = False
 
 
-stream = os.popen('git log --left-right --graph --cherry-pick --oneline master...upstream/release-1.3')
+stream = os.popen(f'git log --left-right --graph --cherry-pick --oneline {args.main}...{args.release}')
 output = stream.read()
 
 regexp = re.findall("Merge pull request #[0-9]+", output)
 nums = set()
 for num in regexp:
     nums.add(num.split("#")[1])
+
+sorted = []
+for num in nums:
+    sorted.append(num)
+
+sorted.sort()
 
 for num in nums:
     req = urllib.request.urlopen(f'https://github.com/crossplane/crossplane/pull/{num}')
