@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import os
 import re
 import time
@@ -7,11 +10,15 @@ import argparse
 
 flags = argparse.ArgumentParser(description='Print draft release notes.')
 flags.add_argument('release',
-                       metavar='release',
-                       type=str,
-                       help='name of the release branch')
-flags.add_argument('--main', default='main', type=str, help='name of the main branch')
+                   metavar='release',
+                   type=str,
+                   help='name of the release branch')
+flags.add_argument('--main',
+                   default='main',
+                   type=str,
+                   help='name of the main branch')
 args = flags.parse_args()
+
 
 class TitleParser(HTMLParser):
     def __init__(self, titleSet):
@@ -34,7 +41,7 @@ output = stream.read()
 regexp = re.findall("Merge pull request #[0-9]+", output)
 nums = set()
 for num in regexp:
-    nums.add(num.split("#")[1])
+    nums.add(int(num.split("#")[1]))
 
 sorted = []
 for num in nums:
@@ -55,6 +62,3 @@ for num in nums:
     print(f'* #{num} - {titleWithUser}')
     req.close()
     time.sleep(1)
-
-
-

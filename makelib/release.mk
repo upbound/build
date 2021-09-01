@@ -15,13 +15,19 @@
 # ====================================================================================
 # Targets
 
+# You can use branch, tag or commit id for BASE and RELEASE here.
+BASE ?= main
+RELEASE ?= $(BRANCH_NAME)
+
 release.notes:
-	python build/scripts/release-notes.py --main master
+	@$(INFO) printing release notes for $(RELEASE) against $(BASE)
+	@python3 build/scripts/release-notes.py $(RELEASE) --main $(BASE)
+	@$(OK) printing release notes for $(RELEASE) against $(BASE)
 
 # ====================================================================================
 # Common Targets
 
 # build release notes only for release branches
-ifneq ($(filter release-%,$(BRANCH_NAME)),)
+ifneq ($(filter release-%,$(RELEASE)),)
 publish.artifacts: release.notes
 endif
