@@ -113,7 +113,7 @@ endif
 ifeq ($(RUNNING_IN_CI),true)
 # Output checkstyle XML rather than human readable output.
 # the timeout is increased to 10m, to accommodate CI machines with low resources.
-GO_LINT_ARGS := --timeout 10m0s --out-format=checkstyle > $(GO_LINT_OUTPUT)/checkstyle.xml
+GO_LINT_ARGS += --timeout 10m0s --out-format=checkstyle > $(GO_LINT_OUTPUT)/checkstyle.xml
 endif
 
 # NOTE: the install suffixes are matched with the build container to speed up the
