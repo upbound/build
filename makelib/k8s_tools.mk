@@ -29,7 +29,7 @@ KIND_VERSION ?= v0.11.1
 KIND := $(TOOLS_HOST_DIR)/kind-$(KIND_VERSION)
 
 # the version of kubectl to use
-KUBECTL_VERSION ?= v1.17.11
+KUBECTL_VERSION ?= v1.22.2
 KUBECTL := $(TOOLS_HOST_DIR)/kubectl-$(KUBECTL_VERSION)
 
 # the version of kustomize to use
@@ -42,7 +42,7 @@ OLMBUNDLE := $(TOOLS_HOST_DIR)/olm-bundle-$(OLMBUNDLE_VERSION)
 
 # the version of helm 3 to use
 USE_HELM3 ?= false
-HELM3_VERSION ?= v3.5.3
+HELM3_VERSION ?= v3.7.1
 HELM3 := $(TOOLS_HOST_DIR)/helm-$(HELM3_VERSION)
 
 # If we enable HELM3 we alias HELM to be HELM3
@@ -50,7 +50,7 @@ ifeq ($(USE_HELM3),true)
 HELM_VERSION ?= $(HELM3_VERSION)
 HELM := $(HELM3)
 else
-HELM_VERSION ?= v2.16.7
+HELM_VERSION ?= v2.17.0
 HELM := $(TOOLS_HOST_DIR)/helm-$(HELM_VERSION)
 endif
 
