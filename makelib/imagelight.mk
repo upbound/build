@@ -153,7 +153,7 @@ img.release.publish: img.release.publish.$(1).$(2)
 
 img.release.promote.$(1).$(2):
 	@$(MAKE) -C $(IMAGE_DIR)/$(2) TO_IMAGE=$(1)/$(2):$(CHANNEL) FROM_IMAGE=$(1)/$(2):$(VERSION) img.promote
-	@[ "$(CHANNEL)" = "master" ] || @$(MAKE) -C $(IMAGE_DIR)/$(2) TO_IMAGE=$(1)/$(2):$(VERSION)-$(CHANNEL) FROM_IMAGE=$(1)/$(2):$(VERSION) img.promote
+	@[ "$(CHANNEL)" = "master" ] || $(MAKE) -C $(IMAGE_DIR)/$(2) TO_IMAGE=$(1)/$(2):$(VERSION)-$(CHANNEL) FROM_IMAGE=$(1)/$(2):$(VERSION) img.promote
 img.release.promote: img.release.promote.$(1).$(2)
 
 img.release.clean.$(1).$(2):
