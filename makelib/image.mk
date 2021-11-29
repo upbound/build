@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+# DEPRECATED: this module has been replaced by imagelight.mk and may be removed
+# in the future.
+
 # ====================================================================================
 # Options
 
@@ -259,6 +263,8 @@ endif
 prune: img.prune
 
 define IMAGE_HELPTEXT
+DEPRECATED: this module has been replaced by imagelight.mk and may be removed in the future. 
+
 Image Targets:
     prune        Prune orphaned and cached images.
 
