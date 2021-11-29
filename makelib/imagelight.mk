@@ -35,30 +35,6 @@ ifeq ($(origin BUILD_REGISTRY), undefined)
 BUILD_REGISTRY := build-$(shell echo $(HOSTNAME)-$(ROOT_DIR) | shasum -a 256 | cut -c1-8)
 endif
 
-# In order to reduce built time especially on jenkins, we maintain a cache
-# of already built images. This cache contains images that can be used to help speed
-# future docker build commands using docker's content addressable schemes.
-# All cached images go in in a 'cache/' local registry and we follow an MRU caching
-# policy -- keeping images that have been referenced around and evicting images
-# that have to been referenced in a while (and according to a policy). Note we can
-# not rely on the image's .CreatedAt date since docker only updates then when the
-# image is created and not referenced. Instead we keep a date in the Tag.
-CACHE_REGISTRY := cache
-
-# prune images that are at least this many hours old
-PRUNE_HOURS ?= 48
-
-# prune keeps at least this many images regardless of how old they are
-PRUNE_KEEP ?= 24
-
-# don't actually prune just show what prune would do.
-PRUNE_DRYRUN ?= 0
-
-# the cached image format
-CACHE_DATE_FORMAT := "%Y-%m-%d.%H%M%S"
-CACHE_PRUNE_DATE := $(shell export TZ="UTC+$(PRUNE_HOURS)"; date +"$(CACHE_DATE_FORMAT)")
-CACHE_TAG := $(shell date -u +"$(CACHE_DATE_FORMAT)")
-
 REGISTRY_ORGS ?= docker.io
 IMAGE_ARCHS := $(subst linux_,,$(filter linux_%,$(PLATFORMS)))
 IMAGE_PLATFORMS := $(subst _,/,$(subst $(SPACE),$(COMMA),$(filter linux_%,$(PLATFORMS))))
@@ -101,49 +77,6 @@ img.clean:
 
 img.done:
 	@rm -fr $(IMAGE_TEMP_DIR)
-
-img.cache:
-	@for i in $(CACHE_IMAGES); do \
-		IMGID=$$(docker images -q $$i); \
-		if [ -n "$$IMGID" ]; then \
-			echo === caching image $$i; \
-			CACHE_IMAGE=$(CACHE_REGISTRY)/$${i#*/}; \
-			docker tag $$i $${CACHE_IMAGE}:$(CACHE_TAG); \
-			for r in $$(docker images --format "{{.ID}}#{{.Repository}}:{{.Tag}}" | grep $$IMGID | grep $(CACHE_REGISTRY)/ | grep -v $${CACHE_IMAGE}:$(CACHE_TAG)); do \
-				docker rmi $${r#*#} > /dev/null 2>&1 || true; \
-			done; \
-		fi; \
-	done
-
-# prune removes old cached images
-img.prune:
-	@$(INFO) pruning images older than $(PRUNE_HOURS) keeping a minimum of $(PRUNE_KEEP) images
-	@EXPIRED=$$(docker images --format "{{.Tag}}#{{.Repository}}:{{.Tag}}" \
-		| grep -E '$(CACHE_REGISTRY)/' \
-		| sort -r \
-		| awk -v i=0 -v cd="$(CACHE_PRUNE_DATE)" -F  "#" '{if ($$1 <= cd && i >= $(PRUNE_KEEP)) print $$2; i++ }') &&\
-	for i in $$EXPIRED; do \
-		echo removing expired cache image $$i; \
-		[ $(PRUNE_DRYRUN) = 1 ] || docker rmi $$i > /dev/null 2>&1 || true; \
-	done
-	@for i in $$(docker images -q -f dangling=true); do \
-		echo removing dangling image $$i; \
-		docker rmi $$i > /dev/null 2>&1 || true; \
-	done
-	@$(OK) pruning
-
-debug.nuke:
-	@for c in $$(docker ps -a -q --no-trunc); do \
-		if [ "$$c" != "$(SELF_CID)" ]; then \
-			echo stopping and removing container $${c}; \
-			docker stop $${c}; \
-			docker rm $${c}; \
-		fi; \
-	done
-	@for i in $$(docker images -q); do \
-		echo removing image $$i; \
-		docker rmi -f $$i > /dev/null 2>&1; \
-	done
 
 # 1: registry 2: image
 define repo.targets
@@ -188,27 +121,3 @@ publish.artifacts: $(foreach r,$(REGISTRY_ORGS), $(foreach i,$(IMAGES),img.relea
 endif
 
 promote.artifacts: $(foreach r,$(REGISTRY_ORGS), $(foreach i,$(IMAGES),img.release.promote.$(r).$(i)))
-
-# ====================================================================================
-# Special Targets
-
-prune: img.prune
-
-define IMAGE_HELPTEXT
-Image Targets:
-    prune        Prune orphaned and cached images.
-
-Image Options:
-    PRUNE_HOURS  The number of hours from when an image is last used for it to be
-                 considered a target for pruning. Default is 48 hrs.
-    PRUNE_KEEP   The minimum number of cached images to keep. Default is 24 images.
-
-endef
-export IMAGE_HELPTEXT
-
-img.help:
-	@echo "$$IMAGE_HELPTEXT"
-
-help-special: img.help
-
-.PHONY: prune img.help
