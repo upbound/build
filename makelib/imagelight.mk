@@ -111,7 +111,7 @@ build.artifacts.platform: do.build.images
 else
 build.artifacts.platform: do.skip.images
 endif
-build.done: img.cache img.done
+build.done: img.done
 clean: img.clean img.release.clean
 
 # only publish images for main / master and release branches
