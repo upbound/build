@@ -57,8 +57,12 @@ if [ -n "${LOCAL_DEV_REPOS}" ]; then
   repositories_arr=($LOCAL_DEV_REPOS)
   for i in ${repositories_arr[@]+"${repositories_arr[@]}"}; do
 
+    IFS='@' read -ra repo_and_branch <<< "${i}"
+    repo="${repo_and_branch[0]}"
+    branch="${repo_and_branch[1]:-}"
+
     local_repo=$(basename $(git config --get remote.origin.url) .git)
-    base_repo=$(basename "${i}" .git)
+    base_repo=$(basename "${repo}" .git)
 
     if [ "${LOCALDEV_LOCAL_BUILD}" == "true" ] && [ "${base_repo}" == "${local_repo}" ]; then
       # if it is a local build and repo is the local one, just use local config
