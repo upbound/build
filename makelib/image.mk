@@ -52,7 +52,7 @@ ifeq ($(origin BUILD_REGISTRY), undefined)
 BUILD_REGISTRY := build-$(shell echo $(HOSTNAME)-$(ROOT_DIR) | shasum -a 256 | cut -c1-8)
 endif
 
-MANIFEST_TOOL_VERSION=v0.7.0
+MANIFEST_TOOL_VERSION=v1.0.3
 MANIFEST_TOOL := $(TOOLS_HOST_DIR)/manifest-tool-$(MANIFEST_TOOL_VERSION)
 
 # In order to reduce built time especially on jenkins, we maintain a cache
