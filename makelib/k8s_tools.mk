@@ -40,6 +40,10 @@ KUSTOMIZE := $(TOOLS_HOST_DIR)/kustomize-$(KUSTOMIZE_VERSION)
 OLMBUNDLE_VERSION ?= v0.4.0
 OLMBUNDLE := $(TOOLS_HOST_DIR)/olm-bundle-$(OLMBUNDLE_VERSION)
 
+# the version of up to use
+UP_VERSION ?= v0.10.0
+UP := $(TOOLS_HOST_DIR)/up-$(UP_VERSION)
+
 # the version of helm 3 to use
 USE_HELM3 ?= false
 HELM3_VERSION ?= v3.7.1
@@ -108,6 +112,13 @@ $(OLMBUNDLE):
 	@curl -fsSLo $(OLMBUNDLE) https://github.com/upbound/olm-bundle/releases/download/$(OLMBUNDLE_VERSION)/olm-bundle_$(SAFEHOSTPLATFORM) || $(FAIL)
 	@chmod +x $(OLMBUNDLE)
 	@$(OK) installing olm-bundle $(OLMBUNDLE_VERSION)
+
+# up download and install
+$(UP):
+	@$(INFO) installing up $(UP_VERSION)
+	@curl -fsSLo $(UP) https://cli.upbound.io/stable/$(UP_VERSION)/bin/$(SAFEHOST_PLATFORM)/up?source=build || $(FAIL)
+	@chmod +x $(UP)
+	@$(OK) installing up $(UP_VERSION)
 
 # helm download and install only if helm3 not enabled
 ifeq ($(USE_HELM3),false)
