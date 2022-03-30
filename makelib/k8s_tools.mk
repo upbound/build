@@ -65,6 +65,8 @@ k8s_tools.buildvars:
 	@echo KIND=$(KIND)
 	@echo KUBECTL=$(KUBECTL)
 	@echo KUSTOMIZE=$(KUSTOMIZE)
+	@echo OLM_BUNDLE=$(OLM_BUNDLE)
+	@echo UP=$(UP)
 	@echo HELM=$(HELM)
 	@echo HELM3=$(HELM3)
 
