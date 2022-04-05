@@ -126,6 +126,12 @@ SAFEHOSTARCH := amd64
 TARGETARCH := amd64
 endif
 
+# Automatically translate aarch64 to arm64
+ifeq ($(HOSTARCH),aarch64)
+SAFEHOSTARCH := arm64
+TARGETARCH := arm64
+endif
+
 ifeq ($(filter amd64 arm64 ppc64le ,$(SAFEHOSTARCH)),)
 $(error build only supported on amd64, arm64 and ppc64le host currently)
 endif
