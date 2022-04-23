@@ -27,6 +27,9 @@ ifeq ($(origin IMAGE_TEMP_DIR),undefined)
 IMAGE_TEMP_DIR := $(shell mktemp -d)
 endif
 
+# we don't support darwin os images and instead strictly target linux
+PLATFORM := $(subst darwin,linux,$(PLATFORM))
+
 # a registry that is scoped to the current build tree on this host. this enables
 # us to have isolation between concurrent builds on the same system, as in the case
 # of multiple working directories or on a CI system with multiple executors. All images
