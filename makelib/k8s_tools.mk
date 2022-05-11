@@ -95,7 +95,7 @@ $(KIND):
 # kubectl download and install
 $(KUBECTL):
 	@$(INFO) installing kubectl $(KUBECTL_VERSION)
-	@curl -fsSLo $(KUBECTL) https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VERSION)/bin/$(HOSTOS)/$(SAFEHOSTARCH)/kubectl || $(FAIL)
+	@curl -fsSLo $(KUBECTL) --create-dirs https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VERSION)/bin/$(HOSTOS)/$(SAFEHOSTARCH)/kubectl || $(FAIL)
 	@chmod +x $(KUBECTL)
 	@$(OK) installing kubectl $(KUBECTL_VERSION)
 
@@ -118,7 +118,7 @@ $(OLMBUNDLE):
 # up download and install
 $(UP):
 	@$(INFO) installing up $(UP_VERSION)
-	@curl -fsSLo $(UP) https://cli.upbound.io/stable/$(UP_VERSION)/bin/$(SAFEHOST_PLATFORM)/up?source=build || $(FAIL)
+	@curl -fsSLo $(UP) --create-dirs https://cli.upbound.io/stable/$(UP_VERSION)/bin/$(SAFEHOST_PLATFORM)/up?source=build || $(FAIL)
 	@chmod +x $(UP)
 	@$(OK) installing up $(UP_VERSION)
 
