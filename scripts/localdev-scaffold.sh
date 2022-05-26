@@ -54,13 +54,13 @@ PARAM_FROM_COMPONENT_CONFIG="component-config"
 EOF
 
 echo "initiazing file ${local_config_dir}/${component}/pre-deploy.sh"
-cat << EOF > ${local_config_dir}/${component}/pre-install.sh
+cat << EOF > ${local_config_dir}/${component}/pre-deploy.sh
 # remove this file if the component does not need pre-deploy steps.
 echo "running pre-deploy script..."
 EOF
 
 echo "initiazing file ${local_config_dir}/${component}/post-deploy.sh"
-cat << EOF > ${local_config_dir}/${component}/post-install.sh
+cat << EOF > ${local_config_dir}/${component}/post-deploy.sh
 # remove this file if the component does not need post-deploy steps.
 echo "running post-deploy script..."
 EOF
