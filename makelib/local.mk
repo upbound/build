@@ -30,6 +30,12 @@ $(HELM_HOME): $(HELM)
 	@mkdir -p $(HELM_HOME)
 endif
 
+export BUILD_REGISTRIES=$(REGISTRIES)
+ifndef REGISTRIES
+	# To work with imagelight.mk
+	export BUILD_REGISTRIES=$(REGISTRY_ORGS)
+endif
+
 export KIND
 export KUBECTL
 export KUSTOMIZE
@@ -59,7 +65,6 @@ export LOCALDEV_LOCAL_BUILD
 export HELM_OUTPUT_DIR
 export BUILD_HELM_CHART_VERSION=$(HELM_CHART_VERSION)
 export BUILD_HELM_CHARTS_LIST=$(HELM_CHARTS)
-export BUILD_REGISTRIES=$(REGISTRIES)
 export BUILD_IMAGES=$(IMAGES)
 export BUILD_IMAGE_ARCHS=$(subst linux_,,$(filter linux_%,$(BUILD_PLATFORMS)))
 export TARGETARCH
