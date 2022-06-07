@@ -42,6 +42,7 @@ OLMBUNDLE := $(TOOLS_HOST_DIR)/olm-bundle-$(OLMBUNDLE_VERSION)
 
 # the version of up to use
 UP_VERSION ?= v0.10.0
+UP_CHANNEL ?= stable
 UP := $(TOOLS_HOST_DIR)/up-$(UP_VERSION)
 
 # the version of helm 3 to use
@@ -118,7 +119,7 @@ $(OLMBUNDLE):
 # up download and install
 $(UP):
 	@$(INFO) installing up $(UP_VERSION)
-	@curl -fsSLo $(UP) --create-dirs https://cli.upbound.io/stable/$(UP_VERSION)/bin/$(SAFEHOST_PLATFORM)/up?source=build || $(FAIL)
+	@curl -fsSLo $(UP) --create-dirs https://cli.upbound.io/$(UP_CHANNEL)/$(UP_VERSION)/bin/$(SAFEHOST_PLATFORM)/up?source=build || $(FAIL)
 	@chmod +x $(UP)
 	@$(OK) installing up $(UP_VERSION)
 
