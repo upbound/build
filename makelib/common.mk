@@ -213,7 +213,9 @@ ifeq ($(shell git tag),)
 VERSION := $(shell echo "v0.0.0-$$(git rev-list HEAD --count)-g$$(git describe --dirty --always)" | sed 's/-/./2' | sed 's/-/./2' | sed 's/-/./2')
 else
 # use tags
-VERSION := $(shell git describe --dirty --always --tags | sed 's/-/./2' | sed 's/-/./2' | sed 's/-/./2' )
+# set if you want to consider only the tags matching your glob, e.g. "aws/*".
+VERSION_TAG_MATCH ?= '*'
+VERSION := $(shell git describe --dirty --always --tags --match '$(VERSION_TAG_MATCH)' | sed 's|.*/||' | sed 's/-/./2' | sed 's/-/./2' | sed 's/-/./2')
 endif
 endif
 export VERSION
