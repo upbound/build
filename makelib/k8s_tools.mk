@@ -59,6 +59,15 @@ HELM_VERSION ?= v2.17.0
 HELM := $(TOOLS_HOST_DIR)/helm-$(HELM_VERSION)
 endif
 
+# the version of kuttl to use
+KUTTL_VERSION ?= 0.12.1
+KUTTL := $(TOOLS_HOST_DIR)/kuttl-$(KUTTL_VERSION)
+KUTTL_DOWNLOAD_TUPLE := $(HOSTARCH)
+# Translate amd64 to x86_64. Please see the releases page for reason of this translation: https://github.com/kudobuilder/kuttl/releases
+ifeq ($(KUTTL_DOWNLOAD_TUPLE),amd64)
+KUTTL_DOWNLOAD_TUPLE := x86_64
+endif
+
 # ====================================================================================
 # Common Targets
 
@@ -70,6 +79,7 @@ k8s_tools.buildvars:
 	@echo UP=$(UP)
 	@echo HELM=$(HELM)
 	@echo HELM3=$(HELM3)
+	@echo KUTTL=$(KUTTL)
 
 build.vars: k8s_tools.buildvars
 
@@ -142,3 +152,10 @@ $(HELM3):
 	@mv $(TOOLS_HOST_DIR)/tmp-helm3/$(SAFEHOSTPLATFORM)/helm $(HELM3)
 	@rm -fr $(TOOLS_HOST_DIR)/tmp-helm3
 	@$(OK) installing helm3 $(HELM_VERSION)
+
+# kuttl download and install
+$(KUTTL):
+	@$(INFO) installing kuttl $(KUTTL_VERSION)
+	@curl -fsSLo $(KUTTL) --create-dirs https://github.com/kudobuilder/kuttl/releases/download/v$(KUTTL_VERSION)/kubectl-kuttl_$(KUTTL_VERSION)_$(HOSTOS)_$(KUTTL_DOWNLOAD_TUPLE) || $(FAIL)
+	@chmod +x $(KUTTL)
+	@$(OK) installing kuttl $(KUTTL_VERSION)
