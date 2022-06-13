@@ -205,6 +205,13 @@ endif
 # ====================================================================================
 # Version and Tagging
 
+# set if you want to use tag grouping, e.g. setting it to "aws" would produce tags like "aws/v0.1.0" 
+# and release branch would be named as "release-aws-0.1" but the version would still be "v0.1.0".
+ifneq ($(PROJECT_VERSION_TAG_GROUP),)
+VERSION_TAG_PREFIX := $(PROJECT_VERSION_TAG_GROUP)/
+RELEASE_BRANCH_GROUP := $(PROJECT_VERSION_TAG_GROUP)-
+endif
+
 # set a semantic version number from git if VERSION is undefined.
 ifeq ($(origin VERSION), undefined)
 # check if there are any existing `git tag` values
@@ -213,9 +220,7 @@ ifeq ($(shell git tag),)
 VERSION := $(shell echo "v0.0.0-$$(git rev-list HEAD --count)-g$$(git describe --dirty --always)" | sed 's/-/./2' | sed 's/-/./2' | sed 's/-/./2')
 else
 # use tags
-# set if you want to consider only the tags matching your glob, e.g. "aws/*".
-VERSION_TAG_MATCH ?= '*'
-VERSION := $(shell git describe --dirty --always --tags --match '$(VERSION_TAG_MATCH)' | sed 's|.*/||' | sed 's/-/./2' | sed 's/-/./2' | sed 's/-/./2')
+VERSION := $(shell git describe --dirty --always --tags --match '$(VERSION_TAG_PREFIX)*' | sed 's|.*/||' | sed 's/-/./2' | sed 's/-/./2' | sed 's/-/./2')
 endif
 endif
 export VERSION
@@ -230,13 +235,13 @@ release.tag:
 ifneq ($(VERSION_VALID),1)
 	$(error invalid version $(VERSION). must be a semantic version with v[Major].[Minor].[Patch] only)
 endif
-	@$(INFO) tagging commit hash $(COMMIT_HASH) with v$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
-	git tag -f -m "release $(VERSION)" v$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH) $(COMMIT_HASH)
-	git push $(REMOTE_NAME) v$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
-	@set -e; if ! git ls-remote --heads $(REMOTE_NAME) | grep -q refs/heads/release-$(VERSION_MAJOR).$(VERSION_MINOR); then \
-		echo === creating new release branch release-$(VERSION_MAJOR).$(VERSION_MINOR) ;\
-		git branch -f release-$(VERSION_MAJOR).$(VERSION_MINOR) $(COMMIT_HASH) ;\
-		git push $(REMOTE_NAME) release-$(VERSION_MAJOR).$(VERSION_MINOR) ;\
+	@$(INFO) tagging commit hash $(COMMIT_HASH) with $(VERSION_TAG_PREFIX)$(VERSION)
+	git tag -f -m "$(VERSION_TAG_PREFIX)$(VERSION)" $(VERSION_TAG_PREFIX)$(VERSION) $(COMMIT_HASH)
+	git push $(REMOTE_NAME) $(VERSION_TAG_PREFIX)$(VERSION)
+	@set -e; if ! git ls-remote --heads $(REMOTE_NAME) | grep -q refs/heads/release-$(RELEASE_BRANCH_GROUP)$(VERSION_MAJOR).$(VERSION_MINOR); then \
+		echo === creating new release branch release-$(RELEASE_BRANCH_GROUP)$(VERSION_MAJOR).$(VERSION_MINOR) ;\
+		git branch -f release-$(RELEASE_BRANCH_GROUP)$(VERSION_MAJOR).$(VERSION_MINOR) $(COMMIT_HASH) ;\
+		git push $(REMOTE_NAME) release-$(RELEASE_BRANCH_GROUP)$(VERSION_MAJOR).$(VERSION_MINOR) ;\
 	fi
 	@$(OK) tagging
 
