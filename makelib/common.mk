@@ -16,7 +16,7 @@
 .SUFFIXES:
 
 # set the shell to bash always
-SHELL := /bin/bash
+SHELL := /usr/bin/env bash
 
 # default target is build
 .PHONY: all
