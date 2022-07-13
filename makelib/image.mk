@@ -44,12 +44,19 @@ $(error unsupported architecture $(ARCH))
 endif
 endif
 
+# shasum is not available on all systems. In that case, fall back to sha256sum.
+ifneq ($(shell type shasum 2>/dev/null),)
+SHA256SUM := shasum -a 256
+else
+SHA256SUM := sha256sum
+endif
+
 # a registry that is scoped to the current build tree on this host. this enables
 # us to have isolation between concurrent builds on the same system, as in the case
 # of multiple working directories or on a CI system with multiple executors. All images
 # tagged with this build registry can safely be untagged/removed at the end of the build.
 ifeq ($(origin BUILD_REGISTRY), undefined)
-BUILD_REGISTRY := build-$(shell echo $(HOSTNAME)-$(ROOT_DIR) | shasum -a 256 | cut -c1-8)
+BUILD_REGISTRY := build-$(shell echo $(HOSTNAME)-$(ROOT_DIR) | $(SHA256SUM) | cut -c1-8)
 endif
 
 MANIFEST_TOOL_VERSION=v1.0.3
