@@ -16,12 +16,12 @@
 # Options
 
 # the version of istio to use
-ISTIO_VERSION ?= 1.8.1
+ISTIO_VERSION ?= 1.12.9
 ISTIO := $(TOOLS_HOST_DIR)/istioctl-$(ISTIO_VERSION)
 ISTIOOS := $(HOSTOS)
 ISTIO_DOWNLOAD_TUPLE := $(SAFEHOSTPLATFORM)
 ifeq ($(HOSTOS),darwin)
-ISTIO_DOWNLOAD_TUPLE := osx
+ISTIO_DOWNLOAD_TUPLE := osx-$(SAFEHOSTARCH)
 endif
 
 # the version of kind to use
@@ -29,15 +29,15 @@ KIND_VERSION ?= v0.14.0
 KIND := $(TOOLS_HOST_DIR)/kind-$(KIND_VERSION)
 
 # the version of kubectl to use
-KUBECTL_VERSION ?= v1.24.1
+KUBECTL_VERSION ?= v1.24.3
 KUBECTL := $(TOOLS_HOST_DIR)/kubectl-$(KUBECTL_VERSION)
 
 # the version of kustomize to use
-KUSTOMIZE_VERSION ?= v3.3.0
+KUSTOMIZE_VERSION ?= v4.5.5
 KUSTOMIZE := $(TOOLS_HOST_DIR)/kustomize-$(KUSTOMIZE_VERSION)
 
 # the version of olm-bundle to use
-OLMBUNDLE_VERSION ?= v0.4.0
+OLMBUNDLE_VERSION ?= v0.5.2
 OLMBUNDLE := $(TOOLS_HOST_DIR)/olm-bundle-$(OLMBUNDLE_VERSION)
 
 # the version of up to use
@@ -47,7 +47,7 @@ UP := $(TOOLS_HOST_DIR)/up-$(UP_VERSION)
 
 # the version of helm 3 to use
 USE_HELM3 ?= false
-HELM3_VERSION ?= v3.7.1
+HELM3_VERSION ?= v3.9.1
 HELM3 := $(TOOLS_HOST_DIR)/helm-$(HELM3_VERSION)
 
 # If we enable HELM3 we alias HELM to be HELM3
