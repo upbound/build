@@ -105,13 +105,6 @@ endif
 # Set the host's arch.
 HOSTARCH := $(shell uname -m)
 
-# Set safe architectures for supported OSes (darwin and linux).
-# Apple Silicon binaries are not widely available yet
-ifeq ($(HOSTOS),darwin)
-SAFEHOSTARCH := amd64
-TARGETARCH := $(HOSTARCH)
-endif
-
 # If SAFEHOSTARCH and TARGETARCH have not been defined yet, use HOST
 ifeq ($(origin SAFEHOSTARCH),undefined)
 SAFEHOSTARCH := $(HOSTARCH)
@@ -211,7 +204,7 @@ endif
 # ====================================================================================
 # Version and Tagging
 
-# set if you want to use tag grouping, e.g. setting it to "aws" would produce tags like "aws/v0.1.0" 
+# set if you want to use tag grouping, e.g. setting it to "aws" would produce tags like "aws/v0.1.0"
 # and release branch would be named as "release-aws-0.1" but the version would still be "v0.1.0".
 ifneq ($(PROJECT_VERSION_TAG_GROUP),)
 VERSION_TAG_PREFIX := $(PROJECT_VERSION_TAG_GROUP)/
@@ -490,4 +483,3 @@ help:
 	@$(MAKE) help-special
 
 .PHONY: help help-special
-
