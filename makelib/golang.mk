@@ -84,6 +84,10 @@ GOIMPORTS := $(TOOLS_HOST_DIR)/goimports
 GO := go
 GOHOST := GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) go
 GO_VERSION := $(shell $(GO) version | sed -ne 's/[^0-9]*\(\([0-9]\.\)\{0,4\}[0-9][^.]\).*/\1/p')
+GO_REQUIRED_VERSION := 1.18
+ifneq ($(GO_VERSION),$(GO_REQUIRED_VERSION))
+$(error "go version $(GO_VERSION) is too old. required version is $(GO_REQUIRED_VERSION)")
+endif
 
 # we use a consistent version of gofmt even while running different go compilers.
 # see https://github.com/golang/go/issues/26397 for more details
