@@ -15,6 +15,12 @@
 # ====================================================================================
 # Options
 
+# Optional. The Go Binary to use
+GO ?= go
+
+# Optional. Minimum Go version.
+GO_REQUIRED_VERSION ?= 1.18
+
 # The go project including repo name, for example, github.com/rook/rook
 GO_PROJECT ?= $(PROJECT_REPO)
 
@@ -72,7 +78,7 @@ ifneq ($(GO_TEST_SUITE),)
 GO_TEST_FLAGS += -run '$(GO_TEST_SUITE)'
 endif
 
-GOPATH := $(shell go env GOPATH)
+GOPATH := $(shell $(GO) env GOPATH)
 
 # setup tools used during the build
 DEP_VERSION=v0.5.1
@@ -81,12 +87,10 @@ GOJUNIT := $(TOOLS_HOST_DIR)/go-junit-report
 GOCOVER_COBERTURA := $(TOOLS_HOST_DIR)/gocover-cobertura
 GOIMPORTS := $(TOOLS_HOST_DIR)/goimports
 
-GO := go
-GOHOST := GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) go
+GOHOST := GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) $(GO)
 GO_VERSION := $(shell $(GO) version | sed -ne 's/[^0-9]*\(\([0-9]\.\)\{0,4\}[0-9][^.]\).*/\1/p')
-GO_REQUIRED_VERSION := 1.18
 ifneq ($(GO_VERSION),$(GO_REQUIRED_VERSION))
-$(error "go version $(GO_VERSION) is too old. required version is $(GO_REQUIRED_VERSION)")
+$(error "$(GO) version $(GO_VERSION) is too old. required version is $(GO_REQUIRED_VERSION)")
 endif
 
 # we use a consistent version of gofmt even while running different go compilers.
