@@ -18,7 +18,7 @@
 # Optional. The Go Binary to use
 GO ?= go
 
-# Optional. Minimum Go version.
+# Optional. Required Go version.
 GO_REQUIRED_VERSION ?= 1.18
 
 # The go project including repo name, for example, github.com/rook/rook
@@ -84,7 +84,7 @@ GOIMPORTS := $(TOOLS_HOST_DIR)/goimports
 GOHOST := GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) $(GO)
 GO_VERSION := $(shell $(GO) version | sed -ne 's/[^0-9]*\(\([0-9]\.\)\{0,4\}[0-9][^.]\).*/\1/p')
 ifneq ($(GO_VERSION),$(GO_REQUIRED_VERSION))
-$(error "$(GO) version $(GO_VERSION) is too old. required version is $(GO_REQUIRED_VERSION)")
+$(error "$(GO) version $(GO_VERSION) is not supported. required version is $(GO_REQUIRED_VERSION)")
 endif
 
 # we use a consistent version of gofmt even while running different go compilers.
@@ -193,22 +193,45 @@ go.fmt.simplify: $(GOFMT)
 
 go.validate: go.vet go.fmt
 
-go.vendor.lite go.vendor.check:
-	@$(INFO) verify dependencies have expected content
-	@$(GOHOST) mod verify || $(FAIL)
-	@$(OK) go modules dependencies verified
+go.vendor.lite go.vendor.check: go.modules.check
+go.vendor.update: go.modules.update
+go.vendor: go.modules.download
 
-go.vendor.update:
-	@$(INFO) update go modules
-	@$(GOHOST) get -u ./... || $(FAIL)
-	@$(OK) update go modules
+go.modules.check: go.modules.tidy.check go.modules.verify
 
-go.vendor:
+go.modules.download:
 	@$(INFO) mod download
-	@$(GOHOST) mod download || $(FAIL)
+	@$(GO) mod download || $(FAIL)
 	@$(OK) mod download
 
+go.modules.verify:
+	@$(INFO) verify go modules dependencies have expected content
+	@$(GO) mod verify || $(FAIL)
+	@$(OK) go modules dependencies verified
+
+go.modules.tidy:
+	@$(INFO) mod tidy
+	@$(GO) mod tidy
+	@$(OK) mod tidy
+
+go.modules.tidy.check:
+	@$(INFO) verify go modules dependencies are tidy
+	@$(GO) mod tidy
+	@$(shell git diff --exit-code --name-only go.mod go.sum)
+	@$(OK) go modules are tidy
+
+go.modules.update:
+	@$(INFO) update go modules
+	@$(GO) get -u ./... || $(FAIL)
+	@$(MAKE) go.modules.tidy
+	@$(MAKE) go.modules.verify
+	@$(OK) update go modules
+
+go.modules.clean:
+	@$(GO) clean -modcache
+
 go.clean:
+	@$(GO) clean -cache -testcache -modcache
 	@rm -fr $(GO_BIN_DIR) $(GO_TEST_DIR)
 
 go.distclean:
@@ -224,6 +247,7 @@ go.generate:
 
 .PHONY: go.init go.build go.install go.test.unit go.test.integration go.test.codecov go.lint go.vet go.fmt go.generate
 .PHONY: go.validate go.vendor.lite go.vendor go.vendor.check go.vendor.update go.clean go.distclean
+.PHONY: go.modules.check go.modules.download go.modules.verify go.modules.tidy go.modules.tidy.check go.modules.update go.modules.clean
 
 # ====================================================================================
 # Common Targets
