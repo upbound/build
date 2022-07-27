@@ -78,8 +78,14 @@ GOPATH := $(shell $(GO) env GOPATH)
 
 # setup tools used during the build
 GOJUNIT := $(TOOLS_HOST_DIR)/go-junit-report
+GOJUNIT_VERSION ?= v2.0.0
+
 GOCOVER_COBERTURA := $(TOOLS_HOST_DIR)/gocover-cobertura
+# https://github.com/t-yuki/gocover-cobertura/commit/aaee18c8195c3f2d90e5ef80ca918d265463842a
+GOCOVER_COBERTURA_VERSION ?= aaee18c8195c3f2d90e5ef80ca918d265463842a
+
 GOIMPORTS := $(TOOLS_HOST_DIR)/goimports
+GOIMPORTS_VERSION ?= v0.1.12
 
 GOHOST := GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) $(GO)
 GO_VERSION := $(shell $(GO) version | sed -ne 's/[^0-9]*\(\([0-9]\.\)\{0,4\}[0-9][^.]\).*/\1/p')
@@ -318,15 +324,15 @@ $(GOFMT):
 
 $(GOIMPORTS):
 	@$(INFO) installing goimports
-	@GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) install golang.org/x/tools/cmd/goimports@latest || $(FAIL)
+	@GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) install golang.org/x/tools/cmd/goimports@$(GOIMPORTS_VERSION) || $(FAIL)
 	@$(OK) installing goimports
 
 $(GOJUNIT):
 	@$(INFO) installing go-junit-report
-	@GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) install github.com/jstemmer/go-junit-report/v2@latest || $(FAIL)
+	@GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) install github.com/jstemmer/go-junit-report/v2@$(GOJUNIT_VERSION) || $(FAIL)
 	@$(OK) installing go-junit-report
 
 $(GOCOVER_COBERTURA):
 	@$(INFO) installing gocover-cobertura
-	@GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) install github.com/t-yuki/gocover-cobertura@latest || $(FAIL)
+	@GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) install github.com/t-yuki/gocover-cobertura@$(GOCOVER_COBERTURA_VERSION) || $(FAIL)
 	@$(OK) installing gocover-cobertura
