@@ -91,11 +91,11 @@ patches:
   - path: patch-deployment.yaml
     target:
       kind: Deployment
-      name: "*"
+      name: ".*"
   - path: patch-rollout.yaml
     target:
       kind: Rollout
-      name: "*"
+      name: ".*"
 EOF
 
 localdev_postrender_patch_deployment="${DEPLOY_LOCAL_POSTRENDER_WORKDIR}/patch-deployment.yaml"
