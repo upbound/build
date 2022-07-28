@@ -70,7 +70,7 @@ export BUILD_IMAGE_ARCHS=$(subst linux_,,$(filter linux_%,$(BUILD_PLATFORMS)))
 export TARGETARCH
 
 # Install gomplate
-GOMPLATE_VERSION := 3.7.0
+GOMPLATE_VERSION := 3.11.1
 GOMPLATE := $(TOOLS_HOST_DIR)/gomplate-$(GOMPLATE_VERSION)
 
 gomplate.buildvars:

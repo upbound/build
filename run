@@ -152,7 +152,6 @@ docker run \
     -h ${BUILD_HOST} \
     -e BUILD_REGISTRY=${BUILD_REGISTRY} \
     -e GOPATH="${BUILDER_HOME}/go" \
-    -e GO_PKG_DIR="" \
     -e GITHUB_TOKEN \
     -e VERSION \
     -e CHANNEL \
