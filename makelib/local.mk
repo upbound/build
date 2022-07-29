@@ -135,13 +135,13 @@ endif
 
 local.down: kind.down local.clean
 
-local.deploy.%: local.prepare $(KUBECTL) $(KUSTOMIZE) $(HELM) $(HELM3) $(HELM_HOME) $(GOMPLATE) $(ISTIO) kind.setcontext
+local.deploy.%: local.prepare $(KUBECTL) $(KUSTOMIZE) $(HELM3) $(HELM_HOME) $(GOMPLATE) kind.setcontext
 	@$(INFO) localdev deploy component: $*
 	@$(eval PLATFORMS=$(BUILD_PLATFORMS))
 	@$(SCRIPTS_DIR)/localdev-deploy-component.sh $* || $(FAIL)
 	@$(OK) localdev deploy component: $*
 
-local.remove.%: local.prepare $(KUBECTL) $(HELM) $(HELM3) $(HELM_HOME) $(GOMPLATE) kind.setcontext
+local.remove.%: local.prepare $(KUBECTL) $(HELM3) $(HELM_HOME) $(GOMPLATE) kind.setcontext
 	@$(INFO) localdev remove component: $*
 	@$(SCRIPTS_DIR)/localdev-remove-component.sh $* || $(FAIL)
 	@$(OK) localdev remove component: $*
