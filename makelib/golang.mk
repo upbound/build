@@ -223,7 +223,7 @@ go.modules.tidy:
 go.modules.tidy.check:
 	@$(INFO) verify go modules dependencies are tidy
 	@$(GO) mod tidy
-	@$(shell git diff --exit-code --name-only go.mod go.sum)
+	@changed=$$(git diff --exit-code --name-only go.mod go.sum 2>&1) && [ -z "$${changed}" ] || (echo "go.mod is not tidy" 1>&2; $(FAIL))
 	@$(OK) go modules are tidy
 
 go.modules.update:
