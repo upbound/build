@@ -18,8 +18,8 @@
 # Optional. The Go Binary to use
 GO ?= go
 
-# Optional. Required Go version.
-GO_REQUIRED_VERSION ?= 1.18
+# Optional. Supported Go versions.
+GO_SUPPORTED_VERSIONS ?= 1.18|1.19
 
 # The go project including repo name, for example, github.com/rook/rook
 GO_PROJECT ?= $(PROJECT_REPO)
@@ -89,8 +89,9 @@ GOIMPORTS_VERSION ?= v0.1.12
 
 GOHOST := GOOS=$(GOHOSTOS) GOARCH=$(GOHOSTARCH) $(GO)
 GO_VERSION := $(shell $(GO) version | sed -ne 's/[^0-9]*\(\([0-9]\.\)\{0,4\}[0-9][^.]\).*/\1/p')
-ifneq ($(GO_VERSION),$(GO_REQUIRED_VERSION))
-$(error "$(GO) version $(GO_VERSION) is not supported. required version is $(GO_REQUIRED_VERSION)")
+GO_FULL_VERSION := $(shell $(GO) version)
+ifneq ($(shell $(GO) version | grep -q -E '\bgo($(GO_SUPPORTED_VERSIONS))\b' && echo 0 || echo 1), 0)
+	$(error unsupported: $(GO_FULL_VERSION). Please make install one of the following supported version: '$(GO_SUPPORTED_VERSIONS)')
 endif
 
 # we use a consistent version of gofmt even while running different go compilers.
