@@ -197,7 +197,7 @@ go.fmt.simplify: $(GOFMT)
 	@$(GOFMT) -l -s -w $(GO_SUBDIRS) $(GO_INTEGRATION_TESTS_SUBDIRS) || $(FAIL)
 	@$(OK) gofmt simplify
 
-go.validate: go.vet go.fmt
+go.validate: go.modules.check go.vet go.fmt
 
 go.vendor.lite: go.modules.verify
 go.vendor.check: go.modules.check
