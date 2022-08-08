@@ -199,7 +199,8 @@ go.fmt.simplify: $(GOFMT)
 
 go.validate: go.vet go.fmt
 
-go.vendor.lite go.vendor.check: go.modules.check
+go.vendor.lite: go.modules.verify
+go.vendor.check: go.modules.check
 go.vendor.update: go.modules.update
 go.vendor: go.modules.download
 
