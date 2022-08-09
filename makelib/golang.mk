@@ -197,9 +197,10 @@ go.fmt.simplify: $(GOFMT)
 	@$(GOFMT) -l -s -w $(GO_SUBDIRS) $(GO_INTEGRATION_TESTS_SUBDIRS) || $(FAIL)
 	@$(OK) gofmt simplify
 
-go.validate: go.vet go.fmt
+go.validate: go.modules.check go.vet go.fmt
 
-go.vendor.lite go.vendor.check: go.modules.check
+go.vendor.lite: go.modules.verify
+go.vendor.check: go.modules.check
 go.vendor.update: go.modules.update
 go.vendor: go.modules.download
 
@@ -223,7 +224,7 @@ go.modules.tidy:
 go.modules.tidy.check:
 	@$(INFO) verify go modules dependencies are tidy
 	@$(GO) mod tidy
-	@changed=$$(git diff --exit-code --name-only go.mod go.sum 2>&1) && [ -z "$${changed}" ] || (echo "go.mod is not tidy" 1>&2; $(FAIL))
+	@changed=$$(git diff --exit-code --name-only go.mod go.sum 2>&1) && [ -z "$${changed}" ] || (echo "go.mod is not tidy. Please run 'make go.modules.tidy' and stage the changes" 1>&2; $(FAIL))
 	@$(OK) go modules are tidy
 
 go.modules.update:
