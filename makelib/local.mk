@@ -36,6 +36,7 @@ ifndef REGISTRIES
 	export BUILD_REGISTRIES=$(REGISTRY_ORGS)
 endif
 
+export UP
 export KIND
 export KUBECTL
 export KUSTOMIZE
