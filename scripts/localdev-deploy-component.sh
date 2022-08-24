@@ -153,7 +153,12 @@ echo_info "Running helm upgrade --install with computed parameters..."
 set -x
 "${HELM}" upgrade --install "${HELM_RELEASE_NAME}" --namespace "${HELM_RELEASE_NAMESPACE}" --kubeconfig "${KUBECONFIG}" \
   "${HELM_CHART_REF}" ${helm_chart_version_flag:-} -f "${DEPLOY_LOCAL_CONFIG_DIR}/${COMPONENT}/value-overrides.yaml" \
- ${post_render_args:-} ${helm_wait_atomic_flag:-}
+ ${post_render_args:-}
+
+sleep 300
+
+${KUBECTL} get pods -A
+${HELM} ls -A
 { set +x; } 2>/dev/null
 echo_info "Running helm upgrade --install with computed parameters...OK"
 
