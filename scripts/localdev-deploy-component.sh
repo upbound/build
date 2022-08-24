@@ -160,6 +160,7 @@ sleep 300
 ${KUBECTL} get pods -A
 ${HELM} ls -A
 ${KUBECTL} -n upbound-system describe pods -l app=mcp-mysql
+${KUBECTL} -n upbound-system logs -l app=mcp-mysql
 
 { set +x; } 2>/dev/null
 echo_info "Running helm upgrade --install with computed parameters...OK"
