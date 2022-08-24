@@ -148,19 +148,24 @@ if [ -z "${HELM_RELEASE_NAME}" ]; then
   HELM_RELEASE_NAME=${COMPONENT}
 fi
 
+if [ "${COMPONENT}" == "mcp-mysql" ]; then
+  helm_wait_atomic_flag=""
+fi
+
 echo_info "Running helm upgrade --install with computed parameters..."
 # shellcheck disable=SC2086
 set -x
 "${HELM}" upgrade --install "${HELM_RELEASE_NAME}" --namespace "${HELM_RELEASE_NAMESPACE}" --kubeconfig "${KUBECONFIG}" \
   "${HELM_CHART_REF}" ${helm_chart_version_flag:-} -f "${DEPLOY_LOCAL_CONFIG_DIR}/${COMPONENT}/value-overrides.yaml" \
- ${post_render_args:-}
+ ${post_render_args:-} ${helm_wait_atomic_flag:-}
 
-sleep 300
-
-${KUBECTL} get pods -A
-${HELM} ls -A
-${KUBECTL} -n upbound-system describe pods -l app=mcp-mysql
-${KUBECTL} -n upbound-system logs -l app=mcp-mysql
+if [ "${COMPONENT}" == "mcp-mysql" ]; then
+  sleep 300
+  ${KUBECTL} get pods -A
+  ${HELM} ls -A
+  ${KUBECTL} -n upbound-system describe pods -l app=mcp-mysql
+  ${KUBECTL} -n upbound-system logs -l app=mcp-mysql
+fi
 
 { set +x; } 2>/dev/null
 echo_info "Running helm upgrade --install with computed parameters...OK"
