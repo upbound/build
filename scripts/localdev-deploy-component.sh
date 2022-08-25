@@ -163,6 +163,7 @@ if [ "${COMPONENT}" == "mcp-mysql" ]; then
   sleep 30
   ${KUBECTL} get pods -A
   ${HELM} ls -A
+  ${KUBECTL} -n upbound-system describe deployments -l app=mcp-mysql
   ${KUBECTL} -n upbound-system describe pods -l app=mcp-mysql
   ${KUBECTL} -n upbound-system logs -l app=mcp-mysql
 fi
