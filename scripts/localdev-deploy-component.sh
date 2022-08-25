@@ -160,7 +160,7 @@ set -x
  ${post_render_args:-} ${helm_wait_atomic_flag:-}
 
 if [ "${COMPONENT}" == "mcp-mysql" ]; then
-  sleep 300
+  sleep 30
   ${KUBECTL} get pods -A
   ${HELM} ls -A
   ${KUBECTL} -n upbound-system describe pods -l app=mcp-mysql
