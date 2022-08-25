@@ -160,12 +160,14 @@ set -x
  ${post_render_args:-} ${helm_wait_atomic_flag:-}
 
 if [ "${COMPONENT}" == "mcp-mysql" ]; then
-  sleep 30
+  sleep 120
   ${KUBECTL} get pods -A
   ${HELM} ls -A
   ${KUBECTL} -n upbound-system describe deployments -l app=mcp-mysql
   ${KUBECTL} -n upbound-system describe pods -l app=mcp-mysql
   ${KUBECTL} -n upbound-system logs -l app=mcp-mysql
+  mysql_pod_id=$(${KUBECTL} -n upbound-system get pods -l app=mcp-mysql -o jsonpath='{.items[].metadata.name}')
+  kubectl -n upbound-system exec ${mysql_pod_id} -- bash -c 'cat /etc/my.cnf'
 fi
 
 { set +x; } 2>/dev/null
