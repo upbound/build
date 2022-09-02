@@ -259,7 +259,6 @@ go.generate:
 build.init: go.init
 build.code.platform: go.build
 clean: go.clean
-distclean: go.distclean
 lint.init: go.init
 lint.run: go.lint
 test.init: go.init
