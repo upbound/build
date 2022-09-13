@@ -46,12 +46,12 @@ export HELM_HOME
 
 # https://helm.sh/docs/faq/#xdg-base-directory-support
 ifeq ($(USE_HELM3),true)
-XDG_DATA_HOME := $(HELM_HOME)
-XDG_CONFIG_HOME := $(HELM_HOME)
-XDG_CACHE_HOME := $(HELM_HOME)
-export XDG_DATA_HOME
-export XDG_CONFIG_HOME
-export XDG_CACHE_HOME
+HELM_CACHE_HOME = $(HELM_HOME)/cache
+HELM_CONFIG_HOME = $(HELM_HOME)/config
+HELM_DATA_HOME = $(HELM_HOME)/data
+export HELM_CACHE_HOME
+export HELM_CONFIG_HOME
+export HELM_DATA_HOME
 endif
 
 # remove the leading `v` for helm chart versions
@@ -117,6 +117,9 @@ helm.build: $(HELM_INDEX)
 
 helm.clean:
 	@rm -fr $(HELM_OUTPUT_DIR)
+
+helm.env: $(HELM)
+	@$(HELM) env
 
 # ====================================================================================
 # helm
