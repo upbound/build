@@ -25,7 +25,7 @@ ISTIO_DOWNLOAD_TUPLE := osx-$(SAFEHOSTARCH)
 endif
 
 # the version of kind to use
-KIND_VERSION ?= v0.14.0
+KIND_VERSION ?= v0.16.0
 KIND := $(TOOLS_HOST_DIR)/kind-$(KIND_VERSION)
 
 # the version of kubectl to use
