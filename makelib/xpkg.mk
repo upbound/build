@@ -64,8 +64,9 @@ define xpkg.build.targets
 xpkg.build.$(1):
 	@$(INFO) Building package $(1)-$(VERSION).xpkg for $(PLATFORM)
 	@mkdir -p $(OUTPUT_DIR)/xpkg/$(PLATFORM)
-	@$(UP) xpkg build \
-		--controller $(BUILD_REGISTRY)/$(1)-$(ARCH) \
+	@controller_arg=$$$$(grep -E '^kind:\s+Provider\s*$$$$' $(XPKG_DIR)/crossplane.yaml > /dev/null && echo "--controller $(BUILD_REGISTRY)/$(1)-$(ARCH)"); \
+	$(UP) xpkg build \
+		$$$${controller_arg} \
 		--package-root $(XPKG_DIR) \
 		--examples-root $(XPKG_EXAMPLES_DIR) \
 		--ignore $(XPKG_IGNORE) \
