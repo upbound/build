@@ -283,6 +283,8 @@ common.buildvars:
 	@echo HOSTARCH=$(HOSTARCH)
 	@echo SAFEHOSTARCH=$(SAFEHOSTARCH)
 	@echo TARGETARCH=$(TARGETARCH)
+	@echo PLATFORM=$(PLATFORM)
+	@echo VERSION=$(VERSION)
 
 build.vars: common.buildvars
 
