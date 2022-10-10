@@ -258,8 +258,8 @@ version.isdirty:
 SED_CMD?=sed -i -e
 
 COMMA := ,
-SPACE :=
-SPACE +=
+EMPTY :=
+SPACE := $(EMPTY) $(EMPTY)
 
 # define a newline
 define \n
