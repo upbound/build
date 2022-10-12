@@ -52,6 +52,9 @@ docs.generate:
 docs.run: docs.generate
 	cd $(DOCS_WORK_DIR) && DOCS_VERSION=$(DOCS_VERSION) $(MAKE) run
 
+docs.validate: docs.generate
+	cd $(DOCS_WORK_DIR) && DOCS_VERSION=$(DOCS_VERSION) $(MAKE) validate
+
 docs.publish: docs.generate
 	cd $(DOCS_WORK_DIR) && DOCS_VERSION=$(DOCS_VERSION) $(MAKE) publish
 
