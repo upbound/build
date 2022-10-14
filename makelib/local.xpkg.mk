@@ -17,7 +17,7 @@ CROSSPLANE_NAMESPACE ?= crossplane-system
 local.xpkg.init: $(KUBECTL)
 	@$(INFO) patching Crossplane with dev sidecar
 	@if ! $(KUBECTL) -n $(CROSSPLANE_NAMESPACE) get deployment crossplane -o jsonpath="{.spec.template.spec.containers[*].name}" | grep "dev" > /dev/null; then \
-		$(KUBECTL) -n $(CROSSPLANE_NAMESPACE) patch deployment/crossplane --type='json' -p='[{"op":"add","path":"/spec/template/spec/containers/1","value":{"image":"nginx","imagePullPolicy":"Always","name":"dev","resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","volumeMounts":[{"mountPath":"/tmp/cache","name":"package-cache"}]}},{"op":"add","path":"/spec/template/metadata/labels/patched","value":"true"}]'; \
+		$(KUBECTL) -n $(CROSSPLANE_NAMESPACE) patch deployment/crossplane --type='json' -p='[{"op":"add","path":"/spec/template/spec/containers/1","value":{"image":"alpine","name":"dev","command":["sleep","infinity"],"volumeMounts":[{"mountPath":"/tmp/cache","name":"package-cache"}]}},{"op":"add","path":"/spec/template/metadata/labels/patched","value":"true"}]'; \
 		$(KUBECTL) -n $(CROSSPLANE_NAMESPACE) wait deploy crossplane --for condition=Available --timeout=60s; \
 		$(KUBECTL) -n $(CROSSPLANE_NAMESPACE) wait pods -l app=crossplane,patched=true --for condition=Ready --timeout=60s; \
 	fi
@@ -31,7 +31,7 @@ local.xpkg.sync: local.xpkg.init $(UP)
 		$(KUBECTL) -n $(CROSSPLANE_NAMESPACE) cp $(XPKG_OUTPUT_DIR)/cache -c dev $$XPPOD:/tmp
 	@$(OK) copying local xpkg cache to Crossplane pod
 
-local.xpkg.deploy-cfg.%: local.xpkg.sync
+local.xpkg.deploy.configuration.%: local.xpkg.sync
 	@$(INFO) deploying configuration package $* $(VERSION)
 	@echo '{"apiVersion":"pkg.crossplane.io/v1","kind":"Configuration","metadata":{"name":"$*"},"spec":{"package":"$*-$(VERSION).gz","packagePullPolicy":"Never"}}' | $(KUBECTL) apply -f -
 	@$(OK) deploying configuration package $* $(VERSION)
