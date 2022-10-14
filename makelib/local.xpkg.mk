@@ -31,7 +31,7 @@ local.xpkg.sync: local.xpkg.init $(UP)
 		$(KUBECTL) -n $(CROSSPLANE_NAMESPACE) cp $(XPKG_OUTPUT_DIR)/cache -c dev $$XPPOD:/tmp
 	@$(OK) copying local xpkg cache to Crossplane pod
 
-local.xpkg.deploy.%: local.xpkg.sync
-	@$(INFO) deploying xpkg $* $(VERSION)
+local.xpkg.deploy-cfg.%: local.xpkg.sync
+	@$(INFO) deploying configuration package $* $(VERSION)
 	@echo '{"apiVersion":"pkg.crossplane.io/v1","kind":"Configuration","metadata":{"name":"$*"},"spec":{"package":"$*-$(VERSION).gz","packagePullPolicy":"Never"}}' | $(KUBECTL) apply -f -
-	@$(OK) deploying xpkg $* $(VERSION)
+	@$(OK) deploying configuration package $* $(VERSION)
