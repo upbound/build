@@ -14,6 +14,8 @@
 
 KIND_CLUSTER_NAME ?= uptest
 
+CONTROLPLANE_DUMP_DIRECTORY ?= $(OUTPUT_DIR)/controlplane-dump
+
 controlplane.up: $(UP) $(KUBECTL) $(KIND)
 	@$(INFO) setting up controlplane
 	@$(KIND) get kubeconfig --name $(KIND_CLUSTER_NAME) >/dev/null 2>&1 || $(KIND) create cluster --name=$(KIND_CLUSTER_NAME)
@@ -25,3 +27,8 @@ controlplane.down: $(UP) $(KUBECTL) $(KIND)
 	@$(INFO) deleting controlplane
 	@$(KIND) delete cluster --name=$(KIND_CLUSTER_NAME)
 	@$(OK) deleting controlplane
+
+controlplane.dump: $(KUBECTL)
+	mkdir -p $(CONTROLPLANE_DUMP_DIRECTORY)
+	@$(KUBECTL) cluster-info dump --output-directory $(CONTROLPLANE_DUMP_DIRECTORY) --all-namespaces || true
+	@$(KUBECTL) get managed -o yaml > $(CONTROLPLANE_DUMP_DIRECTORY)/managed.yaml || true
