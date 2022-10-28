@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+KIND_CLUSTER_NAME ?= local-dev
 CROSSPLANE_NAMESPACE ?= crossplane-system
 
 local.xpkg.init: $(KUBECTL)
@@ -35,3 +36,10 @@ local.xpkg.deploy.configuration.%: local.xpkg.sync
 	@$(INFO) deploying configuration package $* $(VERSION)
 	@echo '{"apiVersion":"pkg.crossplane.io/v1","kind":"Configuration","metadata":{"name":"$*"},"spec":{"package":"$*-$(VERSION).gz","packagePullPolicy":"Never"}}' | $(KUBECTL) apply -f -
 	@$(OK) deploying configuration package $* $(VERSION)
+
+local.xpkg.deploy.provider.%: $(KIND) local.xpkg.sync
+	@$(INFO) deploying provider package $* $(VERSION)
+	@$(KIND) load docker-image $(BUILD_REGISTRY)/$*-$(ARCH) -n $(KIND_CLUSTER_NAME)
+	@echo '{"apiVersion":"pkg.crossplane.io/v1alpha1","kind":"ControllerConfig","metadata":{"name":"config"},"spec":{"args":["-d"],"image":"$(BUILD_REGISTRY)/$*-$(ARCH)"}}' | $(KUBECTL) apply -f -
+	@echo '{"apiVersion":"pkg.crossplane.io/v1","kind":"Provider","metadata":{"name":"$*"},"spec":{"package":"$*-$(VERSION).gz","packagePullPolicy":"Never","controllerConfigRef":{"name":"config"}}}' | $(KUBECTL) apply -f -
+	@$(OK) deploying provider package $* $(VERSION)

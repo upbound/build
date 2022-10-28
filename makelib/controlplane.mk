@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-KIND_CLUSTER_NAME ?= uptest
+KIND_CLUSTER_NAME ?= local-dev
 
 CONTROLPLANE_DUMP_DIRECTORY ?= $(OUTPUT_DIR)/controlplane-dump
 
