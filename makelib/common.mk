@@ -226,9 +226,16 @@ export VERSION
 
 VERSION_REGEX := ^v\([0-9]*\)[.]\([0-9]*\)[.]\([0-9]*\)$$
 VERSION_VALID := $(shell echo "$(VERSION)" | grep -q '$(VERSION_REGEX)' && echo 1 || echo 0)
-VERSION_MAJOR := $(shell echo "$(VERSION)" | sed -e 's/$(VERSION_REGEX)/\1/')
-VERSION_MINOR := $(shell echo "$(VERSION)" | sed -e 's/$(VERSION_REGEX)/\2/')
-VERSION_PATCH := $(shell echo "$(VERSION)" | sed -e 's/$(VERSION_REGEX)/\3/')
+
+# Given "v0.17.0-3.gb4eee9f.dirty" it returns "0".
+VERSION_MAJOR := $(shell echo "$(VERSION)" | cut -d'.' -f1 | sed '1s/^.//')
+
+# Given "v0.17.0-3.gb4eee9f.dirty" it returns "17".
+VERSION_MINOR := $(shell echo "$(VERSION)" | cut -d'.' -f2)
+
+# Given "v0.17.0-3.gb4eee9f.dirty" it returns "0-3.gb4eee9f.dirty".
+# Given "v0.17.1" it returns "1".
+VERSION_PATCH := $(shell echo "$(VERSION)" | cut -d'.' -f3-)
 
 release.tag:
 ifneq ($(VERSION_VALID),1)
@@ -258,8 +265,8 @@ version.isdirty:
 SED_CMD?=sed -i -e
 
 COMMA := ,
-SPACE :=
-SPACE +=
+EMPTY :=
+SPACE := $(EMPTY) $(EMPTY)
 
 # define a newline
 define \n
@@ -283,6 +290,8 @@ common.buildvars:
 	@echo HOSTARCH=$(HOSTARCH)
 	@echo SAFEHOSTARCH=$(SAFEHOSTARCH)
 	@echo TARGETARCH=$(TARGETARCH)
+	@echo PLATFORM=$(PLATFORM)
+	@echo VERSION=$(VERSION)
 
 build.vars: common.buildvars
 

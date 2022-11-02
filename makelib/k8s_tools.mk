@@ -25,7 +25,7 @@ ISTIO_DOWNLOAD_TUPLE := osx-$(SAFEHOSTARCH)
 endif
 
 # the version of kind to use
-KIND_VERSION ?= v0.14.0
+KIND_VERSION ?= v0.16.0
 KIND := $(TOOLS_HOST_DIR)/kind-$(KIND_VERSION)
 
 # the version of kubectl to use
@@ -63,6 +63,9 @@ endif
 KUTTL_VERSION ?= 0.12.1
 KUTTL := $(TOOLS_HOST_DIR)/kuttl-$(KUTTL_VERSION)
 
+# the version of uptest to use
+UPTEST_VERSION ?= v0.1.0
+UPTEST := $(TOOLS_HOST_DIR)/uptest-$(UPTEST_VERSION)
 # ====================================================================================
 # Common Targets
 
@@ -154,3 +157,11 @@ $(KUTTL):
 	@curl -fsSLo $(KUTTL) --create-dirs https://github.com/kudobuilder/kuttl/releases/download/v$(KUTTL_VERSION)/kubectl-kuttl_$(KUTTL_VERSION)_$(HOST_PLATFORM) || $(FAIL)
 	@chmod +x $(KUTTL)
 	@$(OK) installing kuttl $(KUTTL_VERSION)
+
+# uptest download and install
+$(UPTEST):
+	@$(INFO) installing uptest $(UPTEST)
+	@curl -fsSLo $(UPTEST) https://github.com/upbound/uptest/releases/download/$(UPTEST_VERSION)/uptest_$(SAFEHOSTPLATFORM) || $(FAIL)
+	@chmod +x $(UPTEST)
+	@$(OK) installing uptest $(UPTEST)
+
