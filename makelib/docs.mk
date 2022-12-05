@@ -45,7 +45,7 @@ docs.generate:
 	rm -rf $(DOCS_VERSION_DIR)
 	@if [ "$(DOCS_VERSION_ACTIVE)" == "true" ]; then \
 		$(INFO) Including version in documentation ; \
-		cp -r $(SOURCE_DOCS_DIR)/ $(DOCS_VERSION_DIR); \
+		ln -s $(ROOT_DIR)/$(SOURCE_DOCS_DIR) $(DOCS_VERSION_DIR); \
 		$(OK) Version included in documentation ; \
 	fi
 
