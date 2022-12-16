@@ -32,7 +32,7 @@ docs.init:
 docs.run: docs.init
 	cd $(DOCS_WORK_DIR) $(MAKE) run
 
-docs.validate: docs.generate
+docs.validate:
 	cd $(DOCS_WORK_DIR) $(MAKE) validate
 
 
