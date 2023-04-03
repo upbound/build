@@ -41,7 +41,7 @@ OLMBUNDLE_VERSION ?= v0.5.2
 OLMBUNDLE := $(TOOLS_HOST_DIR)/olm-bundle-$(OLMBUNDLE_VERSION)
 
 # the version of up to use
-UP_VERSION ?= v0.12.2
+UP_VERSION ?= v0.16.0
 UP_CHANNEL ?= stable
 UP := $(TOOLS_HOST_DIR)/up-$(UP_VERSION)
 
