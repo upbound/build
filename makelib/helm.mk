@@ -35,6 +35,10 @@ HELM_OUTPUT_DIR ?= $(OUTPUT_DIR)/charts
 # the helm index file
 HELM_INDEX := $(HELM_OUTPUT_DIR)/index.yaml
 
+HELM_DOCS_VERSION ?= v1.11.0
+HELM_DOCS_ENABLED ?= false
+HELM_DOCS := $(TOOLS_HOST_DIR)/helm-docs
+
 HELM_CHART_LINT_STRICT ?= true
 ifeq ($(HELM_CHART_LINT_STRICT),true)
 HELM_CHART_LINT_STRICT_ARG += --strict
@@ -83,6 +87,20 @@ $(HELM_OUTPUT_DIR)/$(1)-$(HELM_CHART_VERSION).tgz: $(HELM_HOME) $(HELM_OUTPUT_DI
 		$(HELM) package --version $(HELM_CHART_VERSION) --app-version $(HELM_CHART_VERSION) -d $(HELM_OUTPUT_DIR) $(abspath $(HELM_CHARTS_DIR)/$(1)); \
 	fi
 	@$(OK) helm package $(1) $(HELM_CHART_VERSION)
+
+helm.generate.$(1): $(HELM_HOME) $(HELM_DOCS)
+	@if [ "$(HELM_DOCS_ENABLED)" != "true" ]; then \
+		$(OK) helm-docs $(1) [disabled]; \
+	else \
+		$(INFO) helm-docs $(1); \
+		$(MAKE) VERSION="master" helm.prepare.$(1); \
+		cd $(HELM_CHARTS_DIR)/$(1) && $(HELM_DOCS); \
+		rm -f $(HELM_CHARTS_DIR)/$(1)/values.yaml; \
+		$(OK) helm-docs $(1); \
+	fi
+
+
+helm.generate: helm.generate.$(1)
 
 helm.prepare.$(1): $(HELM_HOME)
 	@cp -f $(HELM_CHARTS_DIR)/$(1)/values.yaml.tmpl $(HELM_CHARTS_DIR)/$(1)/values.yaml
@@ -168,6 +186,7 @@ build.artifacts: helm.build
 clean: helm.clean
 lint: helm.lint
 promote.artifacts: helm.promote helm.museum
+generate.run: helm.generate
 
 # ====================================================================================
 # Special Targets
@@ -186,3 +205,10 @@ helm.help:
 
 help-special: helm.help
 
+# ====================================================================================
+# Tools install targets
+
+$(HELM_DOCS):
+	@$(INFO) installing helm-docs
+	@GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) install github.com/norwoodj/helm-docs/cmd/helm-docs@$(HELM_DOCS_VERSION) || $(FAIL)
+	@$(OK) installing helm-docs
