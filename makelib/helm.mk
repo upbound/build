@@ -89,11 +89,12 @@ $(HELM_OUTPUT_DIR)/$(1)-$(HELM_CHART_VERSION).tgz: $(HELM_HOME) $(HELM_OUTPUT_DI
 	@$(OK) helm package $(1) $(HELM_CHART_VERSION)
 
 helm.generate.$(1): $(HELM_HOME) $(HELM_DOCS)
+	@$(INFO) helm-docs $(1)
 	@if [ "$(HELM_DOCS_ENABLED)" != "true" ]; then \
 		$(OK) helm-docs $(1) [disabled]; \
 	else \
-		$(INFO) helm-docs $(1); \
-		$(MAKE) VERSION="master" HELM_DOCS_PREPARE="true" helm.prepare.$(1); \
+		$(MAKE) VERSION="master" HELM_PREPARE_CLEANUP="true" helm.prepare.$(1); \
+		$(HELM_DOCS); \
 		$(OK) helm-docs $(1); \
 	fi
 
@@ -103,8 +104,7 @@ helm.generate: helm.generate.$(1)
 helm.prepare.$(1): $(HELM_HOME)
 	@cp -f $(HELM_CHARTS_DIR)/$(1)/values.yaml.tmpl $(HELM_CHARTS_DIR)/$(1)/values.yaml
 	@cd $(HELM_CHARTS_DIR)/$(1) && $(SED_CMD) 's|%%VERSION%%|$(VERSION)|g' values.yaml
-	@if [ "$(HELM_DOCS_PREPARE)" == "true" ]; then \
-		$(HELM_DOCS); \
+	@if [ "$(HELM_PREPARE_CLEANUP)" == "true" ]; then \
 		rm -f $(HELM_CHARTS_DIR)/$(1)/values.yaml; \
 	fi
 
