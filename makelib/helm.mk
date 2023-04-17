@@ -93,9 +93,7 @@ helm.generate.$(1): $(HELM_HOME) $(HELM_DOCS)
 		$(OK) helm-docs $(1) [disabled]; \
 	else \
 		$(INFO) helm-docs $(1); \
-		$(MAKE) VERSION="master" helm.prepare.$(1); \
-		cd $(HELM_CHARTS_DIR)/$(1) && $(HELM_DOCS); \
-		rm -f $(HELM_CHARTS_DIR)/$(1)/values.yaml; \
+		$(MAKE) VERSION="master" HELM_DOCS_PREPARE="true" helm.prepare.$(1); \
 		$(OK) helm-docs $(1); \
 	fi
 
@@ -105,6 +103,10 @@ helm.generate: helm.generate.$(1)
 helm.prepare.$(1): $(HELM_HOME)
 	@cp -f $(HELM_CHARTS_DIR)/$(1)/values.yaml.tmpl $(HELM_CHARTS_DIR)/$(1)/values.yaml
 	@cd $(HELM_CHARTS_DIR)/$(1) && $(SED_CMD) 's|%%VERSION%%|$(VERSION)|g' values.yaml
+	@if [ "$(HELM_DOCS_PREPARE)" == "true" ]; then \
+		$(HELM_DOCS); \
+		rm -f $(HELM_CHARTS_DIR)/$(1)/values.yaml; \
+	fi
 
 helm.prepare: helm.prepare.$(1)
 
