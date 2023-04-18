@@ -39,6 +39,8 @@ HELM_DOCS_VERSION ?= v1.11.0
 HELM_DOCS_ENABLED ?= false
 HELM_DOCS := $(TOOLS_HOST_DIR)/helm-docs
 
+HELM_VALUES_TEMPLATE_SKIPPED ?= false
+
 HELM_CHART_LINT_STRICT ?= true
 ifeq ($(HELM_CHART_LINT_STRICT),true)
 HELM_CHART_LINT_STRICT_ARG += --strict
@@ -90,23 +92,28 @@ $(HELM_OUTPUT_DIR)/$(1)-$(HELM_CHART_VERSION).tgz: $(HELM_HOME) $(HELM_OUTPUT_DI
 
 helm.generate.$(1): $(HELM_HOME) $(HELM_DOCS)
 	@$(INFO) helm-docs $(1)
-	@if [ "$(HELM_DOCS_ENABLED)" != "true" ]; then \
-		$(OK) helm-docs $(1) [disabled]; \
-	else \
-		$(MAKE) VERSION="master" HELM_PREPARE_CLEANUP="true" helm.prepare.$(1); \
-		$(HELM_DOCS); \
-		$(OK) helm-docs $(1); \
-	fi
-
+ifneq ($(HELM_DOCS_ENABLED),true)
+	@$(OK) helm-docs $(1) [skipped]
+else
+	@$(MAKE) VERSION="master" HELM_PREPARE_CLEANUP="true" helm.prepare.$(1)
+	@$(HELM_DOCS)
+	@$(OK) helm-docs $(1)
+endif
 
 helm.generate: helm.generate.$(1)
 
 helm.prepare.$(1): $(HELM_HOME)
+	@$(INFO) helm prepare $(1)
+ifeq ($(HELM_VALUES_TEMPLATE_SKIPPED),true)
+		@$(OK) helm prepare $(1) [skipped]
+else
 	@cp -f $(HELM_CHARTS_DIR)/$(1)/values.yaml.tmpl $(HELM_CHARTS_DIR)/$(1)/values.yaml
 	@cd $(HELM_CHARTS_DIR)/$(1) && $(SED_CMD) 's|%%VERSION%%|$(VERSION)|g' values.yaml
 	@if [ "$(HELM_PREPARE_CLEANUP)" == "true" ]; then \
 		rm -f $(HELM_CHARTS_DIR)/$(1)/values.yaml; \
 	fi
+	@$(OK) helm prepare $(1)
+endif
 
 helm.prepare: helm.prepare.$(1)
 
