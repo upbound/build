@@ -121,3 +121,14 @@ endif
 # https://github.com/estesp/manifest-tool/issues/122
 # https://github.com/moby/buildkit/issues/2438
 promote.artifacts: $(foreach r,$(filter-out $(XPKG_REG_ORGS_NO_PROMOTE),$(XPKG_REG_ORGS)), $(foreach x,$(XPKGS),xpkg.release.promote.$(r).$(x)))
+
+# NOTE(aru): makelib/common.mk will need to be included before this target.
+# A sample invocation is as follows:
+# make -j2 IMG_ORG=ulucinar xpkg.push
+REG_ENDPOINT ?= https://index.docker.io/v1/
+xpkg.push: build.all
+	@$(INFO) Pushing package $(IMG_ORG)/$(PROJECT_NAME):$(VERSION) to the registry at $(REG_ENDPOINT)
+	@$(UP) xpkg push $(IMG_ORG)/$(PROJECT_NAME):$(VERSION) \
+		$(foreach p,$(XPKG_LINUX_PLATFORMS),--package $(XPKG_OUTPUT_DIR)/$(p)/$(PROJECT_NAME)-$(VERSION).xpkg ) \
+		--override-registry-endpoint=$(REG_ENDPOINT) || $(FAIL)
+	@$(OK) Pushed package $(IMG_ORG)/$(PROJECT_NAME):$(VERSION) to the registry at $(REG_ENDPOINT)
