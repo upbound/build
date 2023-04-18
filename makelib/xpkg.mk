@@ -19,6 +19,13 @@ ifeq ($(origin XPKG_DIR),undefined)
 XPKG_DIR := $(ROOT_DIR)/package
 endif
 
+# xref https://github.com/upbound/provider-aws/pull/647, https://github.com/upbound/up/pull/309
+# in up v0.16.0, support for ProviderConfig documentation via object annotations was added.
+# by convention, we will assume the extensions file resides in the package directory.
+ifeq ($(origin XPKG_AUTH_EXT),undefined)
+XPKG_AUTH_EXT := $(XPKG_DIR)/auth.yaml
+endif
+
 ifeq ($(origin XPKG_EXAMPLES_DIR),undefined)
 XPKG_EXAMPLES_DIR := $(ROOT_DIR)/examples
 endif
@@ -68,6 +75,7 @@ xpkg.build.$(1):
 	$(UP) xpkg build \
 		$$$${controller_arg} \
 		--package-root $(XPKG_DIR) \
+		--auth-ext $(XPKG_AUTH_EXT) \
 		--examples-root $(XPKG_EXAMPLES_DIR) \
 		--ignore $(XPKG_IGNORE) \
 		--output $(XPKG_OUTPUT_DIR)/$(PLATFORM)/$(1)-$(VERSION).xpkg || $(FAIL)
