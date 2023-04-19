@@ -93,9 +93,10 @@ $(HELM_OUTPUT_DIR)/$(1)-$(HELM_CHART_VERSION).tgz: $(HELM_HOME) $(HELM_OUTPUT_DI
 helm.generate.$(1): $(HELM_HOME) $(HELM_DOCS)
 	@$(INFO) helm-docs $(1)
 ifneq ($(HELM_DOCS_ENABLED),true)
-	@$(OK) helm-docs $(1) [skipped]
+	@$(OK) helm docs not enabled [skipped]
+else ifneq ($(HELM_VALUES_TEMPLATE_SKIPPED),true)
+	@$(WARN) helm-docs not supported with templated values.yaml [skipped]
 else
-	@$(MAKE) VERSION="master" HELM_PREPARE_CLEANUP="true" helm.prepare.$(1)
 	@$(HELM_DOCS)
 	@$(OK) helm-docs $(1)
 endif
@@ -105,13 +106,11 @@ helm.generate: helm.generate.$(1)
 helm.prepare.$(1): $(HELM_HOME)
 	@$(INFO) helm prepare $(1)
 ifeq ($(HELM_VALUES_TEMPLATE_SKIPPED),true)
-		@$(OK) helm prepare $(1) [skipped]
+	@$(OK) HELM_VALUES_TEMPLATE_SKIPPED set to true [skipped]
 else
+	@$(WARN) templating helm values.yaml for %%VERSION%% is deprecated, use appVersion and an empty tag instead.
 	@cp -f $(HELM_CHARTS_DIR)/$(1)/values.yaml.tmpl $(HELM_CHARTS_DIR)/$(1)/values.yaml
 	@cd $(HELM_CHARTS_DIR)/$(1) && $(SED_CMD) 's|%%VERSION%%|$(VERSION)|g' values.yaml
-	@if [ "$(HELM_PREPARE_CLEANUP)" == "true" ]; then \
-		rm -f $(HELM_CHARTS_DIR)/$(1)/values.yaml; \
-	fi
 	@$(OK) helm prepare $(1)
 endif
 
