@@ -35,6 +35,12 @@ HELM_OUTPUT_DIR ?= $(OUTPUT_DIR)/charts
 # the helm index file
 HELM_INDEX := $(HELM_OUTPUT_DIR)/index.yaml
 
+HELM_DOCS_VERSION ?= v1.11.0
+HELM_DOCS_ENABLED ?= false
+HELM_DOCS := $(TOOLS_HOST_DIR)/helm-docs
+
+HELM_VALUES_TEMPLATE_SKIPPED ?= false
+
 HELM_CHART_LINT_STRICT ?= true
 ifeq ($(HELM_CHART_LINT_STRICT),true)
 HELM_CHART_LINT_STRICT_ARG += --strict
@@ -84,9 +90,29 @@ $(HELM_OUTPUT_DIR)/$(1)-$(HELM_CHART_VERSION).tgz: $(HELM_HOME) $(HELM_OUTPUT_DI
 	fi
 	@$(OK) helm package $(1) $(HELM_CHART_VERSION)
 
+helm.generate.$(1): $(HELM_HOME) $(HELM_DOCS)
+	@$(INFO) helm-docs $(1)
+ifneq ($(HELM_DOCS_ENABLED),true)
+	@$(OK) helm docs not enabled [skipped]
+else ifneq ($(HELM_VALUES_TEMPLATE_SKIPPED),true)
+	@$(WARN) helm-docs not supported with templated values.yaml [skipped]
+else
+	@$(HELM_DOCS)
+	@$(OK) helm-docs $(1)
+endif
+
+helm.generate: helm.generate.$(1)
+
 helm.prepare.$(1): $(HELM_HOME)
+	@$(INFO) helm prepare $(1)
+ifeq ($(HELM_VALUES_TEMPLATE_SKIPPED),true)
+	@$(OK) HELM_VALUES_TEMPLATE_SKIPPED set to true [skipped]
+else
+	@$(WARN) templating helm values.yaml for %%VERSION%% is deprecated, use appVersion and an empty tag instead.
 	@cp -f $(HELM_CHARTS_DIR)/$(1)/values.yaml.tmpl $(HELM_CHARTS_DIR)/$(1)/values.yaml
 	@cd $(HELM_CHARTS_DIR)/$(1) && $(SED_CMD) 's|%%VERSION%%|$(VERSION)|g' values.yaml
+	@$(OK) helm prepare $(1)
+endif
 
 helm.prepare: helm.prepare.$(1)
 
@@ -168,6 +194,7 @@ build.artifacts: helm.build
 clean: helm.clean
 lint: helm.lint
 promote.artifacts: helm.promote helm.museum
+generate.run: helm.generate
 
 # ====================================================================================
 # Special Targets
@@ -186,3 +213,10 @@ helm.help:
 
 help-special: helm.help
 
+# ====================================================================================
+# Tools install targets
+
+$(HELM_DOCS):
+	@$(INFO) installing helm-docs
+	@GOBIN=$(TOOLS_HOST_DIR) $(GOHOST) install github.com/norwoodj/helm-docs/cmd/helm-docs@$(HELM_DOCS_VERSION) || $(FAIL)
+	@$(OK) installing helm-docs
