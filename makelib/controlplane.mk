@@ -13,14 +13,15 @@
 # limitations under the License.
 
 KIND_CLUSTER_NAME ?= local-dev
+CROSSPLANE_NAMESPACE ?= upbound-system
 
 CONTROLPLANE_DUMP_DIRECTORY ?= $(OUTPUT_DIR)/controlplane-dump
 
 controlplane.up: $(UP) $(KUBECTL) $(KIND)
 	@$(INFO) setting up controlplane
 	@$(KIND) get kubeconfig --name $(KIND_CLUSTER_NAME) >/dev/null 2>&1 || $(KIND) create cluster --name=$(KIND_CLUSTER_NAME)
-	@$(KUBECTL) -n upbound-system get cm universal-crossplane-config >/dev/null 2>&1 || $(UP) uxp install
-	@$(KUBECTL) -n upbound-system wait deploy crossplane --for condition=Available --timeout=120s
+	@$(KUBECTL) -n $(CROSSPLANE_NAMESPACE) get cm universal-crossplane-config >/dev/null 2>&1 || $(UP) uxp install --namespace=$(CROSSPLANE_NAMESPACE)
+	@$(KUBECTL) -n $(CROSSPLANE_NAMESPACE) wait deploy crossplane --for condition=Available --timeout=120s
 	@$(OK) setting up controlplane
 
 controlplane.down: $(UP) $(KUBECTL) $(KIND)
