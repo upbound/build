@@ -13,7 +13,7 @@
 # limitations under the License.
 
 KIND_CLUSTER_NAME ?= local-dev
-CROSSPLANE_NAMESPACE ?= crossplane-system
+CROSSPLANE_NAMESPACE ?= upbound-system
 
 local.xpkg.init: $(KUBECTL)
 	@$(INFO) patching Crossplane with dev sidecar
