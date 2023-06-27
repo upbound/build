@@ -59,9 +59,6 @@ ifeq ($(origin BUILD_REGISTRY), undefined)
 BUILD_REGISTRY := build-$(shell echo $(HOSTNAME)-$(ROOT_DIR) | $(SHA256SUM) | cut -c1-8)
 endif
 
-MANIFEST_TOOL_VERSION=v1.0.3
-MANIFEST_TOOL := $(TOOLS_HOST_DIR)/manifest-tool-$(MANIFEST_TOOL_VERSION)
-
 # In order to reduce built time especially on jenkins, we maintain a cache
 # of already built images. This cache contains images that can be used to help speed
 # future docker build commands using docker's content addressable schemes.
@@ -89,6 +86,8 @@ CACHE_TAG := $(shell date -u +"$(CACHE_DATE_FORMAT)")
 REGISTRIES ?= $(DOCKER_REGISTRY)
 IMAGE_ARCHS := $(subst linux_,,$(filter linux_%,$(PLATFORMS)))
 IMAGE_PLATFORMS := $(subst _,/,$(subst $(SPACE),$(COMMA),$(filter linux_%,$(PLATFORMS))))
+IMAGE_PLATFORMS_LIST := $(subst _,/,$(filter linux_%,$(PLATFORMS)))
+IMAGE_PLATFORM := $(subst _,/,$(PLATFORM))
 
 # if set to 1 docker image caching will not be used.
 CACHEBUST ?= 0
@@ -221,12 +220,15 @@ img.release.clean: img.release.clean.$(1).$(2).$(3)
 endef
 $(foreach r,$(REGISTRIES), $(foreach i,$(IMAGES), $(foreach a,$(IMAGE_ARCHS),$(eval $(call repo.targets,$(r),$(i),$(a))))))
 
-img.release.manifest.publish.%: img.release.publish $(MANIFEST_TOOL)
-	@$(MANIFEST_TOOL) push from-args --platforms $(IMAGE_PLATFORMS) --template $(DOCKER_REGISTRY)/$*-ARCH:$(VERSION) --target $(DOCKER_REGISTRY)/$*:$(VERSION) || $(FAIL)
+img.release.manifest.publish.%: img.release.publish
+	@docker manifest create -a $(DOCKER_REGISTRY)/$*:$(VERSION) $(foreach PLATFORM,$(IMAGE_PLATFORMS_LIST),$(DOCKER_REGISTRY)/$*-$(subst linux/,,$(PLATFORM)):$(VERSION)) || $(FAIL)
+	@docker manifest push $(DOCKER_REGISTRY)/$*:$(VERSION) || $(FAIL)
 
-img.release.manifest.promote.%: img.release.promote $(MANIFEST_TOOL)
-	@[ "$(CHANNEL)" = "master" ] || $(MANIFEST_TOOL) push from-args --platforms $(IMAGE_PLATFORMS) --template $(DOCKER_REGISTRY)/$*-ARCH:$(VERSION) --target $(DOCKER_REGISTRY)/$*:$(VERSION)-$(CHANNEL) || $(FAIL)
-	@$(MANIFEST_TOOL) push from-args --platforms $(IMAGE_PLATFORMS) --template $(DOCKER_REGISTRY)/$*-ARCH:$(VERSION) --target $(DOCKER_REGISTRY)/$*:$(CHANNEL) || $(FAIL)
+img.release.manifest.promote.%: img.release.promote
+	@[ "$(CHANNEL)" = "master" ] || docker manifest create -a $(DOCKER_REGISTRY)/$*:$(VERSION)-$(CHANNEL) $(foreach PLATFORM,$(IMAGE_PLATFORMS_LIST),$(DOCKER_REGISTRY)/$*-$(subst linux/,,$(PLATFORM)):$(VERSION)) || $(FAIL)
+	@[ "$(CHANNEL)" = "master" ] || docker manifest push $(DOCKER_REGISTRY)/$*:$(VERSION)-$(CHANNEL) || $(FAIL)
+	@docker manifest create -a $(DOCKER_REGISTRY)/$*:$(CHANNEL) $(foreach PLATFORM,$(IMAGE_PLATFORMS_LIST),$(DOCKER_REGISTRY)/$*-$(subst linux/,,$(PLATFORM)):$(VERSION)) || $(FAIL)
+	@docker manifest push $(DOCKER_REGISTRY)/$*:$(CHANNEL) || $(FAIL)
 
 # ====================================================================================
 # Common Targets
@@ -238,7 +240,8 @@ ifeq ($(DOCKER_REGISTRY),)
 $(error the variable DOCKER_REGISTRY must be set prior to including image.mk)
 endif
 
-do.build.image.%: ; @$(MAKE) -C $(IMAGE_DIR)/$* PLATFORM=$(PLATFORM)
+do.build.image.%:
+	@$(MAKE) -C $(IMAGE_DIR)/$* IMAGE_PLATFORMS=$(IMAGE_PLATFORM) IMAGE=$(BUILD_REGISTRY)/$*-$(ARCH) img.build
 do.build.images: $(foreach i,$(IMAGES), do.build.image.$(i)) ;
 build.artifacts.platform: do.build.images
 build.done: img.cache img.done
@@ -289,13 +292,3 @@ img.help:
 help-special: img.help
 
 .PHONY: prune img.help
-
-# ====================================================================================
-# tools
-
-$(MANIFEST_TOOL):
-	@$(INFO) installing manifest-tool $(MANIFEST_TOOL_VERSION)
-	@mkdir -p $(TOOLS_HOST_DIR) || $(FAIL)
-	@curl -fsSL https://github.com/estesp/manifest-tool/releases/download/$(MANIFEST_TOOL_VERSION)/manifest-tool-$(HOSTOS)-$(SAFEHOSTARCH) > $@ || $(FAIL)
-	@chmod +x $@ || $(FAIL)
-	@$(OK) installing manifest-tool $(MANIFEST_TOOL_VERSION)
