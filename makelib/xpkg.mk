@@ -116,7 +116,7 @@ else
 build.artifacts.platform: do.skip.xpkgs
 endif
 
-# only publish images for main / master, release branches and custom branches in case of other naming convention
+# only publish package for main / master, release branches and custom branches in case of other naming convention
 # TODO(hasheddan): remove master
 ifneq ($(filter main master release-% $(PUBLISH_BRANCH_NAME),$(BRANCH_NAME)),)
 publish.artifacts: $(foreach r,$(XPKG_REG_ORGS), $(foreach x,$(XPKGS),xpkg.release.publish.$(r).$(x)))
