@@ -22,10 +22,10 @@ controlplane.up: $(UP) $(KUBECTL) $(KIND)
 	@$(KIND) get kubeconfig --name $(KIND_CLUSTER_NAME) >/dev/null 2>&1 || $(KIND) create cluster --name=$(KIND_CLUSTER_NAME)
 ifndef CROSSPLANE_ARGS
 	@$(INFO) setting up crossplane core without args
-	@$(KUBECTL) -n $(CROSSPLANE_NAMESPACE) get cm universal-crossplane-config >/dev/null 2>&1 || $(UP) uxp install --namespace=$(CROSSPLANE_NAMESPACE)
+	@$(KUBECTL) -n $(CROSSPLANE_NAMESPACE) get cm universal-crossplane-config >/dev/null 2>&1 || $(UP) uxp install $(UXP_VERSION) --namespace=$(CROSSPLANE_NAMESPACE) $(UXP_INSTALL_OPTS)
 else
-	@$(INFO) setting up crossplane core with args @$(CROSSPLANE_ARGS)
-	@$(KUBECTL) -n $(CROSSPLANE_NAMESPACE) get cm universal-crossplane-config >/dev/null 2>&1 || $(UP) uxp install --namespace=$(CROSSPLANE_NAMESPACE) --set "args={${CROSSPLANE_ARGS}}"
+	@$(INFO) setting up crossplane core with args $(CROSSPLANE_ARGS)
+	@$(KUBECTL) -n $(CROSSPLANE_NAMESPACE) get cm universal-crossplane-config >/dev/null 2>&1 || $(UP) uxp install $(UXP_VERSION) --namespace=$(CROSSPLANE_NAMESPACE) $(UXP_INSTALL_OPTS) --set "args={${CROSSPLANE_ARGS}}"
 endif
 controlplane.down: $(UP) $(KUBECTL) $(KIND)
 	@$(INFO) deleting controlplane
