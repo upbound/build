@@ -45,6 +45,11 @@ UP_VERSION ?= v0.19.2
 UP_CHANNEL ?= stable
 UP := $(TOOLS_HOST_DIR)/up-$(UP_VERSION)
 
+# the version of crossplane cli to use
+CROSSPLANE_CLI_VERSION ?= v1.14.5
+CROSSPLANE_CLI_CHANNEL ?= stable
+CROSSPLANE_CLI := $(TOOLS_HOST_DIR)/crossplane-cli-$(CROSSPLANE_CLI_VERSION)
+
 # the version of helm 3 to use
 USE_HELM3 ?= false
 HELM3_VERSION ?= v3.9.1
@@ -130,6 +135,13 @@ $(UP):
 	@curl -fsSLo $(UP) --create-dirs https://cli.upbound.io/$(UP_CHANNEL)/$(UP_VERSION)/bin/$(SAFEHOST_PLATFORM)/up?source=build || $(FAIL)
 	@chmod +x $(UP)
 	@$(OK) installing up $(UP_VERSION)
+
+# Crossplane CLI download and install
+$(CROSSPLANE_CLI):
+	@$(INFO) installing Crossplane CLI $(CROSSPLANE_CLI_VERSION)
+	@curl -fsSLo $(CROSSPLANE_CLI) --create-dirs https://releases.crossplane.io/$(CROSSPLANE_CLI_CHANNEL)/$(CROSSPLANE_CLI_VERSION)/bin/$(SAFEHOST_PLATFORM)/crank?source=build || $(FAIL)
+	@chmod +x $(CROSSPLANE_CLI)
+	@$(OK) installing Crossplane CLI $(CROSSPLANE_CLI_VERSION)
 
 # helm download and install only if helm3 not enabled
 ifeq ($(USE_HELM3),false)
