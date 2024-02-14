@@ -68,7 +68,7 @@ docs.publish: docs.generate
 # ====================================================================================
 # Common Targets
 
-# only publish docs for master and release branches
-ifneq ($(filter master release-%,$(BRANCH_NAME)),)
+# only publish docs for main, master and release branches
+ifneq ($(filter main master release-%,$(BRANCH_NAME)),)
 publish.artifacts: docs.publish
 endif
