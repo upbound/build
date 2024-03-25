@@ -116,9 +116,13 @@ else
 build.artifacts.platform: do.skip.xpkgs
 endif
 
-# only publish package for main / master and release branches
-# TODO(hasheddan): remove master and support overriding
-ifneq ($(filter main master release-%,$(BRANCH_NAME)),)
+# only publish package for main / master and release branches, unless the DO_PUBLISH override is set to true
+DO_PUBLISH ?= false
+ifneq ($(filter main release-%,$(BRANCH_NAME)),)
+DO_PUBLISH = true
+endif
+
+ifeq ($(DO_PUBLISH),true)
 publish.artifacts: $(foreach r,$(XPKG_REG_ORGS), $(foreach x,$(XPKGS),xpkg.release.publish.$(r).$(x)))
 endif
 
