@@ -68,6 +68,10 @@ endif
 KUTTL_VERSION ?= 0.12.1
 KUTTL := $(TOOLS_HOST_DIR)/kuttl-$(KUTTL_VERSION)
 
+# the version of chainsaw to use
+CHAINSAW_VERSION ?= 0.2.0
+CHAINSAW := $(TOOLS_HOST_DIR)/chainsaw-$(CHAINSAW_VERSION)
+
 # the version of uptest to use
 UPTEST_VERSION ?= v0.1.0
 UPTEST := $(TOOLS_HOST_DIR)/uptest-$(UPTEST_VERSION)
@@ -88,6 +92,7 @@ k8s_tools.buildvars:
 	@echo HELM=$(HELM)
 	@echo HELM3=$(HELM3)
 	@echo KUTTL=$(KUTTL)
+	@echo CHAINSAW=$(CHAINSAW)
 	@echo YQ=$(YQ)
 
 build.vars: k8s_tools.buildvars
@@ -176,6 +181,16 @@ $(KUTTL):
 	@curl -fsSLo $(KUTTL) --create-dirs https://github.com/kudobuilder/kuttl/releases/download/v$(KUTTL_VERSION)/kubectl-kuttl_$(KUTTL_VERSION)_$(HOST_PLATFORM) || $(FAIL)
 	@chmod +x $(KUTTL)
 	@$(OK) installing kuttl $(KUTTL_VERSION)
+
+# chainsaw download and install
+$(CHAINSAW):
+	@$(INFO) installing chainsaw $(CHAINSAW_VERSION)
+	@mkdir -p $(TOOLS_HOST_DIR)
+	@curl -fsSLo $(CHAINSAW).tar.gz --create-dirs https:https://github.com/kyverno/chainsaw/releases/download/v$(CHAINSAW_VERSION)/chainsaw_$(HOST_PLATFORM).tar.gz || $(FAIL)
+	@tar -xvf chainsaw.tar.gz $(CHAINSAW)
+	@chmod +x $(CHAINSAW)
+	@rm $(CHAINSAW).tar.gz
+	@$(OK) installing chainsaw $(CHAINSAW_VERSION)
 
 # uptest download and install
 $(UPTEST):
