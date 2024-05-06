@@ -69,7 +69,7 @@ KUTTL_VERSION ?= 0.12.1
 KUTTL := $(TOOLS_HOST_DIR)/kuttl-$(KUTTL_VERSION)
 
 # the version of uptest to use
-UPTEST_VERSION ?= v0.1.0
+UPTEST_VERSION ?= v0.12.0
 UPTEST_CHANNEL ?= stable
 UPTEST := $(TOOLS_HOST_DIR)/uptest-$(UPTEST_VERSION)
 
