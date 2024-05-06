@@ -186,8 +186,9 @@ $(KUTTL):
 $(CHAINSAW):
 	@$(INFO) installing chainsaw $(CHAINSAW_VERSION)
 	@mkdir -p $(TOOLS_HOST_DIR)
-	@curl -fsSLo $(CHAINSAW).tar.gz --create-dirs https:https://github.com/kyverno/chainsaw/releases/download/v$(CHAINSAW_VERSION)/chainsaw_$(HOST_PLATFORM).tar.gz || $(FAIL)
-	@tar -xvf chainsaw.tar.gz $(CHAINSAW)
+	@curl -fsSLo $(CHAINSAW).tar.gz --create-dirs https://github.com/kyverno/chainsaw/releases/download/v$(CHAINSAW_VERSION)/chainsaw_$(HOST_PLATFORM).tar.gz || $(FAIL)
+	@tar -xvf $(CHAINSAW).tar.gz chainsaw
+	@mv chainsaw $(CHAINSAW)
 	@chmod +x $(CHAINSAW)
 	@rm $(CHAINSAW).tar.gz
 	@$(OK) installing chainsaw $(CHAINSAW_VERSION)
