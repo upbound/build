@@ -1,5 +1,9 @@
 # Build
 
+> [!IMPORTANT]
+> Crossplane no longer uses this build submodule. We recommend Crossplane
+> providers switch to using https://github.com/crossplane/build.
+
 This project contains common build scripts that are used by a number of open source projects at Upbound. We standardize on a makefile interface to all projects with simple verbs. We attempt to put more logic in makefiles and closer to the project and less on side of CI. This enables the builds to run on multiple environments including laptops and different CI/CD systems. Most build and test operations are designed to run in a container that contains all the tools necessary.
 
 Some features include:
