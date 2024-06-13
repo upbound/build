@@ -73,7 +73,8 @@ CHAINSAW_VERSION ?= 0.2.0
 CHAINSAW := $(TOOLS_HOST_DIR)/chainsaw-$(CHAINSAW_VERSION)
 
 # the version of uptest to use
-UPTEST_VERSION ?= v0.1.0
+UPTEST_VERSION ?= v0.12.0
+UPTEST_CHANNEL ?= stable
 UPTEST := $(TOOLS_HOST_DIR)/uptest-$(UPTEST_VERSION)
 
 # the version of yq to use
@@ -197,7 +198,7 @@ $(CHAINSAW):
 $(UPTEST):
 	@$(INFO) installing uptest $(UPTEST)
 	@mkdir -p $(TOOLS_HOST_DIR)
-	@curl -fsSLo $(UPTEST) https://github.com/upbound/uptest/releases/download/$(UPTEST_VERSION)/uptest_$(SAFEHOSTPLATFORM) || $(FAIL)
+	@curl -fsSLo $(UPTEST) https://s3.us-west-2.amazonaws.com/crossplane.uptest.releases/$(UPTEST_CHANNEL)/$(UPTEST_VERSION)/bin/$(SAFEHOST_PLATFORM)/uptest || $(FAIL)
 	@chmod +x $(UPTEST)
 	@$(OK) installing uptest $(UPTEST)
 
