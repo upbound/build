@@ -124,9 +124,9 @@ endif
 build.done: img.done
 clean: img.clean img.release.clean
 
-# only publish images for main / master and release branches
-# TODO(hasheddan): remove master and support overriding
-ifneq ($(filter main master release-%,$(BRANCH_NAME)),)
+# only publish images for main / master, release branches and custom branches in case of other naming convention
+# TODO(hasheddan): remove master
+ifneq ($(filter main master release-% $(PUBLISH_BRANCH_NAME),$(BRANCH_NAME)),)
 publish.artifacts: $(foreach r,$(REGISTRY_ORGS), $(foreach i,$(IMAGES),img.release.publish.$(r).$(i)))
 endif
 
